@@ -76,6 +76,3 @@ Learn how to analyze and optimize a resume for Applicant Tracking Systems (ATS) 
 * Optimized Resume File
 * GitHub Commit URL
 
-## GitHub Commit URL
-
-(Add your commit URL here)
