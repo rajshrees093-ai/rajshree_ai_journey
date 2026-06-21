@@ -2,7 +2,7 @@ Hi [Name],
 
 Hope you're doing well! I've been following your work at [Company] and really admire the team's contributions to [specific domain].
 
-I'm Rajshree Sinha, a 2nd-year CS student at ABES Engineering College. I've been building AI/ML and full stack projects — including a GCP-deployed AI Document Sign App and a GenAI-powered hackathon project — and I'm actively looking for AI/ML or SWE internship opportunities.
+I'm Rajshree, a 2nd-year CS student at ABES Engineering College. I've been building AI/ML and full stack projects — including a GCP-deployed AI Document Sign App and a GenAI-powered hackathon project — and I'm actively looking for AI/ML or SWE internship opportunities.
 
 I noticed [Company] has openings in this space and was wondering if you'd be comfortable referring me or sharing any guidance on the process. I completely understand if it's not possible — even a pointer to the right team would mean a lot.
 
