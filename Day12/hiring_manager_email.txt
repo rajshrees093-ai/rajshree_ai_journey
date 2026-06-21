@@ -1,0 +1,20 @@
+Subject: CS Undergrad with AI/ML Project Experience — Internship Interest at [Company Name]
+
+Hi [Manager Name],
+
+I noticed your team at [Company Name] is working on [specific area — e.g., AI infrastructure / ML platform], and I wanted to reach out directly as someone deeply interested in contributing to that work.
+
+I'm Rajshree Sinha, a 2nd-year CS Engineering student. I've independently built and deployed production-grade AI applications — including an AI Document Sign App on Google Cloud Platform integrating intelligent document processing and REST APIs, and a Generative AI hackathon project converting natural language to images using prompt engineering and LLM APIs.
+
+What I can contribute from Day 1:
+• Python-based AI/ML development (scikit-learn, TensorFlow basics, NLP, GenAI APIs)
+• Full stack web development with Flask and REST APIs
+• GCP deployment and cloud integration
+• Fast execution under tight deadlines — demonstrated in a 48-hour hackathon
+
+I'd genuinely value 15 minutes to learn about your team's challenges and share how I might contribute. Happy to share my GitHub portfolio as well.
+
+Thank you for your time.
+
+Rajshree 
+rajshrees093@gmail.com | https://github.com/rajshrees093-ai

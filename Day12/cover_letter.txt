@@ -1,0 +1,20 @@
+Subject: Application for AI/ML Engineer / Software Engineer Internship
+
+Dear Hiring Manager,
+
+I am a 2nd-year Computer Science & Engineering undergraduate at ABES Engineering College (AKTU) with hands-on experience building AI-powered applications, full stack web platforms, and cloud-deployed solutions. I am eager to contribute to [Company Name]'s engineering team as an AI/ML Engineer or Software Engineering Intern.
+
+My most notable project is an AI Document Sign App — a production-grade web application that automates end-to-end document workflows using intelligent document processing, REST APIs, and Python/Flask backend logic, deployed on Google Cloud Platform for multi-user scalability. This project required me to independently design and integrate AI/ML APIs, build a responsive frontend, and manage cloud infrastructure — skills directly aligned with the requirements of modern AI/ML and SWE roles.
+
+Beyond individual projects, I demonstrated the ability to deliver under pressure at the GUVI & HCL 48-Hour Hackathon, where I built a Text-to-Image Story Generator using NLP and Generative AI APIs. Applying prompt engineering techniques to produce contextually accurate visual outputs from narrative text, the project reflected practical knowledge of LLMs — a skill increasingly critical across MAANG-caliber engineering teams.
+
+I also built a full stack Cab Booking Application featuring user authentication, real-time ride management, fare calculation, and persistent database storage — and a College Marketplace Platform (Quest Traders) that earned a project appreciation award for its practical UX implementation.
+
+As Promotion Coordinator for GDG On Campus ABESEC, I drive technical outreach for a 500+ student community, coordinating with core teams and managing digital campaigns across LinkedIn and WhatsApp — demonstrating both leadership and communication skills valued in collaborative engineering environments.
+
+I hold multiple Google Cloud Skill Badges (Qwiklabs) and am actively expanding my knowledge in machine learning, generative AI, and scalable system design. I would welcome the opportunity to discuss how my skills and initiative can add value to your team.
+
+Sincerely,
+Rajshree 
+rajshrees093@gmail.com | +91 9263280521
+https://www.linkedin.com/in/rajshreesinha/ | https://github.com/rajshrees093-ai

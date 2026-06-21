@@ -1,0 +1,1 @@
+Hi [Name], I'm a 2nd-year CS student passionate about AI/ML and full stack dev. I've built GCP-deployed AI apps and GenAI projects. Would love to connect and learn from your journey at [Company]!

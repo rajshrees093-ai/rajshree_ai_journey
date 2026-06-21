@@ -1,0 +1,19 @@
+Subject: AI/ML & SWE Intern Candidate — CS Undergrad with GCP & GenAI Project Experience
+
+Hi [Recruiter Name],
+
+I came across [Company Name] on LinkedIn and wanted to reach out directly. I'm Rajshree Sinha, a 2nd-year CS Engineering student at ABES Engineering College, with hands-on experience building AI-powered applications using Python, Flask, GCP, and Generative AI APIs.
+
+A few highlights from my profile:
+• Built and deployed an AI Document Sign App on Google Cloud Platform with REST API integration
+• Developed a Text-to-Image Story Generator at a 48-hour GUVI & HCL hackathon using NLP and prompt engineering
+• Full stack experience: Python, JavaScript, MySQL, MongoDB, HTML/CSS
+• Google Cloud Skill Badges (Qwiklabs) — certified GCP hands-on experience
+
+I'm actively seeking an AI/ML Engineer or SWE internship and would love to explore if there's a fit at [Company Name]. I've attached my resume for your review.
+
+Would you be open to a quick 10-minute call this week?
+
+Best regards,
+Rajshree 
++91 9263280521 | linkedin.com/in/rajshreesinha | https://github.com/rajshrees093-ai
