@@ -1,0 +1,7 @@
+Hi, I'm Rajshree — a 2nd-year Computer Science student at ABES Engineering College, specializing in AI/ML engineering and full stack development.
+
+I've built and deployed real-world applications including an AI-powered Document Signing platform on Google Cloud, and a Generative AI story generator I built in 48 hours at a GUVI & HCL hackathon — which gave me hands-on experience with NLP, prompt engineering, and LLM APIs.
+
+My tech stack includes Python, Flask, REST APIs, GCP, and JavaScript, with growing expertise in machine learning frameworks.
+
+I'm currently seeking an AI/ML or Software Engineering internship where I can contribute to production-grade solutions while deepening my engineering skills. I'd love to learn more about the kind of challenges your team is working on.
