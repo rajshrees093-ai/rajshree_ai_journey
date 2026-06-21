@@ -1,0 +1,4 @@
+Unique value proposition
+A 2nd-year CS undergrad who doesn't wait to graduate to ship real software. I build AI-powered, cloud-deployed applications — not just coursework — and I deliver them under tight deadlines. My combination of GenAI hands-on experience, GCP deployment skills, and full stack capability makes me ready to contribute from day one of an internship.
+Professional positioning statement
+AI/ML and full stack engineer who bridges intelligent systems with production-ready applications. Proven ability to design, build, and deploy end-to-end solutions — from REST API backends to GCP-hosted platforms — while staying current with emerging generative AI technologies.
