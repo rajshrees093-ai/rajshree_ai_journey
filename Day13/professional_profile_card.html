@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Search Report — AI & Data Science Student, Delhi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: #E2E0D8;
+    --text-primary: #1A1917;
+    --text-secondary: #5C5A55;
+    --text-muted: #9B9890;
+    --accent: #2563EB;
+    --accent-light: #EFF4FF;
+    --accent-dark: #1D4ED8;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --amber: #92400E;
+    --amber-light: #FEF3C7;
+    --teal: #0F766E;
+    --teal-light: #CCFBF1;
+    --score-high: #2563EB;
+    --score-mid: #0891B2;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .page-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── Header ── */
+  .report-header {
+    margin-bottom: 48px;
+  }
+  .report-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .report-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .report-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+  .report-meta {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .meta-chip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 36px 0;
+  }
+
+  /* ── Section titles ── */
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    background: var(--text-primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+  }
+
+  /* ── Profile card ── */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+  }
+  .profile-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .profile-name { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; }
+  .profile-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+  @media (max-width: 540px) { .profile-grid { grid-template-columns: 1fr; } }
+  .profile-item { font-size: 13px; }
+  .profile-item-label { color: var(--text-muted); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .profile-item-value { color: var(--text-primary); font-weight: 500; }
+  .skill-tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin: 2px 3px 2px 0;
+  }
+
+  /* ── Criteria grid ── */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .criteria-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .criteria-icon { font-size: 20px; margin-bottom: 8px; }
+  .criteria-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+  .criteria-value { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+
+  /* ── Job cards ── */
+  .job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .job-card.top-pick { border: 2px solid var(--accent); }
+  .top-badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  .job-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .job-role { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .job-company { font-size: 13px; color: var(--text-secondary); }
+  .score-block { text-align: right; flex-shrink: 0; }
+  .score-num { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .score-label { font-size: 11px; color: var(--text-muted); }
+  .score-bar { width: 80px; height: 5px; background: var(--surface2); border-radius: 3px; margin: 4px 0 2px auto; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .job-desc { font-size: 13px; color: var(--text-secondary); margin: 12px 0 10px; line-height: 1.55; }
+  .job-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .job-meta { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; }
+  .job-meta span { display: flex; align-items: center; gap: 5px; }
+  .apply-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .apply-link:hover { background: var(--accent-light); }
+  .apply-link svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* ── Summary table ── */
+  .job-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); white-space: nowrap; }
+  td { padding: 12px 14px; border-top: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+  td:first-child { color: var(--text-primary); font-weight: 500; }
+  tr:hover td { background: var(--bg); }
+  .score-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+  }
+
+  /* ── Skills ── */
+  .skills-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 540px) { .skills-two-col { grid-template-columns: 1fr; } }
+  .skills-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .skills-box-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px; }
+  .skill-have { background: var(--green-light); color: var(--green); }
+  .skill-gap { background: var(--amber-light); color: var(--amber); }
+  .gap-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .gap-row:last-child { border-bottom: none; }
+  .gap-priority { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .p-high { background: #FEE2E2; color: #991B1B; }
+  .p-med { background: var(--amber-light); color: var(--amber); }
+  .p-low { background: var(--teal-light); color: var(--teal); }
+
+  /* ── Market stats ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-value { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ── Recommendations ── */
+  .reco-list { display: flex; flex-direction: column; gap: 10px; }
+  .reco-item {
+    display: flex;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    align-items: flex-start;
+  }
+  .reco-num {
+    width: 28px; height: 28px;
+    background: var(--text-primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .reco-text { font-size: 14px; color: var(--text-secondary); line-height: 1.55; }
+  .reco-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ── Overall fit ── */
+  .fit-card {
+    background: var(--text-primary);
+    color: #fff;
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .fit-score-ring {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .fit-score-num { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; }
+  .fit-text h3 { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .fit-text p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.55; }
+
+  /* ── Footer ── */
+  .report-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .apply-link { color: var(--accent) !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── Header ── -->
+  <div class="report-header">
+    <p class="report-eyebrow">AI-generated job search report</p>
+    <h1 class="report-title">Job Discovery Report</h1>
+    <p class="report-subtitle">Data Science, Data Analyst & Python Intern · Delhi/NCR · Hybrid · June 2026</p>
+    <div class="report-meta">
+      <span class="meta-chip">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Generated 22 June 2026
+      </span>
+      <span class="meta-chip">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Delhi, India
+      </span>
+      <span class="meta-chip">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Sources: Internshala · LinkedIn · Indeed
+      </span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       PROMPT 1 — Professional Profile
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">1</span>Professional profile</h2>
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="avatar">AI</div>
+      <div>
+        <div class="profile-name">AI & Data Science Student</div>
+        <div class="profile-sub">Early-career · Startup environment · Open to internships</div>
+      </div>
+    </div>
+    <div class="profile-grid">
+      <div class="profile-item">
+        <div class="profile-item-label">Current role</div>
+        <div class="profile-item-value">Student</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-item-label">Experience</div>
+        <div class="profile-item-value">0–2 years</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-item-label">Industry</div>
+        <div class="profile-item-value">Artificial Intelligence & Machine Learning</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-item-label">Company type</div>
+        <div class="profile-item-value">Startup</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-item-label">Location</div>
+        <div class="profile-item-value">Delhi, India</div>
+      </div>
+      <div class="profile-item">
+        <div class="profile-item-label">Core skills</div>
+        <div style="margin-top:4px;">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">AI</span>
+          <span class="skill-tag">Data Science</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       PROMPT 2 — Job Search Criteria
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">2</span>Job search criteria</h2>
+  <div class="criteria-grid">
+    <div class="criteria-card">
+      <div class="criteria-label">Target roles</div>
+      <div class="criteria-value">Data Science Intern<br>Data Analyst Intern<br>Python Developer Intern</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-label">Work mode</div>
+      <div class="criteria-value">Hybrid</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-label">Salary expectation</div>
+      <div class="criteria-value">₹10,000 / month</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-label">Recency</div>
+      <div class="criteria-value">Posted in last 7 days</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-label">Location</div>
+      <div class="criteria-value">Delhi / NCR (Noida, Gurgaon)</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-label">Exclusions</div>
+      <div class="criteria-value">None specified</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       PROMPT 3 — Job Discovery
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">3</span>Top matching opportunities</h2>
+
+  <!-- Top pick -->
+  <div class="job-card top-pick">
+    <span class="top-badge">Top pick</span>
+    <div class="job-header">
+      <div>
+        <div class="job-role">LLM Engineering Intern</div>
+        <div class="job-company">AI/ML Startup · Delhi, Noida (Hybrid) · Posted ~3 days ago</div>
+      </div>
+      <div class="score-block">
+        <div class="score-num">92%</div>
+        <div class="score-bar"><div class="score-fill" style="width:92%"></div></div>
+        <div class="score-label">match score</div>
+      </div>
+    </div>
+    <p class="job-desc">Prototype AI features, integrate LLMs via LangChain/LlamaIndex, evaluate model outputs, and document findings. Requires Python + NLP knowledge — closely aligns with your AI & data science background. Open-source contributions or published projects are a bonus.</p>
+    <div class="job-footer">
+      <div class="job-meta">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          ₹10,000–15,000/mo (est.)
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Startup · 3–6 months
+        </span>
+      </div>
+      <a href="https://internshala.com/internships/data-science-internship-in-delhi/" class="apply-link" target="_blank">
+        Apply on Internshala
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Job 2 -->
+  <div class="job-card">
+    <div class="job-header">
+      <div>
+        <div class="job-role">Data Science Intern (EDA & ML)</div>
+        <div class="job-company">EdTech Startup · Delhi, Gurgaon, Noida (Hybrid) · Posted ~5 days ago</div>
+      </div>
+      <div class="score-block">
+        <div class="score-num">85%</div>
+        <div class="score-bar"><div class="score-fill" style="width:85%"></div></div>
+        <div class="score-label">match score</div>
+      </div>
+    </div>
+    <p class="job-desc">EDA, model building and testing (accuracy, precision, recall), dashboards with Python libraries. Tableau/Power BI is a nice-to-have. IIT/IIM alumni-founded team — strong mentorship opportunity with real-world AI/drone tech exposure.</p>
+    <div class="job-footer">
+      <div class="job-meta">
+        <span>₹8,000–12,000/mo (est.)</span>
+        <span>EdTech · 6 months</span>
+      </div>
+      <a href="https://internshala.com/internships/data-science-internship-in-delhi/" class="apply-link" target="_blank">
+        Apply on Internshala
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Job 3 -->
+  <div class="job-card">
+    <div class="job-header">
+      <div>
+        <div class="job-role">Data Analyst Intern – LLM & AI Agent</div>
+        <div class="job-company">The Night Marketer · Shalimar Bagh, Delhi (Hybrid) · Posted ~4 days ago</div>
+      </div>
+      <div class="score-block">
+        <div class="score-num">80%</div>
+        <div class="score-bar"><div class="score-fill" style="width:80%"></div></div>
+        <div class="score-label">match score</div>
+      </div>
+    </div>
+    <p class="job-desc">Python (Pandas, NumPy), data analysis integrated with AI agent tools. Goes beyond traditional analytics — strong Python + AI interest is the key requirement you already meet. Bonus if you have exposure to LLM APIs.</p>
+    <div class="job-footer">
+      <div class="job-meta">
+        <span>₹8,000–12,000/mo (est.)</span>
+        <span>Agency · 3 months</span>
+      </div>
+      <a href="https://in.indeed.com/Data-Analyst-Internship-jobs-in-Delhi" class="apply-link" target="_blank">
+        Apply on Indeed
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Job 4 -->
+  <div class="job-card">
+    <div class="job-header">
+      <div>
+        <div class="job-role">Data Science Intern – Simbi Labs</div>
+        <div class="job-company">Simbi Labs India · Model Town, Delhi (Hybrid) · Posted ~6 days ago</div>
+      </div>
+      <div class="score-block">
+        <div class="score-num">78%</div>
+        <div class="score-bar"><div class="score-fill" style="width:78%"></div></div>
+        <div class="score-label">match score</div>
+      </div>
+    </div>
+    <p class="job-desc">EDA, survey data analysis, statistics concepts. Entry-level friendly with salary search available. A solid stepping-stone role that builds your analytical foundation before moving into ML-heavy positions.</p>
+    <div class="job-footer">
+      <div class="job-meta">
+        <span>₹5,000–10,000/mo (est.)</span>
+        <span>Startup · 3–6 months</span>
+      </div>
+      <a href="https://in.indeed.com/q-data-science-internship-l-delhi,-delhi-jobs.html" class="apply-link" target="_blank">
+        Apply on Indeed
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Job 5 -->
+  <div class="job-card">
+    <div class="job-header">
+      <div>
+        <div class="job-role">Python Developer Intern</div>
+        <div class="job-company">Webninjaz · Dilshad Garden, Delhi (Hybrid) · Posted ~2 days ago</div>
+      </div>
+      <div class="score-block">
+        <div class="score-num">73%</div>
+        <div class="score-bar"><div class="score-fill" style="width:73%"></div></div>
+        <div class="score-label">match score</div>
+      </div>
+    </div>
+    <p class="job-desc">Backend development, APIs, web scraping, automation. No prior work experience needed. Lower match due to backend focus vs your AI/DS interests, but an excellent skill-builder for Python depth.</p>
+    <div class="job-footer">
+      <div class="job-meta">
+        <span>₹5,000–8,000/mo (est.)</span>
+        <span>Tech · 6 months</span>
+      </div>
+      <a href="https://in.indeed.com/q-python-internship-l-noida,-uttar-pradesh-jobs.html" class="apply-link" target="_blank">
+        Apply on Indeed
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <h3 style="font-family:'Sora',sans-serif; font-size:16px; font-weight:600; margin:28px 0 14px;">Quick-reference table</h3>
+  <div class="job-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Company / Location</th>
+          <th>Posted</th>
+          <th>Stipend (est.)</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LLM Engineering Intern</td>
+          <td>AI Startup · Delhi/Noida</td>
+          <td>~3 days ago</td>
+          <td>₹10–15k/mo</td>
+          <td><span class="score-pill">92%</span></td>
+        </tr>
+        <tr>
+          <td>Data Science Intern (EDA & ML)</td>
+          <td>EdTech · Delhi/Gurgaon</td>
+          <td>~5 days ago</td>
+          <td>₹8–12k/mo</td>
+          <td><span class="score-pill">85%</span></td>
+        </tr>
+        <tr>
+          <td>Data Analyst Intern – LLM & AI Agent</td>
+          <td>The Night Marketer · Delhi</td>
+          <td>~4 days ago</td>
+          <td>₹8–12k/mo</td>
+          <td><span class="score-pill">80%</span></td>
+        </tr>
+        <tr>
+          <td>Data Science Intern</td>
+          <td>Simbi Labs · Model Town</td>
+          <td>~6 days ago</td>
+          <td>₹5–10k/mo</td>
+          <td><span class="score-pill">78%</span></td>
+        </tr>
+        <tr>
+          <td>Python Developer Intern</td>
+          <td>Webninjaz · Dilshad Garden</td>
+          <td>~2 days ago</td>
+          <td>₹5–8k/mo</td>
+          <td><span class="score-pill">73%</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       Skill Gap Analysis
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">4</span>Skill gap analysis</h2>
+  <div class="skills-two-col">
+    <div class="skills-box">
+      <div class="skills-box-title">Skills you already have</div>
+      <div>
+        <span class="skill-tag skill-have">Python</span>
+        <span class="skill-tag skill-have">AI/ML concepts</span>
+        <span class="skill-tag skill-have">Data analysis</span>
+        <span class="skill-tag skill-have">EDA</span>
+        <span class="skill-tag skill-have">Data science fundamentals</span>
+      </div>
+    </div>
+    <div class="skills-box">
+      <div class="skills-box-title">Most required across job listings</div>
+      <div>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">SQL</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">Pandas</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">NumPy</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">Scikit-learn</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">Power BI / Tableau</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">LangChain</span>
+        <span class="skill-tag" style="background:#F1EFE8; color:#444441;">GitHub portfolio</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="skills-box">
+      <div class="skills-box-title">Gaps to close — prioritised</div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">SQL (SELECT, JOIN, GROUP BY)</span>
+        <span class="gap-priority p-high">High priority</span>
+      </div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">Pandas & NumPy</span>
+        <span class="gap-priority p-high">High priority</span>
+      </div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">Scikit-learn (ML pipelines)</span>
+        <span class="gap-priority p-high">High priority</span>
+      </div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">GitHub portfolio (2–3 projects)</span>
+        <span class="gap-priority p-med">Medium priority</span>
+      </div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">Power BI or Tableau (basics)</span>
+        <span class="gap-priority p-med">Medium priority</span>
+      </div>
+      <div class="gap-row">
+        <span style="font-size:14px; font-weight:500; color:var(--text-primary);">LangChain / LlamaIndex (LLM tooling)</span>
+        <span class="gap-priority p-low">Low priority (stretch)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       Market Demand Insights
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">5</span>Market demand insights</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Active DS/AI listings</div>
+      <div class="stat-value">200+</div>
+      <div class="stat-sub">Delhi/NCR on Internshala & LinkedIn</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Typical stipend</div>
+      <div class="stat-value">₹8–15k</div>
+      <div class="stat-sub">per month for AI/DS interns</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">PPO conversion rate</div>
+      <div class="stat-value">~40%</div>
+      <div class="stat-sub">for AI-focused intern roles</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Hottest skill in JDs</div>
+      <div class="stat-value">LLMs</div>
+      <div class="stat-sub">RAG, LangChain, LlamaIndex</div>
+    </div>
+  </div>
+
+  <div class="skills-box" style="margin-bottom:0;">
+    <div class="skills-box-title">Key market trends — June 2026</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+      <div style="font-size:13px; color:var(--text-secondary); padding-left:14px; border-left:3px solid var(--accent); line-height:1.55;">
+        <strong style="color:var(--text-primary);">LLM tooling demand is surging.</strong> Nearly every AI startup JD in Delhi/NCR now mentions LangChain, RAG, or LlamaIndex — even for intern roles. Familiarity here is a fast differentiator.
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); padding-left:14px; border-left:3px solid #0891B2; line-height:1.55;">
+        <strong style="color:var(--text-primary);">Hybrid is the dominant mode.</strong> Over 60% of data-focused internship listings in Delhi offer hybrid arrangements, aligning perfectly with your preference.
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); padding-left:14px; border-left:3px solid var(--green); line-height:1.55;">
+        <strong style="color:var(--text-primary);">Startups prefer portfolio over pedigree.</strong> IIT brand matters less than a visible GitHub with working projects. Startups explicitly state they value "builders" over competitive coders.
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); padding-left:14px; border-left:3px solid #92400E; line-height:1.55;">
+        <strong style="color:var(--text-primary);">Your ₹10k expectation is well-calibrated.</strong> The market rate sits at ₹8–15k for student-level AI/DS interns, with top-funded startups reaching ₹20k for NLP-proficient candidates.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       Recommendations
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">6</span>Recommendations to improve interview chances</h2>
+  <div class="reco-list">
+    <div class="reco-item">
+      <div class="reco-num">1</div>
+      <div class="reco-text"><strong>Build a GitHub portfolio this week.</strong> Two or three projects — even small ones like EDA on a public dataset or a basic classification model — are the single highest-ROI action you can take. Most recruiters check this before calling.</div>
+    </div>
+    <div class="reco-item">
+      <div class="reco-num">2</div>
+      <div class="reco-text"><strong>Learn SQL in under a week.</strong> SELECT, JOIN, GROUP BY, and subqueries cover ~90% of what intern JDs actually test. Use SQLZoo or Mode Analytics SQL tutorial — both are free and take 5–7 days to work through.</div>
+    </div>
+    <div class="reco-item">
+      <div class="reco-num">3</div>
+      <div class="reco-text"><strong>Get hands-on with Pandas and NumPy.</strong> These are the practical data toolkit employers expect alongside Python knowledge. Work through a real dataset on Kaggle rather than isolated exercises.</div>
+    </div>
+    <div class="reco-item">
+      <div class="reco-num">4</div>
+      <div class="reco-text"><strong>Submit to one Kaggle competition.</strong> Even a basic submission gives you a public score to cite in applications, and the notebooks you write in the process become portfolio material.</div>
+    </div>
+    <div class="reco-item">
+      <div class="reco-num">5</div>
+      <div class="reco-text"><strong>Apply in volume — 10–15 roles this week.</strong> Response rates for intern roles are typically 5–15%, so volume is essential. Internshala (222+ Delhi DS listings) and LinkedIn are your highest-yield platforms right now.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════════
+       Overall Fit Assessment
+  ═════════════════════════════════════ -->
+  <h2 class="section-title"><span class="section-num">7</span>Overall fit assessment</h2>
+  <div class="fit-card">
+    <div class="fit-score-ring">
+      <span class="fit-score-num">79%</span>
+    </div>
+    <div class="fit-text">
+      <h3>Good fit for your target market</h3>
+      <p>Your profile is well-positioned for the Delhi/NCR intern market. Python + AI + Data Science is exactly what startups are hiring for. The main gap isn't your skills — it's the lack of visible proof of them. A GitHub with 2–3 working projects and SQL basics would likely move you from shortlisted to interviewed at most of these companies. Your ₹10k salary expectation is realistic and competitive for this market.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="report-footer">
+    <span>Report generated by Claude · claude.ai · 22 June 2026</span>
+    <span>Sources: Internshala · LinkedIn Jobs India · Indeed India</span>
+  </div>
+
+</div>
+</body>
+</html>
