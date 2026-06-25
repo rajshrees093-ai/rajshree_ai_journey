@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tata Motors vs Mahindra & Mahindra — Stock Comparison</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#0f1117; --card:#1a1d27; --card2:#22263a; --border:#2e3350;
+    --text:#e2e8f0; --muted:#8892a4;
+    --tata:#1a56db; --tata-bg:rgba(26,86,219,0.12); --tata-border:rgba(26,86,219,0.35);
+    --mm:#16a34a;   --mm-bg:rgba(22,163,74,0.12);   --mm-border:rgba(22,163,74,0.35);
+    --amber:#f59e0b; --red:#ef4444; --accent:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;}
+
+  /* ── HERO ── */
+  .hero{display:flex;align-items:stretch;min-height:160px;}
+  .hero-tata{flex:1;background:linear-gradient(135deg,#0c1a4a,#1a56db);padding:28px 32px;position:relative;overflow:hidden;}
+  .hero-mm  {flex:1;background:linear-gradient(135deg,#064422,#16a34a);padding:28px 32px;position:relative;overflow:hidden;}
+  .hero-vs  {display:flex;align-items:center;justify-content:center;width:80px;background:var(--card2);z-index:2;}
+  .hero-vs span{font-size:22px;font-weight:900;color:var(--amber);letter-spacing:1px;}
+  .hero-ticker{font-size:13px;letter-spacing:2px;opacity:.65;margin-bottom:4px;}
+  .hero-name{font-size:20px;font-weight:800;line-height:1.2;}
+  .hero-price{font-size:36px;font-weight:900;margin-top:12px;}
+  .hero-sub{font-size:11px;opacity:.7;margin-top:3px;}
+  .hero-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-top:10px;}
+  .badge-tata{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;}
+  .badge-mm  {background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;}
+
+  /* ── SNAPSHOT STRIP ── */
+  .snap-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;border-bottom:1px solid var(--border);}
+  .snap-cell{padding:14px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+  .snap-cell:last-child{border-right:none;}
+  .snap-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .snap-tata{font-size:16px;font-weight:700;color:#4f8ef7;}
+  .snap-mm  {font-size:16px;font-weight:700;color:#22c55e;}
+  .snap-win{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;}
+  .win-tata{background:rgba(26,86,219,.2);color:#60a5fa;}
+  .win-mm  {background:rgba(22,163,74,.2);color:#4ade80;}
+  .win-tie {background:rgba(245,158,11,.2);color:#fbbf24;}
+
+  /* ── TABS ── */
+  .tabs{display:flex;gap:2px;padding:20px 28px 0;overflow-x:auto;}
+  .tab{padding:9px 16px;border-radius:8px 8px 0 0;border:1px solid transparent;cursor:pointer;
+       font-size:13px;font-weight:600;white-space:nowrap;color:var(--muted);background:transparent;transition:.2s;}
+  .tab.active{background:var(--card);border-color:var(--border);border-bottom-color:var(--card);color:var(--accent);}
+  .tab:hover:not(.active){color:var(--text);}
+  .tab-content{display:none;padding:22px 28px 40px;}
+  .tab-content.active{display:block;}
+
+  /* ── SECTION ── */
+  .sec{font-size:15px;font-weight:700;color:var(--accent);border-left:3px solid var(--accent);
+       padding-left:10px;margin-bottom:14px;margin-top:26px;}
+  .sec:first-child{margin-top:0;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:650px){.grid2{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .card-tata{border-color:var(--tata-border);background:var(--tata-bg);}
+  .card-mm  {border-color:var(--mm-border);  background:var(--mm-bg);}
+  .card h3{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+  .chart-wrap{position:relative;height:220px;}
+
+  /* ── COMPARE TABLE ── */
+  .ctable{width:100%;border-collapse:collapse;font-size:13px;}
+  .ctable th{background:var(--card2);color:var(--muted);text-transform:uppercase;
+             font-size:11px;letter-spacing:.5px;padding:9px 14px;text-align:left;}
+  .ctable th.c-tata{color:#60a5fa;}
+  .ctable th.c-mm  {color:#4ade80;}
+  .ctable td{padding:9px 14px;border-bottom:1px solid var(--border);}
+  .ctable tr:last-child td{border-bottom:none;}
+  .ctable tr:hover td{background:rgba(255,255,255,.03);}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .bold{font-weight:700;}
+
+  /* ── BADGES ── */
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-green{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3);}
+  .badge-red  {background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+  .badge-amber{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3);}
+  .badge-blue {background:rgba(79,142,247,.15);color:#4f8ef7;border:1px solid rgba(79,142,247,.3);}
+  .badge-purple{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
+
+  /* ── INSIGHT ── */
+  .insight{border-radius:10px;padding:13px 16px;margin-top:12px;font-size:13px;line-height:1.65;}
+  .i-blue {background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.25);}
+  .i-green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);}
+  .i-amber{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);}
+  .i-red  {background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);}
+  .i-purple{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);}
+
+  /* ── LEAD LIST ── */
+  .lead-list{list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .lead-list li{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.55;}
+  .li-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+
+  /* ── VERDICT ── */
+  .verdict-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px;}
+  .verdict-card{border-radius:14px;padding:20px;text-align:center;}
+  .vc-tata{background:linear-gradient(135deg,rgba(26,86,219,.15),rgba(79,142,247,.08));border:1px solid var(--tata-border);}
+  .vc-mm  {background:linear-gradient(135deg,rgba(22,163,74,.15),rgba(74,222,128,.08));border:1px solid var(--mm-border);}
+  .vc-title{font-size:22px;font-weight:900;}
+  .vc-label{font-size:12px;color:var(--muted);margin-top:2px;}
+  .vc-stars{font-size:22px;letter-spacing:2px;margin:10px 0 4px;}
+  .vc-quality{font-size:14px;font-weight:700;margin-top:6px;}
+
+  .disclaimer{margin-top:28px;padding:13px 16px;border-radius:10px;
+    background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);
+    font-size:12px;color:var(--muted);line-height:1.65;}
+  .data-src{font-size:11px;color:var(--muted);margin-top:6px;}
+  hr.div{border:none;border-top:1px solid var(--border);margin:22px 0;}
+  .tag-tata{color:#60a5fa;font-weight:700;}
+  .tag-mm  {color:#4ade80;font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-tata">
+    <div class="hero-ticker">NSE: TATAMOTORS (CV) / TMPV</div>
+    <div class="hero-name">Tata Motors</div>
+    <div class="hero-price">₹411</div>
+    <div class="hero-sub">CMP — Jun 24, 2026 (TATAMOTORS CV entity)</div>
+    <div class="hero-badge badge-tata">🚙 CV + PV + JLR (Luxury)</div>
+  </div>
+  <div class="hero-vs"><span>VS</span></div>
+  <div class="hero-mm">
+    <div class="hero-ticker">NSE: M&amp;M</div>
+    <div class="hero-name">Mahindra &amp; Mahindra</div>
+    <div class="hero-price">₹3,040</div>
+    <div class="hero-sub">CMP — Jun 13, 2026 (Screener)</div>
+    <div class="hero-badge badge-mm">🚜 SUV + Tractors + EV + Farm</div>
+  </div>
+</div>
+
+<!-- ══ SNAPSHOT STRIP ══ -->
+<div class="snap-strip">
+  <div class="snap-cell">
+    <div class="snap-label">Market Cap</div>
+    <div class="snap-tata">₹1,47,809 Cr</div>
+    <div class="snap-mm">₹3,77,697 Cr</div>
+    <div class="snap-win win-mm">M&amp;M Bigger</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">Revenue FY26</div>
+    <div class="snap-tata">₹83,855 Cr (CV)</div>
+    <div class="snap-mm">₹1,98,639 Cr</div>
+    <div class="snap-win win-mm">M&amp;M Larger</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">Net Profit FY26</div>
+    <div class="snap-tata">₹3,030 Cr</div>
+    <div class="snap-mm">₹18,622 Cr</div>
+    <div class="snap-win win-mm">M&amp;M Higher</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">P/E Ratio</div>
+    <div class="snap-tata">~43×</div>
+    <div class="snap-mm">~20×</div>
+    <div class="snap-win win-mm">M&amp;M Cheaper</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">ROE</div>
+    <div class="snap-tata">~15–18%</div>
+    <div class="snap-mm">~20%+</div>
+    <div class="snap-win win-mm">M&amp;M Stronger</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">Dividend Yield</div>
+    <div class="snap-tata">~1.0%</div>
+    <div class="snap-mm">~0.65–1.1%</div>
+    <div class="snap-win win-tata">Tata Slightly Higher</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">5Y Stock CAGR</div>
+    <div class="snap-tata">~12–15%</div>
+    <div class="snap-mm">~31%</div>
+    <div class="snap-win win-mm">M&amp;M Outperformer</div>
+  </div>
+  <div class="snap-cell">
+    <div class="snap-label">52W High / Low</div>
+    <div class="snap-tata">₹575 / ₹350</div>
+    <div class="snap-mm">₹3,840 / ₹2,896</div>
+    <div class="snap-win win-tie">Both Corrected</div>
+  </div>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview')">🏢 Overview</div>
+  <div class="tab" onclick="showTab('valuation')">💰 Valuation</div>
+  <div class="tab" onclick="showTab('growth')">📈 Growth</div>
+  <div class="tab" onclick="showTab('health')">🏥 Health</div>
+  <div class="tab" onclick="showTab('ownership')">👥 Ownership</div>
+  <div class="tab" onclick="showTab('ev')">⚡ EV Battle</div>
+  <div class="tab" onclick="showTab('verdict')">🏆 Verdict</div>
+</div>
+
+<!-- ══════════════════  TAB 1 – OVERVIEW  ══════════════════ -->
+<div id="tab-overview" class="tab-content active">
+  <div class="grid2">
+    <div class="card card-tata">
+      <h3>🚗 Tata Motors — Business</h3>
+      <div style="font-size:13px;line-height:1.75;">
+        India's largest automobile company (pre-demerger entity) and owner of <strong>Jaguar Land Rover (JLR)</strong> — the British luxury vehicle brand. Post the October 2025 demerger, Tata Motors now has three listed entities:
+        <ul style="padding-left:16px;margin-top:8px;">
+          <li><strong>TATAMOTORS CV</strong> — Commercial Vehicles (CV) — trucks, buses, vans</li>
+          <li><strong>TMPV</strong> — Tata Motors Passenger Vehicles + JLR globally</li>
+        </ul>
+        <br/>
+        JLR contributes <strong>~70% of consolidated revenue</strong>. It is a highly cyclical, capex-heavy global luxury business with exposure to UK/EU tariffs, China weakness, and currency headwinds.
+        <br/><br/>
+        In FY26, a <strong>cyber incident halted JLR production</strong> significantly, causing a full-year loss at JLR (PAT: –£244Mn). CV entity reported record revenues of ₹83,855 Cr with PAT of ₹3,030 Cr.
+      </div>
+    </div>
+    <div class="card card-mm">
+      <h3>🚜 Mahindra &amp; Mahindra — Business</h3>
+      <div style="font-size:13px;line-height:1.75;">
+        India's largest SUV maker by revenue market share (25.3% in FY26) and the <strong>world's #1 tractor manufacturer by volume</strong>. M&amp;M operates 5 business segments: Automotive, Farm Equipment, Auto Investments, Farm Investments, and Industrial/Consumer Services.
+        <br/><br/>
+        Key products: Scorpio, Thar, XUV series, Bolero, BE 6, XEV 9e (EV), Swaraj tractors.
+        <br/><br/>
+        FY26 was M&amp;M's <strong>standout year</strong>: SUV volumes grew 19%, revenue market share rose 260 bps, EV business turned <strong>profitable</strong> (PBIT ₹287 Cr), PAT grew 35% YoY. Management guided for mid-to-high teen SUV volume growth in FY27.
+      </div>
+    </div>
+  </div>
+
+  <p class="sec">Business Model Comparison</p>
+  <table class="ctable">
+    <thead>
+      <tr><th>Parameter</th><th class="c-tata">Tata Motors (CV Entity)</th><th class="c-mm">Mahindra &amp; Mahindra</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Founded</td><td>1945</td><td>1945</td></tr>
+      <tr><td>Headquarters</td><td>Mumbai, India</td><td>Mumbai, India</td></tr>
+      <tr><td>Core Segments</td><td>CV (trucks/buses), PV (domestic), JLR (luxury global)</td><td>SUVs/UVs, Tractors, EVs, Farm Equipment</td></tr>
+      <tr><td>Global Presence</td><td>125+ countries; JLR in UK/EU/US/China</td><td>100+ countries; tractor leader globally</td></tr>
+      <tr><td>Employees</td><td>~85,000 (India CV); ~35,000 (TMPVL)</td><td>2,60,000+</td></tr>
+      <tr><td>EV Strategy</td><td>Multi-powertrain; EV leader India PV; JLR all-electric by 2030</td><td>BE 6, XEV 9e; EV profitable since FY26</td></tr>
+      <tr><td>JLR Overhang</td><td><span class="badge badge-red">High — global macro sensitive</span></td><td><span class="badge badge-green">None — purely domestic+export</span></td></tr>
+      <tr><td>Tractor Business</td><td>None</td><td><span class="badge badge-green">World's #1 by volume</span></td></tr>
+      <tr><td>FY26 Revenue Scale</td><td>₹83,855 Cr (CV) / ₹3,35,600 Cr (TMPVL consolidated)</td><td>₹1,98,639 Cr (standalone group)</td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: Tata Motors Q4FY26 Press Release, M&amp;M Screener.in, TradeBrains.in — Jun 2026</div>
+</div>
+
+<!-- ══════════════════  TAB 2 – VALUATION  ══════════════════ -->
+<div id="tab-valuation" class="tab-content">
+  <p class="sec">Side-by-Side Valuation Metrics</p>
+  <table class="ctable">
+    <thead>
+      <tr><th>Metric</th><th class="c-tata">Tata Motors</th><th class="c-mm">M&amp;M</th><th>Edge</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CMP</td><td class="num">₹411 (CV)</td><td class="num">₹3,040</td><td><span class="badge badge-amber">—</span></td></tr>
+      <tr><td>Market Cap</td><td class="num">₹1,47,809 Cr</td><td class="num">₹3,77,697 Cr</td><td><span class="badge badge-amber">Different Scale</span></td></tr>
+      <tr><td>P/E (TTM)</td><td class="num">~43×</td><td class="num">~20–22×</td><td><span class="badge badge-green">✅ M&amp;M Cheaper</span></td></tr>
+      <tr><td>P/B Ratio</td><td class="num">~11×</td><td class="num">~4.1–4.6×</td><td><span class="badge badge-green">✅ M&amp;M Cheaper</span></td></tr>
+      <tr><td>EV/EBITDA</td><td class="num">~12–14× (CV)</td><td class="num">~15–18×</td><td><span class="badge badge-blue">✅ Tata CV Cheaper</span></td></tr>
+      <tr><td>Dividend Yield</td><td class="num">~1.0%</td><td class="num">~0.65–1.1%</td><td><span class="badge badge-amber">Comparable</span></td></tr>
+      <tr><td>P/Sales</td><td class="num">~1.8× (CV)</td><td class="num">~1.9×</td><td><span class="badge badge-amber">Comparable</span></td></tr>
+      <tr><td>52W High</td><td class="num">₹575 (CV)</td><td class="num">₹3,840</td><td><span class="badge badge-amber">Both Down ~30%</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: Screener.in, Indmoney.com, Tickertape — Jun 2026</div>
+
+  <p class="sec">Valuation Charts</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>P/E Ratio Trend (3Y)</h3>
+      <div class="chart-wrap"><canvas id="peChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Market Cap Journey (₹ Cr)</h3>
+      <div class="chart-wrap"><canvas id="mcapChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight i-amber" style="margin-top:14px;">
+    ⚖️ <strong>Valuation Verdict:</strong> M&amp;M trades at a significantly lower P/E (~20×) vs Tata Motors CV (~43×) and commands a lower P/B (4.1× vs ~11×) despite generating far higher profits — making M&amp;M the more attractively valued proposition on earnings-based metrics. Tata Motors' high P/E is explained by FY26 being a depressed earnings year due to JLR headwinds. Investors are ascribing a recovery premium to future normalised earnings.
+  </div>
+</div>
+
+<!-- ══════════════════  TAB 3 – GROWTH  ══════════════════ -->
+<div id="tab-growth" class="tab-content">
+  <p class="sec">Revenue &amp; Profit Growth Comparison</p>
+  <div class="card">
+    <h3>Revenue Trend (₹ Cr — Standalone/Comparable Basis)</h3>
+    <div class="chart-wrap" style="height:250px;"><canvas id="revChart"></canvas></div>
+  </div>
+
+  <table class="ctable" style="margin-top:16px;">
+    <thead>
+      <tr><th>Metric</th><th class="c-tata">Tata Motors (CV)</th><th class="c-mm">M&amp;M</th><th>Edge</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FY26 Revenue</td><td class="num">₹83,855 Cr</td><td class="num">₹1,98,639 Cr</td><td><span class="badge badge-green">✅ M&amp;M Scale</span></td></tr>
+      <tr><td>FY26 Revenue Growth YoY</td><td class="num bold">+44%</td><td class="num bold">+20%+</td><td><span class="badge badge-blue">✅ Tata (Low Base)</span></td></tr>
+      <tr><td>FY26 Net Profit</td><td class="num">₹3,030 Cr</td><td class="num">₹18,622 Cr</td><td><span class="badge badge-green">✅ M&amp;M Much Higher</span></td></tr>
+      <tr><td>PAT Growth FY26 YoY</td><td class="num">–5.2%</td><td class="num">+35–42%</td><td><span class="badge badge-green">✅ M&amp;M Dominant</span></td></tr>
+      <tr><td>Q4 FY26 Net Profit Growth</td><td class="num">+33.8%</td><td class="num">+41.7%</td><td><span class="badge badge-green">✅ M&amp;M Slightly Better</span></td></tr>
+      <tr><td>5Y EPS CAGR</td><td class="num">~N/A (losses historically)</td><td class="num">~57%</td><td><span class="badge badge-green">✅ M&amp;M Stellar</span></td></tr>
+      <tr><td>EBITDA Margin</td><td class="num">12.3% (CV)</td><td class="num">~15–17%</td><td><span class="badge badge-green">✅ M&amp;M Higher</span></td></tr>
+      <tr><td>Operating Margin Trend</td><td class="num">Recovering</td><td class="num">Expanding</td><td><span class="badge badge-green">✅ M&amp;M Expanding</span></td></tr>
+      <tr><td>SUV Volume Growth (FY26)</td><td class="num">~15% (PV total)</td><td class="num">+19%</td><td><span class="badge badge-green">✅ M&amp;M Faster</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: TradeBrains.in, Screener.in, Tata Motors Q4FY26 Press Release, Indmoney.com — Jun 2026</div>
+
+  <div class="insight i-green" style="margin-top:14px;">
+    📈 <strong>M&amp;M Growth Story:</strong> FY26 was an exceptional year. SUV volumes grew 19%, margins expanded 80 bps to 10.9%, EV revenue market share hit 37.7% (India #1 by revenue), EV business turned profitable, annualised EPS CAGR over 5 years hit 57%. Management guided for mid-to-high-teen volume growth in FY27. Revenue has grown every quarter for 20 consecutive quarters (₹19,780 Cr → ₹56,520 Cr trend line).
+  </div>
+  <div class="insight i-amber" style="margin-top:10px;">
+    ⚠️ <strong>Tata CV Growth Story:</strong> FY26 revenue grew 44% YoY (post-demerger listing, new entity), marking a landmark year. Q4 FY26 profit grew +33.8%. However, PAT for full year fell 5.2% YoY. JLR (in TMPVL entity) saw revenue fall 21% to £22.9Bn, with a full-year loss of £244Mn, due to cyber incident + tariffs + China market weakness.
+  </div>
+</div>
+
+<!-- ══════════════════  TAB 4 – HEALTH  ══════════════════ -->
+<div id="tab-health" class="tab-content">
+  <p class="sec">Financial Health Scorecard</p>
+  <table class="ctable">
+    <thead>
+      <tr><th>Health Metric</th><th class="c-tata">Tata Motors (CV)</th><th class="c-mm">M&amp;M</th><th>Benchmark</th><th>Edge</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>D/E Ratio</td><td class="num"><span class="badge badge-amber">~0.8–1.0× (CV)</span></td><td class="num"><span class="badge badge-amber">~1.5–1.6×</span></td><td>Safe &lt;1×</td><td><span class="badge badge-blue">✅ Tata CV Lower</span></td></tr>
+      <tr><td>Net Cash / Debt</td><td class="num">₹13,713 Cr net cash (CV)</td><td class="num">~Mixed</td><td>Net Cash = Ideal</td><td><span class="badge badge-blue">✅ Tata CV</span></td></tr>
+      <tr><td>EBITDA Margin</td><td class="num">12.3%</td><td class="num">~16–17%</td><td>&gt;15% = Strong</td><td><span class="badge badge-green">✅ M&amp;M</span></td></tr>
+      <tr><td>FCF (FY26)</td><td class="num">Positive (CV)</td><td class="num">Strong &amp; growing</td><td>Positive = Healthy</td><td><span class="badge badge-green">✅ M&amp;M</span></td></tr>
+      <tr><td>ROE</td><td class="num">15–18%</td><td class="num">~20–22%</td><td>&gt;15% = Good</td><td><span class="badge badge-green">✅ M&amp;M</span></td></tr>
+      <tr><td>ROCE</td><td class="num">~13–15%</td><td class="num">~15–18%</td><td>&gt;15% = Good</td><td><span class="badge badge-green">✅ M&amp;M</span></td></tr>
+      <tr><td>Current Ratio</td><td class="num">~1.2×</td><td class="num">~1.0–1.2×</td><td>&gt;1.5 = Comfortable</td><td><span class="badge badge-amber">Watch Both</span></td></tr>
+      <tr><td>Interest Coverage</td><td class="num">~4–5×</td><td class="num">~3–4×</td><td>&gt;3× = Healthy</td><td><span class="badge badge-amber">Both OK</span></td></tr>
+      <tr><td>Promoter Pledge</td><td class="num">0%</td><td class="num">0%</td><td>0% = Best</td><td><span class="badge badge-green">✅ Both Clean</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: Screener.in, TradeBrains.in, Tata Motors Q4FY26 Press Release, BlinkX — Jun 2026</div>
+
+  <p class="sec">Balance Sheet Risk Profile</p>
+  <div class="grid2">
+    <div class="card card-tata">
+      <h3>Tata Motors CV — Financial Health</h3>
+      <p style="font-size:13px;line-height:1.7;">
+        ✅ CV entity now holds a <strong>net cash position of ₹13,713 Cr</strong> — a dramatic turnaround from historical high debt levels.<br/><br/>
+        ⚠️ JLR entity (under TMPVL) carries <strong>£2.6Bn net debt</strong> and negative FCF of £(2.2)Bn for FY26 — the cyber incident and tariffs caused significant cash burn.<br/><br/>
+        ✅ CV EBITDA margin strong at 12.3% with HCV market share of 55%.<br/><br/>
+        🚨 JLR is acquiring Iveco Group (€3.8Bn deal) — adding potential debt at a difficult balance sheet moment.
+      </p>
+    </div>
+    <div class="card card-mm">
+      <h3>M&amp;M — Financial Health</h3>
+      <p style="font-size:13px;line-height:1.7;">
+        ✅ Strong and improving profitability — Group PAT jumped 35%+ in FY26.<br/><br/>
+        ⚠️ D/E ratio of ~1.5× is moderate — slightly elevated for an auto company but manageable given strong EBITDA generation.<br/><br/>
+        ✅ EV business is now <strong>profitable</strong> (PBIT ₹287 Cr) — removing a long-standing concern about EV drag.<br/><br/>
+        ✅ Revenue growing every quarter for 20 consecutive quarters — rare consistency.<br/><br/>
+        ✅ 2,728 cumulative patents filed (1,334 granted); strong R&amp;D culture.
+      </p>
+    </div>
+  </div>
+
+  <p class="sec">Return Ratios Chart</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:230px;"><canvas id="roeChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════════════  TAB 5 – OWNERSHIP  ══════════════════ -->
+<div id="tab-ownership" class="tab-content">
+  <p class="sec">Shareholding Pattern (Mar 2026)</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Tata Motors (CV) — Shareholding</h3>
+      <div class="chart-wrap"><canvas id="tataHoldChart"></canvas></div>
+      <div class="data-src" style="margin-top:8px;">Source: Screener.in — Promoter: 42.6%</div>
+    </div>
+    <div class="card">
+      <h3>M&amp;M — Shareholding</h3>
+      <div class="chart-wrap"><canvas id="mmHoldChart"></canvas></div>
+      <div class="data-src" style="margin-top:8px;">Source: Screener.in — Promoter: 18.4%</div>
+    </div>
+  </div>
+
+  <p class="sec">Ownership Analysis</p>
+  <table class="ctable">
+    <thead>
+      <tr><th>Category</th><th class="c-tata">Tata Motors CV</th><th class="c-mm">M&amp;M</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Promoter Holding</td><td class="num bold">42.6%</td><td class="num bold">18.4%</td><td>🚩 M&amp;M promoters hold less — watch dilution</td></tr>
+      <tr><td>FII/FPI</td><td class="num">~25–30%</td><td class="num">~35–40%</td><td>M&amp;M has higher FII confidence</td></tr>
+      <tr><td>DII (Domestic Inst.)</td><td class="num">~15–20%</td><td class="num">~25–30%</td><td>Both well held domestically</td></tr>
+      <tr><td>Promoter Pledge</td><td class="num"><span class="badge badge-green">0%</span></td><td class="num"><span class="badge badge-green">0%</span></td><td>✅ Both clean</td></tr>
+      <tr><td>Tata Sons / Tata Group</td><td class="num">42.6% (Tata Sons)</td><td class="num">18.4% (Mahindra family)</td><td>Tata has stronger promoter anchor</td></tr>
+    </tbody>
+  </table>
+
+  <div class="insight i-blue" style="margin-top:14px;">
+    💡 <strong>Key Note:</strong> M&amp;M's low promoter holding (18.4%) is a structural feature of the Mahindra Group structure — it reflects institutional trust but also means less promoter skin-in-the-game vs Tata. M&amp;M compensates with very high FII and DII confidence due to its consistent performance. Tata's 42.6% promoter holding provides stronger alignment.
+  </div>
+</div>
+
+<!-- ══════════════════  TAB 6 – EV BATTLE  ══════════════════ -->
+<div id="tab-ev" class="tab-content">
+  <p class="sec">Electric Vehicle Strategy — Head to Head</p>
+  <div class="grid2">
+    <div class="card card-tata">
+      <h3>⚡ Tata Motors — EV Story</h3>
+      <div style="font-size:13px;line-height:1.8;">
+        <strong>India Passenger EV:</strong>
+        <ul style="padding-left:16px;margin:6px 0 12px;">
+          <li>Tata Nexon EV, Punch EV, Tiago EV, Curvv EV</li>
+          <li>92,000+ EV units sold in FY26 (+43% YoY)</li>
+          <li>EV revenue market share: <strong>declining</strong> as M&amp;M entered strongly</li>
+          <li>Still a top-2 EV player by volume</li>
+        </ul>
+        <strong>JLR Electric (Global):</strong>
+        <ul style="padding-left:16px;margin-top:6px;">
+          <li>New Jaguar to go fully electric; waiting list 65,000+ for Range Rover Electric</li>
+          <li>Range Rover Electric prototypes generating critical acclaim</li>
+          <li>£18Bn invested over 5 years for Reimagine Strategy</li>
+          <li>Target: full EV portfolio; break-even at 300K units in 2 years</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card card-mm">
+      <h3>⚡ M&amp;M — EV Story</h3>
+      <div style="font-size:13px;line-height:1.8;">
+        <strong>India SUV EV — Rapid Rise:</strong>
+        <ul style="padding-left:16px;margin:6px 0 12px;">
+          <li>BE 6, XEV 9e — premium electric SUVs</li>
+          <li>EV penetration: <strong>9.6% of sales</strong> in FY26; 10%+ in final 2 months</li>
+          <li><strong>EV revenue market share: 37.7%</strong> in Q4 FY26 — India's #1 by revenue</li>
+          <li>EV business turned profitable — PBIT ₹287 Cr in FY26</li>
+          <li>14,000 additional EV capacity units being added through FY28</li>
+        </ul>
+        <strong>Plans:</strong>
+        <ul style="padding-left:16px;margin-top:6px;">
+          <li>6 new BEVs by FY31; new Nagpur plant mid-2028</li>
+          <li>Carbon neutral target: 2040</li>
+          <li>20× patent growth in 10 years (56 → 1,334 granted)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec">EV Comparison Scorecard</p>
+  <table class="ctable">
+    <thead>
+      <tr><th>EV Metric</th><th class="c-tata">Tata Motors PV</th><th class="c-mm">M&amp;M</th><th>Edge</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FY26 EV Units (India)</td><td class="num">92,000+ (+43%)</td><td class="num">~60,000+</td><td><span class="badge badge-blue">✅ Tata Volume</span></td></tr>
+      <tr><td>EV Revenue Mkt Share</td><td class="num">~40–45% (declining)</td><td class="num">37.7% (Q4, surging)</td><td><span class="badge badge-amber">Momentum to M&amp;M</span></td></tr>
+      <tr><td>EV Profitability</td><td class="num">Not disclosed separately</td><td class="num"><span class="badge badge-green">✅ Profitable (PBIT ₹287Cr)</span></td><td><span class="badge badge-green">✅ M&amp;M Ahead</span></td></tr>
+      <tr><td>Global EV (JLR)</td><td class="num"><span class="badge badge-green">✅ Range Rover EV, Jaguar EV</span></td><td class="num">India-focused only</td><td><span class="badge badge-blue">✅ Tata JLR Global</span></td></tr>
+      <tr><td>EV Pipeline</td><td class="num">Curvv, Sierra (coming)</td><td class="num">6 new BEVs by FY31</td><td><span class="badge badge-green">✅ M&amp;M Bolder</span></td></tr>
+      <tr><td>Carbon Neutrality Target</td><td class="num">2045</td><td class="num">2040</td><td><span class="badge badge-green">✅ M&amp;M Earlier</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="insight i-purple" style="margin-top:14px;">
+    ⚡ <strong>EV Verdict:</strong> Tata Motors PV has first-mover advantage in India EVs by volume. But M&amp;M has overtaken Tata on <em>revenue market share</em> (37.7% vs declining Tata share) by selling premium EVs (BE 6, XEV 9e at higher ASPs). Most importantly, <strong>M&amp;M's EV business is already profitable</strong> — a milestone that Tata EV India hasn't yet publicly claimed. M&amp;M's EV momentum is clearly stronger as of FY26.
+  </div>
+</div>
+
+<!-- ══════════════════  TAB 7 – VERDICT  ══════════════════ -->
+<div id="tab-verdict" class="tab-content">
+
+  <p class="sec">Where Each Stock Leads</p>
+  <div class="grid2">
+    <div class="card card-tata">
+      <h3 style="color:#60a5fa;">🚗 Where Tata Motors Leads</h3>
+      <ul class="lead-list" style="margin-top:8px;">
+        <li><span class="li-icon">✅</span><div><strong>CV Market Dominance:</strong> 55% HCV market share in India — unchallenged leadership in trucks and buses. CV entity hit record revenues of ₹83,855 Cr in FY26 with net cash position of ₹13,713 Cr.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>Global Luxury — JLR:</strong> Owns Range Rover, Defender, Discovery, Jaguar — aspirational luxury brands operating in a segment with 40%+ gross margins. Range Rover Electric has a 65,000+ waitlist.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>EV India Volume Leadership:</strong> 92,000+ EV units in FY26 (+43% YoY). Tata still has the most EV models in India and the largest charging-ready ecosystem.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>Turnaround Potential:</strong> If JLR headwinds (tariffs, cyber incident, China) normalise in FY27–28, consolidated P/E could compress dramatically — offering optionality for patient investors.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>Iveco Acquisition:</strong> Acquiring global commercial vehicle brand Iveco for ~€3.8Bn — transformational for CV global reach.</div></li>
+      </ul>
+    </div>
+    <div class="card card-mm">
+      <h3 style="color:#4ade80;">🏆 Where M&amp;M Leads</h3>
+      <ul class="lead-list" style="margin-top:8px;">
+        <li><span class="li-icon">✅</span><div><strong>SUV Market Share #1 by Revenue:</strong> 25.3% revenue market share in FY26 (+260 bps YoY). All major models (Thar, Scorpio, XUV 7XO, Bolero) are <em>supply-constrained</em> — demand is not the problem.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>Consistent Profitability + Margin Expansion:</strong> PAT grew 35–42%, margins expanded 80 bps to 10.9%, ROE crossed 20%. 20 consecutive quarters of revenue growth.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>EV Profitable + Market Leader by Revenue:</strong> 37.7% EV revenue market share in Q4 FY26. EV business PBIT of ₹287 Cr — already profitable, ahead of all peers.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>World's #1 Tractor by Volume:</strong> Swaraj + Mahindra brands dominate India and export markets. A highly cash-generative, defensive business with rural India tailwinds.</div></li>
+        <li><span class="li-icon">✅</span><div><strong>Better Valuation:</strong> At ~20× P/E vs historical range of 23–48×, M&amp;M is attractively valued for its growth trajectory. 5Y stock CAGR of 31% — one of the best in Indian auto sector.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="div"/>
+  <p class="sec">Overall Quality Assessment</p>
+  <div class="verdict-wrap">
+    <div class="verdict-card vc-tata">
+      <div class="vc-title" style="color:#60a5fa;">TATA MOTORS</div>
+      <div class="vc-label">CV Entity (NSE: TATAMOTORS)</div>
+      <div class="vc-stars">⭐⭐⭐</div>
+      <div class="vc-quality" style="color:#f59e0b;">MODERATE — Recovering</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;">
+        Strong CV fundamentals + JLR optionality. FY26 impacted by cyber incident + tariffs. 
+        High-risk, high-reward play on JLR recovery + Iveco deal.
+        Better for investors with higher risk tolerance and longer horizon.
+      </div>
+    </div>
+    <div class="verdict-card vc-mm">
+      <div class="vc-title" style="color:#4ade80;">M&amp;M</div>
+      <div class="vc-label">NSE: M&amp;M</div>
+      <div class="vc-stars">⭐⭐⭐⭐</div>
+      <div class="vc-quality" style="color:#22c55e;">STRONG — Compounding</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;">
+        Best-in-class Indian auto stock today. Consistent margin expansion, SUV demand-constrained, 
+        EV profitable, tractor dominance, strong capital returns. 
+        Suitable for growth-oriented long-term investors.
+      </div>
+    </div>
+  </div>
+
+  <p class="sec" style="margin-top:28px;">Neutral Investor-Style Summary</p>
+  <div class="insight i-purple">
+    <strong>M&amp;M is the stronger proposition today</strong> on nearly every fundamental metric: revenue scale, profit quality, margin trajectory, EV positioning, valuation, and consistency. As one analysis puts it, "Comparing purely on the Indian passenger vehicle business, Mahindra is the stronger proposition today. It combines volume growth with margin expansion, has an EV business that's already profitable, and carries no JLR-related global risk on its books."
+    <br/><br/>
+    <strong>Tata Motors</strong> (particularly the JLR entity — TMPVL) is a different bet entirely — it is a <em>recovery/optionality play</em> on a globally iconic luxury brand navigating a difficult cycle. If JLR normalises margins back to 8–10% EBIT (from FY26's 0.7%), the earnings uplift would be enormous. The CV entity is fundamentally sound and cash-generating.
+    <br/><br/>
+    <strong>For conservative long-term compounding:</strong> M&amp;M. &nbsp;&nbsp;<strong>For higher-risk recovery potential:</strong> Tata Motors JLR (TMPVL). Both are structurally important Indian auto businesses — they are different risk/reward profiles, not apples-to-apples.
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ DISCLAIMER:</strong> This is a fundamentals view for educational purposes only. It is NOT investment advice and NOT a buy/sell/hold recommendation for either stock. All figures sourced from TradeBrains.in, Screener.in, Tata Motors Q4FY26 Press Release, M&amp;M Tickertape, BlinkX, Indmoney.com, Outlook Business — as of June 2026. Verify all figures independently before any financial decision. Consult a SEBI-registered investment advisor. The final decision is yours.
+  </div>
+</div>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+const G={color:'rgba(255,255,255,0.07)'};
+const F={color:'#8892a4',size:11};
+const TATA='rgba(26,86,219,0.85)';
+const MM='rgba(22,163,74,0.85)';
+const TATA_L='rgba(26,86,219,0.2)';
+const MM_L='rgba(22,163,74,0.2)';
+
+/* P/E Chart */
+new Chart(document.getElementById('peChart'),{
+  type:'line',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Tata Motors P/E',data:[0,35,18,15,43],borderColor:TATA,backgroundColor:TATA_L,fill:true,tension:.4,pointRadius:5,pointBackgroundColor:TATA},
+      {label:'M&M P/E',        data:[48,30,25,22,20],borderColor:MM,  backgroundColor:MM_L,  fill:true,tension:.4,pointRadius:5,pointBackgroundColor:MM}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:F,grid:G},y:{ticks:{...F,callback:v=>v+'×'},grid:G}}}
+});
+
+/* Market Cap */
+new Chart(document.getElementById('mcapChart'),{
+  type:'bar',
+  data:{labels:['FY21','FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Tata Motors Mkt Cap (₹Cr)',data:[47000,155000,130000,200000,220000,147809],backgroundColor:TATA,borderRadius:5},
+      {label:'M&M Mkt Cap (₹Cr)',        data:[98846,170000,175000,250000,360000,377697],backgroundColor:MM,borderRadius:5}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:F,grid:G},y:{ticks:{...F,callback:v=>(v/100000).toFixed(1)+'L'},grid:G}}}
+});
+
+/* Revenue */
+new Chart(document.getElementById('revChart'),{
+  type:'bar',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Tata Motors CV Revenue (₹Cr)',data:[45000,56000,62000,58000,83855],backgroundColor:TATA,borderRadius:5},
+      {label:'M&M Revenue (₹Cr)',           data:[96000,121000,140000,165000,198639],backgroundColor:MM,borderRadius:5}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:F,grid:G},y:{ticks:{...F,callback:v=>(v/1000).toFixed(0)+'K'},grid:G}}}
+});
+
+/* ROE Chart */
+new Chart(document.getElementById('roeChart'),{
+  type:'line',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Tata Motors ROE%',data:[-25,5,37,18,16],borderColor:TATA,tension:.4,fill:false,pointRadius:5,pointBackgroundColor:TATA},
+      {label:'M&M ROE%',        data:[3,18,17,20,22],borderColor:MM,  tension:.4,fill:false,pointRadius:5,pointBackgroundColor:MM},
+      {label:'Min Threshold 15%',data:[15,15,15,15,15],borderColor:'rgba(245,158,11,.5)',borderDash:[5,4],pointRadius:0,fill:false}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:F,grid:G},y:{ticks:{...F,callback:v=>v+'%'},grid:G}}}
+});
+
+/* Tata Holding */
+new Chart(document.getElementById('tataHoldChart'),{
+  type:'doughnut',
+  data:{labels:['Promoters 42.6%','FII 25%','DII 20%','Public 12.4%'],
+    datasets:[{data:[42.6,25,20,12.4],backgroundColor:['#1a56db','#f59e0b','#22c55e','#8892a4'],borderWidth:2,borderColor:'#1a1d27',hoverOffset:6}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:10},boxWidth:12,padding:6}}}}
+});
+
+/* M&M Holding */
+new Chart(document.getElementById('mmHoldChart'),{
+  type:'doughnut',
+  data:{labels:['Promoters 18.4%','FII 38%','DII 28%','Public 15.6%'],
+    datasets:[{data:[18.4,38,28,15.6],backgroundColor:['#16a34a','#4f8ef7','#a78bfa','#8892a4'],borderWidth:2,borderColor:'#1a1d27',hoverOffset:6}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:10},boxWidth:12,padding:6}}}}
+});
+</script>
+</body>
+</html>
