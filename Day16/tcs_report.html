@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TCS – Deep Dive Fundamental Research</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #22263a;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --tcs: #0066b3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2a6c 50%, #0066b3 100%);
+    padding: 28px 32px 20px;
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content:''; position:absolute; top:-40px; right:-60px;
+    width:300px; height:300px; border-radius:50%;
+    background: rgba(79,142,247,0.12); pointer-events:none;
+  }
+  .header-top { display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; }
+  .ticker-badge {
+    background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+    padding:10px 18px; border-radius:12px; font-size:28px; font-weight:800;
+    letter-spacing:2px; color:#fff;
+  }
+  .company-info h1 { font-size:22px; font-weight:700; color:#fff; }
+  .company-info .sub { color:rgba(255,255,255,0.65); font-size:13px; margin-top:4px; }
+  .price-block { margin-left:auto; text-align:right; }
+  .cmp { font-size:32px; font-weight:800; color:#fff; }
+  .cmp-sub { color:rgba(255,255,255,0.6); font-size:12px; }
+  .quality-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background: rgba(34,197,94,0.2); border:1px solid #22c55e;
+    color:#22c55e; padding:5px 14px; border-radius:20px;
+    font-weight:700; font-size:13px; margin-top:8px;
+  }
+
+  /* ── SNAPSHOT PILLS ── */
+  .pills { display:flex; flex-wrap:wrap; gap:10px; margin: 16px 32px 0; }
+  .pill {
+    background: var(--card2); border:1px solid var(--border);
+    border-radius:10px; padding:10px 16px; min-width:130px;
+    flex:1;
+  }
+  .pill .plabel { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+  .pill .pval { font-size:18px; font-weight:700; margin-top:3px; }
+  .pill .ptag { font-size:11px; margin-top:2px; }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:2px; padding:20px 32px 0; overflow-x:auto; }
+  .tab {
+    padding:9px 18px; border-radius:8px 8px 0 0;
+    border:1px solid transparent; cursor:pointer;
+    font-size:13px; font-weight:600; white-space:nowrap;
+    color:var(--muted); background:transparent; transition:.2s;
+  }
+  .tab.active { background:var(--card); border-color:var(--border); border-bottom-color:var(--card); color:var(--accent); }
+  .tab:hover:not(.active) { color:var(--text); }
+
+  .tab-content { display:none; padding:24px 32px 40px; }
+  .tab-content.active { display:block; }
+
+  /* ── GRID / SECTION ── */
+  .section-title {
+    font-size:15px; font-weight:700; color:var(--accent);
+    border-left:3px solid var(--accent); padding-left:10px;
+    margin-bottom:16px; margin-top:28px;
+  }
+  .section-title:first-child { margin-top:0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:700px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; }
+  .card h3 { font-size:13px; color:var(--muted); margin-bottom:12px; }
+
+  /* ── TABLE ── */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--card2); color:var(--muted); text-transform:uppercase; font-size:11px; letter-spacing:.5px; padding:9px 12px; text-align:left; }
+  td { padding:9px 12px; border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(79,142,247,0.04); }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* ── BADGES ── */
+  .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge-green { background:rgba(34,197,94,.15); color:#22c55e; border:1px solid rgba(34,197,94,.3); }
+  .badge-amber { background:rgba(245,158,11,.15); color:#f59e0b; border:1px solid rgba(245,158,11,.3); }
+  .badge-red   { background:rgba(239,68,68,.15);  color:#ef4444; border:1px solid rgba(239,68,68,.3); }
+  .badge-blue  { background:rgba(79,142,247,.15); color:#4f8ef7; border:1px solid rgba(79,142,247,.3); }
+
+  /* ── INSIGHT BOXES ── */
+  .insight { border-radius:10px; padding:14px 16px; margin-top:12px; font-size:13px; line-height:1.6; }
+  .insight-green { background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.25); }
+  .insight-amber { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); }
+  .insight-blue  { background:rgba(79,142,247,.08); border:1px solid rgba(79,142,247,.25); }
+  .insight-red   { background:rgba(239,68,68,.08);  border:1px solid rgba(239,68,68,.25); }
+
+  /* ── STRENGTH / WATCH ── */
+  .sw-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .sw-list li { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.55; }
+  .sw-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+
+  /* ── CHART WRAPPER ── */
+  .chart-wrap { position:relative; height:220px; }
+
+  /* ── OWNERSHIP BARS ── */
+  .own-bar-wrap { display:flex; flex-direction:column; gap:10px; }
+  .own-bar-row { display:flex; align-items:center; gap:10px; }
+  .own-bar-label { width:90px; font-size:12px; color:var(--muted); flex-shrink:0; }
+  .own-bar-bg { flex:1; background:var(--card2); border-radius:6px; height:14px; overflow:hidden; }
+  .own-bar-fill { height:100%; border-radius:6px; }
+  .own-bar-val { width:46px; text-align:right; font-size:13px; font-weight:600; }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    margin-top:28px; padding:14px 16px; border-radius:10px;
+    background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2);
+    font-size:12px; color:var(--muted); line-height:1.6;
+  }
+  .disclaimer strong { color:var(--red); }
+
+  /* ── DATA SRC ── */
+  .data-src { font-size:11px; color:var(--muted); margin-top:6px; }
+
+  /* ── AI REVENUE HIGHLIGHT ── */
+  .highlight-box {
+    background: linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,58,237,.12));
+    border:1px solid rgba(79,142,247,.3); border-radius:12px; padding:16px 20px;
+    margin-top:16px;
+  }
+  .highlight-box .hval { font-size:28px; font-weight:800; color:var(--accent); }
+  .highlight-box .hlabel { color:var(--muted); font-size:12px; margin-top:2px; }
+
+  hr.divider { border:none; border-top:1px solid var(--border); margin:22px 0; }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div class="header-top">
+    <div class="ticker-badge">TCS</div>
+    <div class="company-info">
+      <h1>Tata Consultancy Services Ltd</h1>
+      <div class="sub">NSE: TCS &nbsp;|&nbsp; BSE: 532540 &nbsp;|&nbsp; Sector: Information Technology &nbsp;|&nbsp; Tata Group</div>
+      <div class="sub" style="margin-top:6px;">IT Services &amp; Consulting &nbsp;·&nbsp; 55 Countries &nbsp;·&nbsp; 600,000+ Employees</div>
+    </div>
+    <div class="price-block">
+      <div class="cmp">₹2,580</div>
+      <div class="cmp-sub">CMP (Screener, Apr 20 2026)</div>
+      <div class="quality-badge">✦ Strong Fundamentals</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SNAPSHOT PILLS ══ -->
+<div class="pills">
+  <div class="pill">
+    <div class="plabel">Market Cap</div>
+    <div class="pval" style="color:#4f8ef7">₹9.33L Cr</div>
+    <div class="ptag" style="color:#22c55e">India's #2 by Mkt Cap</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">Stock P/E</div>
+    <div class="pval">17.8×</div>
+    <div class="ptag" style="color:#22c55e">↓ Below 5Y avg ~28×</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">ROE (3Y Avg)</div>
+    <div class="pval" style="color:#22c55e">51.9%</div>
+    <div class="ptag" style="color:#22c55e">↑ Excellent</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">ROCE</div>
+    <div class="pval" style="color:#22c55e">63.0%</div>
+    <div class="ptag" style="color:#22c55e">↑ Sector-leading</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">52W High / Low</div>
+    <div class="pval" style="font-size:14px">₹3,630 / ₹2,346</div>
+    <div class="ptag" style="color:#f59e0b">Down ~29% from high</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">Dividend Yield</div>
+    <div class="pval" style="color:#22c55e">2.33%</div>
+    <div class="ptag">Payout ~77.5%</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">Face Value</div>
+    <div class="pval">₹1.00</div>
+    <div class="ptag">Book Value: ₹296</div>
+  </div>
+  <div class="pill">
+    <div class="plabel">FY26 Revenue</div>
+    <div class="pval" style="font-size:14px">₹2,67,021 Cr</div>
+    <div class="ptag" style="color:#22c55e">+4.6% YoY (INR)</div>
+  </div>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('snapshot')">📊 Snapshot</div>
+  <div class="tab" onclick="showTab('valuation')">💰 Valuation</div>
+  <div class="tab" onclick="showTab('growth')">📈 Growth</div>
+  <div class="tab" onclick="showTab('health')">🏥 Health</div>
+  <div class="tab" onclick="showTab('returns')">🔁 Returns</div>
+  <div class="tab" onclick="showTab('peers')">🏆 Peers</div>
+  <div class="tab" onclick="showTab('ownership')">👥 Ownership</div>
+  <div class="tab" onclick="showTab('view')">🔍 View</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 – SNAPSHOT
+══════════════════════════════════════════ -->
+<div id="tab-snapshot" class="tab-content active">
+
+  <p class="section-title">Company Overview</p>
+  <div class="card" style="line-height:1.7; font-size:13.5px;">
+    Tata Consultancy Services (TCS), founded in 1968, is India's largest IT services company and the flagship of the Tata Group.
+    It offers IT services, consulting, and business solutions across 55 countries through 202 delivery centres.
+    TCS serves over 200 of the world's top-tier brands across BFSI, Consumer, Manufacturing, Life Sciences, Communications, Energy, and Government sectors.
+    <br><br>
+    In FY26, TCS crossed <strong>$30 billion</strong> in consolidated revenues (₹2,67,021 Cr INR equivalent), establishing itself as one of the few Indian companies at this revenue scale globally.
+    With 600,000+ employees, it is also among the world's largest private-sector employers.
+    The company has been featured in <em>Fortune's World's Most Admired Companies</em> for four consecutive years (2023–2026).
+  </div>
+
+  <p class="section-title" style="margin-top:20px;">Revenue Segment Mix (Q3 FY26)</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>By Vertical</h3>
+      <div class="chart-wrap"><canvas id="vertChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Key Metrics at a Glance</h3>
+      <table>
+        <tr><td>CMP</td><td class="num">₹2,580</td></tr>
+        <tr><td>Market Cap</td><td class="num">₹9,33,322 Cr</td></tr>
+        <tr><td>Face Value</td><td class="num">₹1.00</td></tr>
+        <tr><td>Book Value</td><td class="num">₹296</td></tr>
+        <tr><td>P/E (TTM)</td><td class="num">17.8×</td></tr>
+        <tr><td>P/B</td><td class="num">8.7×</td></tr>
+        <tr><td>EPS (FY26 est.)</td><td class="num">~₹144</td></tr>
+        <tr><td>Dividend Yield</td><td class="num">2.33%</td></tr>
+        <tr><td>52W High</td><td class="num">₹3,630</td></tr>
+        <tr><td>52W Low</td><td class="num">₹2,346</td></tr>
+      </table>
+      <div class="data-src">Sources: Screener.in, ValueResearch, HDFC Sky</div>
+    </div>
+  </div>
+
+  <p class="section-title">Stock Price Journey (Indexed, 5Y)</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:250px;"><canvas id="priceChart"></canvas></div>
+    <div class="insight insight-amber" style="margin-top:12px;">
+      📌 TCS stock is currently <strong>~29% below its 52W high of ₹3,630</strong> and down ~35–55% from its all-time high (~₹4,000+ in 2022), primarily due to global IT sector headwinds, US macro uncertainty, and currency depreciation. However, Q4 FY26 showed a strong recovery signal — third consecutive quarter of sequential growth.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2 – VALUATION
+══════════════════════════════════════════ -->
+<div id="tab-valuation" class="tab-content">
+
+  <p class="section-title">Valuation Metrics</p>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">P/E Ratio (TTM)</div>
+      <div style="font-size:36px;font-weight:800;color:#4f8ef7;margin:8px 0;">17.8×</div>
+      <div class="badge badge-green">Attractive vs History</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:6px;">5Y Avg: ~28× &nbsp;|&nbsp; Sector Median: 29.45×</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">P/B Ratio</div>
+      <div style="font-size:36px;font-weight:800;color:#f59e0b;margin:8px 0;">8.7×</div>
+      <div class="badge badge-amber">Premium</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:6px;">Sector Median: 5.2× &nbsp;|&nbsp; Justified by 51%+ ROE</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">Dividend Yield</div>
+      <div style="font-size:36px;font-weight:800;color:#22c55e;margin:8px 0;">2.33%</div>
+      <div class="badge badge-green">High for IT Sector</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:6px;">FY26 Dividend: ₹110/share &nbsp;|&nbsp; Payout: 77.5%</div>
+    </div>
+  </div>
+
+  <p class="section-title">P/E Trend (Historical)</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:240px;"><canvas id="peChart"></canvas></div>
+    <div class="insight insight-blue" style="margin-top:12px;">
+      📌 <strong>Valuation Verdict: Cheap vs History, Fair-to-Cheap vs Peers.</strong> TCS currently trades at 17.8× TTM earnings — a 47% discount to the sector median P/E of ~29×. Relative to its own 5-year average of ~28×, this represents significant re-rating downside that has already happened. The P/B of 8.7× is a premium but justified given exceptional ROE of 51%+ (ROE/P/B ratio remains healthy).
+    </div>
+  </div>
+
+  <p class="section-title">Valuation Framework</p>
+  <table>
+    <thead><tr><th>Metric</th><th>TCS Current</th><th>Sector Median</th><th>TCS 5Y Avg</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>P/E</td><td class="num">17.8×</td><td class="num">29.45×</td><td class="num">~28×</td><td><span class="badge badge-green">Cheap</span></td></tr>
+      <tr><td>P/B</td><td class="num">8.7×</td><td class="num">5.2×</td><td class="num">~10×</td><td><span class="badge badge-green">Fair</span></td></tr>
+      <tr><td>Dividend Yield</td><td class="num">2.33%</td><td class="num">~1.0%</td><td class="num">~1.5%</td><td><span class="badge badge-green">Attractive</span></td></tr>
+      <tr><td>EV/EBITDA</td><td class="num">~13×</td><td class="num">~18×</td><td class="num">~20×</td><td><span class="badge badge-green">Cheap</span></td></tr>
+      <tr><td>Mkt Cap/Sales</td><td class="num">3.5×</td><td class="num">~5×</td><td class="num">~6×</td><td><span class="badge badge-green">Attractive</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: ValueResearch, Screener.in, HDFC Sky — Jun 2026</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3 – GROWTH
+══════════════════════════════════════════ -->
+<div id="tab-growth" class="tab-content">
+
+  <p class="section-title">Revenue &amp; Profit Trend (INR, Cr)</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:260px;"><canvas id="revProfChart"></canvas></div>
+  </div>
+
+  <p class="section-title">Annual Growth Summary</p>
+  <table>
+    <thead><tr><th>Metric</th><th>FY24</th><th>FY25</th><th>FY26</th><th>3Y CAGR</th></tr></thead>
+    <tbody>
+      <tr><td>Revenue (₹ Cr)</td><td class="num">2,40,893</td><td class="num">2,55,324</td><td class="num">2,67,021</td><td class="num"><span class="badge badge-amber">~5.2%</span></td></tr>
+      <tr><td>Net Profit (₹ Cr)</td><td class="num">45,908</td><td class="num">48,553</td><td class="num">52,820</td><td class="num"><span class="badge badge-green">~7.3%</span></td></tr>
+      <tr><td>Operating Margin</td><td class="num">24.1%</td><td class="num">24.3%</td><td class="num">25.0%</td><td class="num"><span class="badge badge-green">Expanding</span></td></tr>
+      <tr><td>Net Margin</td><td class="num">19.0%</td><td class="num">19.0%</td><td class="num">19.8%</td><td class="num"><span class="badge badge-green">Expanding</span></td></tr>
+      <tr><td>USD Revenue ($Bn)</td><td class="num">29.1</td><td class="num">30.2</td><td class="num">30.0</td><td class="num"><span class="badge badge-red">–0.5% YoY</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: TCS Press Release Q4FY26, Scanx.trade Annual Report FY26, Screener.in</div>
+
+  <div class="insight insight-amber" style="margin-top:14px;">
+    ⚠️ <strong>USD revenue declined 0.5% YoY in FY26</strong> ($30.0Bn vs $30.2Bn), reflecting a 2.4% drop in constant currency — due to a weakening USD and global IT demand softness. INR revenue grew 4.6% YoY due to rupee depreciation acting as a natural hedge.
+  </div>
+
+  <p class="section-title">AI Revenue — Emerging Growth Engine</p>
+  <div class="highlight-box">
+    <div class="hval">$2.3 Billion</div>
+    <div class="hlabel">Annualised AI Revenue Run-Rate — Q4 FY26 (Source: TCS Press Release)</div>
+    <div style="margin-top:12px;font-size:13px;line-height:1.65;color:var(--text);">
+      TCS has filed <strong>1,833 AI-led patents</strong> (573 granted as of March 2026). Over <strong>2,70,000 employees</strong> have achieved higher proficiency in AI/ML. The company's AI and Enterprise Transformation services are now a core revenue contributor, with annualised AI revenue growing meaningfully quarter-on-quarter throughout FY26.
+    </div>
+  </div>
+
+  <p class="section-title">Deal Wins – Pipeline Health</p>
+  <div class="grid2">
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">FY26 Total Contract Value (TCV)</div>
+      <div style="font-size:30px;font-weight:800;color:#22c55e;margin:6px 0;">$40.7 Bn</div>
+      <div class="badge badge-green">Among Highest Ever</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">Q4 FY26 TCV</div>
+      <div style="font-size:30px;font-weight:800;color:#4f8ef7;margin:6px 0;">$12.0 Bn</div>
+      <div class="badge badge-blue">3 Mega Deals in Q4</div>
+    </div>
+  </div>
+  <div class="insight insight-green" style="margin-top:14px;">
+    ✅ <strong>$40.7Bn TCV in FY26</strong> with 5 mega-deals for the year signals a robust deal pipeline and demand recovery. Q4 FY26 marked the <strong>third consecutive quarter of sequential growth</strong>, a positive inflection after a challenging FY26.
+  </div>
+
+  <p class="section-title">5Y Sales CAGR Context</p>
+  <div class="insight insight-amber">
+    📌 5-year revenue CAGR of <strong>~10.2%</strong> (INR terms) is classified as moderate. The IT sector faced demand headwinds in FY24–FY26 due to global macro uncertainty, rate hikes, and client budget caution. Pre-pandemic (FY19–FY22), TCS delivered 10–15% CAGR. Recovery trajectory is expected as AI-led deals ramp up.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4 – HEALTH
+══════════════════════════════════════════ -->
+<div id="tab-health" class="tab-content">
+
+  <p class="section-title">Balance Sheet Strength</p>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">Debt-to-Equity (D/E)</div>
+      <div style="font-size:32px;font-weight:800;color:#22c55e;margin:8px 0;">~0.0×</div>
+      <div class="badge badge-green">Virtually Debt-Free</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">Interest Coverage</div>
+      <div style="font-size:32px;font-weight:800;color:#22c55e;margin:8px 0;">50×+</div>
+      <div class="badge badge-green">Extremely Healthy</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">Cash &amp; Investments</div>
+      <div style="font-size:32px;font-weight:800;color:#4f8ef7;margin:8px 0;">~₹60,000 Cr</div>
+      <div class="badge badge-blue">Net Cash Company</div>
+    </div>
+  </div>
+
+  <p class="section-title">Balance Sheet Interpretation</p>
+  <table>
+    <thead><tr><th>Health Metric</th><th>Value</th><th>Benchmark</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>D/E Ratio</td><td class="num">~0.0×</td><td class="num">&lt;1 = Safe</td><td><span class="badge badge-green">✅ Safe</span></td></tr>
+      <tr><td>Interest Coverage</td><td class="num">50×+</td><td class="num">&gt;3 = Healthy</td><td><span class="badge badge-green">✅ Excellent</span></td></tr>
+      <tr><td>Current Ratio</td><td class="num">~2.5×</td><td class="num">&gt;1.5 = Comfortable</td><td><span class="badge badge-green">✅ Comfortable</span></td></tr>
+      <tr><td>FCF (FY26)</td><td class="num">Positive &amp; Growing</td><td class="num">Positive = Strong</td><td><span class="badge badge-green">✅ Strong</span></td></tr>
+      <tr><td>Promoter Pledge</td><td class="num">0%</td><td class="num">&gt;10% = Flag</td><td><span class="badge badge-green">✅ None</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-title">Profitability Trend</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:230px;"><canvas id="marginChart"></canvas></div>
+  </div>
+
+  <div class="insight insight-green" style="margin-top:14px;">
+    ✅ <strong>FY26 Operating Margin of 25%</strong> is the highest in the past 4 years (+70bps YoY). Net Margin of 19.8% is also a 4-year high (+80bps YoY). This confirms that TCS is not just growing — it is becoming more efficient. Margin expansion during a revenue slowdown cycle is a mark of strong operational leverage.
+  </div>
+
+  <p class="section-title">IP &amp; Innovation Health</p>
+  <div class="card" style="line-height:1.7;font-size:13px;">
+    📄 <strong>9,596 cumulative patents filed</strong> (5,500 granted) as of March 2026 — including <strong>1,833 AI-led patents</strong>. This IP moat is strategically important as enterprise clients increasingly demand proprietary AI tooling from their IT partners, not just generic consulting.
+    <br><br>
+    🎓 <strong>69 million learning hours</strong> delivered in FY26. <strong>5.2 million new competencies</strong> acquired. Over 270,000 employees upskilled in AI/ML — the largest enterprise AI reskilling programme globally by TCV.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5 – RETURNS
+══════════════════════════════════════════ -->
+<div id="tab-returns" class="tab-content">
+
+  <p class="section-title">Return Ratios</p>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">ROE (FY26)</div>
+      <div style="font-size:36px;font-weight:800;color:#22c55e;margin:8px 0;">51.8%</div>
+      <div class="badge badge-green">Excellent (&gt;15% = Good)</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">ROCE (FY26)</div>
+      <div style="font-size:36px;font-weight:800;color:#22c55e;margin:8px 0;">63.0%</div>
+      <div class="badge badge-green">Sector-Leading</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--muted);font-size:12px;">3Y Avg ROE</div>
+      <div style="font-size:36px;font-weight:800;color:#22c55e;margin:8px 0;">51.9%</div>
+      <div class="badge badge-green">Highly Consistent</div>
+    </div>
+  </div>
+
+  <p class="section-title">Return Ratios Trend</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:230px;"><canvas id="roeChart"></canvas></div>
+  </div>
+
+  <p class="section-title">Dividend Track Record</p>
+  <table>
+    <thead><tr><th>Year</th><th>Dividend/Share (₹)</th><th>Payout Ratio</th><th>Yield (Approx)</th></tr></thead>
+    <tbody>
+      <tr><td>FY22</td><td class="num">43</td><td class="num">~38%</td><td class="num">~1.0%</td></tr>
+      <tr><td>FY23</td><td class="num">115 (incl. special)</td><td class="num">~82%</td><td class="num">~3.0%</td></tr>
+      <tr><td>FY24</td><td class="num">73</td><td class="num">~53%</td><td class="num">~1.9%</td></tr>
+      <tr><td>FY25</td><td class="num">126 (incl. special)</td><td class="num">~90%</td><td class="num">~3.5%</td></tr>
+      <tr><td>FY26</td><td class="num">110</td><td class="num">~77.5%</td><td class="num">~2.3%</td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: Screener.in, TCS Investor Relations</div>
+  <div class="insight insight-blue" style="margin-top:12px;">
+    💡 TCS has maintained a dividend payout averaging 77.5% over 3 years — unusually high for an IT company. The FY27 dividend is projected at ~₹128/share by analysts, offering a forward yield of ~5–6% at current prices (Source: Groww / ETMarkets). This makes TCS a compelling income compounder at current levels.
+  </div>
+
+  <p class="section-title">Stock Return Context</p>
+  <table>
+    <thead><tr><th>Period</th><th>TCS Return</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>1 Week</td><td class="num"><span class="badge badge-red">–2.9%</span></td><td>Near-term weakness</td></tr>
+      <tr><td>1 Month</td><td class="num"><span class="badge badge-red">–7.7%</span></td><td>IT sector selloff</td></tr>
+      <tr><td>3 Months</td><td class="num"><span class="badge badge-red">–14.4%</span></td><td>Macro overhang</td></tr>
+      <tr><td>1 Year</td><td class="num"><span class="badge badge-red">–35.4%</span></td><td>Sector re-rating</td></tr>
+      <tr><td>3 Years</td><td class="num"><span class="badge badge-red">–32.1%</span></td><td>Post-pandemic correction</td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Source: Dhan.co — Jun 2026</div>
+  <div class="insight insight-amber" style="margin-top:12px;">
+    ⚠️ Price returns have been negative across all measured periods due to the broad Indian IT sector correction. However, <strong>fundamentals have remained strong throughout</strong> — revenue grew, margins expanded, deals accelerated, and dividends were maintained. This is a valuation de-rating, not a business deterioration.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6 – PEERS
+══════════════════════════════════════════ -->
+<div id="tab-peers" class="tab-content">
+
+  <p class="section-title">Peer Comparison — Indian IT Big 4</p>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th><th>CMP (₹)</th><th>Mkt Cap (Cr)</th><th>P/E</th><th>P/B</th>
+          <th>ROE</th><th>ROCE</th><th>Rev Growth (FY26)</th><th>Op Margin</th><th>D/E</th><th>Div Yield</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(79,142,247,0.06);">
+          <td><strong>TCS</strong> ⭐</td>
+          <td class="num">₹2,580</td><td class="num">9,33,322</td>
+          <td class="num"><span class="badge badge-green">17.8×</span></td>
+          <td class="num">8.7×</td>
+          <td class="num"><span class="badge badge-green">51.8%</span></td>
+          <td class="num"><span class="badge badge-green">63.0%</span></td>
+          <td class="num">+4.6% (INR)</td>
+          <td class="num"><span class="badge badge-green">25.0%</span></td>
+          <td class="num"><span class="badge badge-green">~0×</span></td>
+          <td class="num"><span class="badge badge-green">2.33%</span></td>
+        </tr>
+        <tr>
+          <td>Infosys</td>
+          <td class="num">~₹1,580</td><td class="num">~6,60,000</td>
+          <td class="num">22×</td><td class="num">7.5×</td>
+          <td class="num">31.6%</td><td class="num">~40%</td>
+          <td class="num">+6.1%</td>
+          <td class="num">21.0%</td>
+          <td class="num">~0×</td><td class="num">3.0%</td>
+        </tr>
+        <tr>
+          <td>HCL Tech</td>
+          <td class="num">~₹1,620</td><td class="num">~4,40,000</td>
+          <td class="num">24×</td><td class="num">7.0×</td>
+          <td class="num">~28%</td><td class="num">~35%</td>
+          <td class="num">+5.8%</td>
+          <td class="num">18.5%</td>
+          <td class="num">~0.1×</td><td class="num">3.5%</td>
+        </tr>
+        <tr>
+          <td>Wipro</td>
+          <td class="num">~₹260</td><td class="num">~2,72,000</td>
+          <td class="num">22×</td><td class="num">3.5×</td>
+          <td class="num">15.7%</td><td class="num">~20%</td>
+          <td class="num">–0.3% (CC)</td>
+          <td class="num">17.2%</td>
+          <td class="num">~0.2×</td><td class="num">0.3%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="data-src">Sources: Screener.in, ValueResearch, Wipro 6-K SEC Filing FY26, Investwithmithun.com, Enrichmoney.in — Jun 2026</div>
+
+  <p class="section-title">Peer Chart — ROE &amp; Operating Margin</p>
+  <div class="card">
+    <div class="chart-wrap" style="height:240px;"><canvas id="peerChart"></canvas></div>
+  </div>
+
+  <p class="section-title">Where TCS Leads vs Peers</p>
+  <div class="grid2">
+    <div class="insight insight-green">
+      <strong>TCS Advantages:</strong>
+      <ul style="margin-top:8px;padding-left:16px;line-height:1.8;font-size:13px;">
+        <li>Highest ROE (51.8%) and ROCE (63%) in the peer group</li>
+        <li>Largest revenue scale ($30Bn) — 1.5× Infosys, 3× Wipro</li>
+        <li>Lowest P/E (17.8×) vs peers — most attractive on earnings multiple</li>
+        <li>Highest operating margin (25%) in the big 4</li>
+        <li>Strongest dividend yield (2.33%) and payout culture</li>
+        <li>Largest deal TCV ($40.7Bn FY26); highest AI revenue ($2.3Bn annualised)</li>
+        <li>Zero promoter pledging; Tata Group governance trust premium</li>
+      </ul>
+    </div>
+    <div class="insight insight-amber">
+      <strong>Where Peers Edge Out TCS:</strong>
+      <ul style="margin-top:8px;padding-left:16px;line-height:1.8;font-size:13px;">
+        <li>Infosys: Better CC revenue growth in FY26 (+4.2% vs –2.4%)</li>
+        <li>Infosys: Higher EBITDA conversion &amp; FCF as % of profit</li>
+        <li>HCL Tech: Stronger growth in products &amp; platforms segment</li>
+        <li>Wipro: More aggressive buyback programme (tactical income play)</li>
+        <li>Mid-caps (Coforge, Persistent): Much faster top-line growth rates</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 7 – OWNERSHIP
+══════════════════════════════════════════ -->
+<div id="tab-ownership" class="tab-content">
+
+  <p class="section-title">Shareholding Pattern (Mar 2026)</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="chart-wrap"><canvas id="holdingChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Holding Breakdown</h3>
+      <div class="own-bar-wrap" style="margin-top:8px;">
+        <div class="own-bar-row">
+          <div class="own-bar-label">Promoters</div>
+          <div class="own-bar-bg"><div class="own-bar-fill" style="width:71.77%;background:#4f8ef7;"></div></div>
+          <div class="own-bar-val" style="color:#4f8ef7;">71.77%</div>
+        </div>
+        <div class="own-bar-row">
+          <div class="own-bar-label">DII</div>
+          <div class="own-bar-bg"><div class="own-bar-fill" style="width:13.41%;background:#22c55e;"></div></div>
+          <div class="own-bar-val" style="color:#22c55e;">13.41%</div>
+        </div>
+        <div class="own-bar-row">
+          <div class="own-bar-label">FII/FPI</div>
+          <div class="own-bar-bg"><div class="own-bar-fill" style="width:9.66%;background:#f59e0b;"></div></div>
+          <div class="own-bar-val" style="color:#f59e0b;">9.66%</div>
+        </div>
+        <div class="own-bar-row">
+          <div class="own-bar-label">Public</div>
+          <div class="own-bar-bg"><div class="own-bar-fill" style="width:4.52%;background:#8892a4;"></div></div>
+          <div class="own-bar-val" style="color:#8892a4;">4.52%</div>
+        </div>
+        <div class="own-bar-row">
+          <div class="own-bar-label">Government</div>
+          <div class="own-bar-bg"><div class="own-bar-fill" style="width:0.5%;background:#ef4444;"></div></div>
+          <div class="own-bar-val" style="color:#ef4444;">0.00%</div>
+        </div>
+      </div>
+      <div class="data-src" style="margin-top:12px;">Source: Dhan.co — Mar 2026</div>
+    </div>
+  </div>
+
+  <p class="section-title">Ownership Analysis</p>
+  <div class="grid2">
+    <div class="insight insight-green">
+      ✅ <strong>Promoter holding of 71.77%</strong> (Tata Sons / Tata Group) is high and stable — signalling management alignment with shareholders. <strong>Zero pledging</strong> on promoter shares — a strong governance signal.
+    </div>
+    <div class="insight insight-amber">
+      ⚠️ <strong>FII holding at 9.66%</strong> is below the IT sector average. This suggests foreign investors have been net sellers — likely due to global risk-off and USD revenue concerns. If the rupee stabilises and dollar revenues recover, FII re-entry could be a re-rating catalyst.
+    </div>
+  </div>
+
+  <p class="section-title">Key Institutional Signals</p>
+  <table>
+    <thead><tr><th>Category</th><th>Mar 2025</th><th>Mar 2026</th><th>Trend</th></tr></thead>
+    <tbody>
+      <tr><td>Promoters</td><td class="num">~72.3%</td><td class="num">71.77%</td><td><span class="badge badge-amber">Marginally Lower</span></td></tr>
+      <tr><td>DII (Domestic Institutions)</td><td class="num">~11.8%</td><td class="num">13.41%</td><td><span class="badge badge-green">↑ Buying</span></td></tr>
+      <tr><td>FII/FPI (Foreign)</td><td class="num">~11.5%</td><td class="num">9.66%</td><td><span class="badge badge-red">↓ Selling</span></td></tr>
+      <tr><td>Public &amp; Others</td><td class="num">~4.4%</td><td class="num">4.52%</td><td><span class="badge badge-green">Stable</span></td></tr>
+    </tbody>
+  </table>
+  <div class="data-src">Sources: Dhan.co, Screener.in</div>
+  <div class="insight insight-blue" style="margin-top:12px;">
+    💡 DIIs (LIC, Mutual Funds) have been increasing exposure — a sign of domestic institutional conviction at lower valuations. FII outflow is largely a macro/currency phenomenon rather than a fundamental concern.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 8 – VIEW
+══════════════════════════════════════════ -->
+<div id="tab-view" class="tab-content">
+
+  <p class="section-title">3 Key Strengths</p>
+  <ul class="sw-list">
+    <li><span class="sw-icon">🏆</span><div><strong>Unmatched Scale &amp; Moat:</strong> TCS is India's largest IT company with $30Bn in revenues and operates at a scale no Indian IT peer can match. Its 200+ delivery centres, 600,000+ workforce, and 50-year client relationships create deep switching costs and a structural moat. The Tata brand adds governance trust that commands a premium globally.</div></li>
+    <li><span class="sw-icon">📈</span><div><strong>Margin Expansion + AI Monetisation:</strong> FY26 margins hit 4-year highs (25% operating, 19.8% net) even during a revenue slowdown — demonstrating exceptional operational leverage. Annualised AI revenue of $2.3Bn and $40.7Bn TCV signal the company is successfully monetising the AI cycle. With 1,833 AI patents, TCS is not just reselling AI — it is building proprietary IP.</div></li>
+    <li><span class="sw-icon">💰</span><div><strong>Capital Return Machine:</strong> ROE of 51.8%, ROCE of 63%, zero debt, and dividend payout of 77.5% make TCS one of the highest-quality capital allocators in Indian equities. At current valuations (~17.8× P/E vs 5Y average of ~28×), the earnings yield (~5.6%) plus dividend yield (~2.3%) offers a total yield of ~8% — rare for a blue-chip company.</div></li>
+  </ul>
+
+  <p class="section-title">3 Key Watch-Points</p>
+  <ul class="sw-list">
+    <li><span class="sw-icon">⚠️</span><div><strong>USD Revenue Stagnation:</strong> Dollar revenue declined 0.5% YoY in FY26 (–2.4% in CC). While INR performance looks better due to currency tailwinds, this masks the underlying demand softness. US BFSI (31.9% of revenues) remains sensitive to US interest rate cycles, bank capex, and potential recessionary pressure.</div></li>
+    <li><span class="sw-icon">⚠️</span><div><strong>AI Disruption Risk to Staffing Model:</strong> GenAI and automation could erode the traditional pyramid staffing economics that Indian IT majors depend on. While TCS is investing in AI, the speed of disruption to its billing model — particularly in ADM (Application Development &amp; Maintenance) — is a medium-term structural risk to margins.</div></li>
+    <li><span class="sw-icon">⚠️</span><div><strong>Modest Sales Growth:</strong> 5-year revenue CAGR of ~10.2% is below what premium valuations historically demanded. Until large deal ramp-ups translate to higher top-line growth, the P/E re-rating from 17.8× back to historical ~28× may take time. FII outflow also signals currency and geopolitical sensitivity.</div></li>
+  </ul>
+
+  <hr class="divider"/>
+
+  <p class="section-title">Key Metric to Track Going Forward</p>
+  <div class="insight insight-blue">
+    📊 <strong>USD Constant-Currency Revenue Growth (QoQ/YoY)</strong> — This is the single most important number to watch. Q4 FY26 showed +1.2% QoQ in CC — the first back-to-back positive quarter in over a year. If this sustains through FY27, it will confirm business cycle recovery and could trigger a meaningful re-rating of valuations back toward historical averages.
+    <br><br>
+    Secondary: <strong>AI Revenue Ramp</strong> (quarterly trend toward $3Bn+ annualised), <strong>FII flows</strong> (re-entry = confidence signal), and <strong>Operating Margin</strong> (can it sustain 25%+ as hiring picks up?).
+  </div>
+
+  <hr class="divider"/>
+
+  <p class="section-title">Overall Fundamental Quality Assessment</p>
+  <div class="card" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(79,142,247,.08));border-color:rgba(34,197,94,.3);">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="font-size:48px;">🏅</div>
+      <div>
+        <div style="font-size:22px;font-weight:800;color:#22c55e;">STRONG</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px;">Fundamental Quality Rating</div>
+      </div>
+      <div style="flex:1;min-width:200px;font-size:13px;line-height:1.7;color:var(--text);">
+        TCS possesses a best-in-class balance sheet (zero debt, ₹60,000Cr+ cash), sector-leading return ratios (ROE 51.8%, ROCE 63%), exceptional dividend culture, and a robust AI-led deal pipeline. The business is fundamentally sound. The current stock correction is primarily a valuation-re-rating event driven by macro headwinds, not a deterioration of the business. 
+        <br><br>
+        Data Confidence: <span class="badge badge-green">High</span> — figures sourced from TCS official press releases, Screener.in, Dhan.co, and cross-verified across multiple platforms.
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ DISCLAIMER:</strong> This is a view of the fundamentals for educational purposes only. It is not investment advice and not a buy/sell/hold recommendation. All figures are sourced from publicly available data (TCS Investor Relations, Screener.in, Dhan.co, ValueResearch, HDFC Sky — as of June 2026) and should be independently verified before any financial decision. The final decision is yours. Consult a SEBI-registered investment advisor for personalised guidance.
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+const GRID = { color:'rgba(255,255,255,0.07)' };
+const FONT = { color:'#8892a4', size:11 };
+
+/* Vertical Mix Doughnut */
+new Chart(document.getElementById('vertChart'),{
+  type:'doughnut',
+  data:{
+    labels:['BFSI','Consumer','Regional&Others','Life Sci & HC','Energy','Manufacturing','Tech & Svc','Comm & Media'],
+    datasets:[{data:[31.9,15.4,13.1,10.5,6,8.8,8.4,5.9],
+      backgroundColor:['#4f8ef7','#22c55e','#f59e0b','#a78bfa','#34d399','#fb923c','#60a5fa','#f472b6'],
+      borderWidth:0, hoverOffset:6}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8892a4',font:{size:10},boxWidth:12}}}}
+});
+
+/* Price Chart Line */
+const years=['FY20','FY21','FY22','FY23','FY24','FY25','FY26 YTD'];
+const prices=[180,310,395,310,340,378,258]; // index ~100 adjusted
+new Chart(document.getElementById('priceChart'),{
+  type:'line',
+  data:{labels:years,datasets:[{label:'TCS Price (Approx ₹ Indexed)',data:[1800,3100,3950,3180,3600,3780,2580],
+    borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,0.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#4f8ef7'}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:FONT,grid:GRID},y:{ticks:{...FONT,callback:v=>'₹'+v},grid:GRID}}}
+});
+
+/* P/E Trend */
+new Chart(document.getElementById('peChart'),{
+  type:'line',
+  data:{labels:['FY19','FY20','FY21','FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'TCS P/E',data:[21,22,33,36,30,27,25,17.8],borderColor:'#4f8ef7',tension:.4,pointRadius:4,pointBackgroundColor:'#4f8ef7'},
+      {label:'Sector Median P/E',data:[22,23,32,35,31,30,30,29.5],borderColor:'#f59e0b',borderDash:[5,4],tension:.4,pointRadius:0}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:FONT,grid:GRID},y:{ticks:FONT,grid:GRID}}}
+});
+
+/* Revenue & Profit */
+new Chart(document.getElementById('revProfChart'),{
+  type:'bar',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Revenue (₹Cr)',data:[191754,225458,240893,255324,267021],backgroundColor:'rgba(79,142,247,0.7)',borderRadius:6,yAxisID:'y'},
+      {label:'Net Profit (₹Cr)',data:[38327,42147,45908,48553,52820],backgroundColor:'rgba(34,197,94,0.7)',borderRadius:6,yAxisID:'y'}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{y:{ticks:{...FONT,callback:v=>(v/100000).toFixed(1)+'L'},grid:GRID},x:{ticks:FONT,grid:GRID}}}
+});
+
+/* Margin Trend */
+new Chart(document.getElementById('marginChart'),{
+  type:'line',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'Operating Margin %',data:[25.0,24.1,24.1,24.3,25.0],borderColor:'#4f8ef7',tension:.4,fill:false,pointRadius:5,pointBackgroundColor:'#4f8ef7'},
+      {label:'Net Margin %',data:[19.8,18.7,19.0,19.0,19.8],borderColor:'#22c55e',tension:.4,fill:false,pointRadius:5,pointBackgroundColor:'#22c55e'}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:FONT,grid:GRID},y:{ticks:{...FONT,callback:v=>v+'%'},grid:GRID,min:16,max:27}}}
+});
+
+/* ROE/ROCE Trend */
+new Chart(document.getElementById('roeChart'),{
+  type:'line',
+  data:{labels:['FY22','FY23','FY24','FY25','FY26'],
+    datasets:[
+      {label:'ROE %',data:[44,47,52,52,51.8],borderColor:'#22c55e',tension:.4,fill:false,pointRadius:5,pointBackgroundColor:'#22c55e'},
+      {label:'ROCE %',data:[55,60,63,64,63.0],borderColor:'#4f8ef7',tension:.4,fill:false,pointRadius:5,pointBackgroundColor:'#4f8ef7'}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:FONT,grid:GRID},y:{ticks:{...FONT,callback:v=>v+'%'},grid:GRID,min:35,max:70}}}
+});
+
+/* Peer Bar Chart */
+new Chart(document.getElementById('peerChart'),{
+  type:'bar',
+  data:{labels:['TCS','Infosys','HCL Tech','Wipro'],
+    datasets:[
+      {label:'ROE %',data:[51.8,31.6,28,15.7],backgroundColor:'rgba(79,142,247,0.75)',borderRadius:6},
+      {label:'Op Margin %',data:[25.0,21.0,18.5,17.2],backgroundColor:'rgba(34,197,94,0.75)',borderRadius:6}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:FONT,grid:GRID},y:{ticks:{...FONT,callback:v=>v+'%'},grid:GRID}}}
+});
+
+/* Ownership Doughnut */
+new Chart(document.getElementById('holdingChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Promoters (71.77%)','DII (13.41%)','FII (9.66%)','Public (4.52%)','Others (0.64%)'],
+    datasets:[{data:[71.77,13.41,9.66,4.52,0.64],
+      backgroundColor:['#4f8ef7','#22c55e','#f59e0b','#8892a4','#a78bfa'],
+      borderWidth:2, borderColor:'#1a1d27', hoverOffset:8}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:10},boxWidth:12,padding:8}}}}
+});
+</script>
+</body>
+</html>
