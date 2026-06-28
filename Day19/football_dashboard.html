@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FIFA World Cup 2026 · Football Intelligence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+
+<style>
+/* ── reset & base ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #080E17;
+  --surface1: #0D1825;
+  --surface2: #112236;
+  --surface3: #162D45;
+  --border:   #1C3A56;
+  --border2:  #254D70;
+  --blue:     #0A84FF;
+  --blue-dim: #0A5CB3;
+  --gold:     #F5C400;
+  --gold-dim: #B38F00;
+  --green:    #00C97A;
+  --red:      #FF3B5C;
+  --purple:   #9B6DFF;
+  --orange:   #FF8C00;
+  --text:     #E8F0F8;
+  --text2:    #9DB8D0;
+  --text3:    #5A7D99;
+  --mono:     'JetBrains Mono', monospace;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── utility ───────────────────────────────────────────────────── */
+.condensed{font-family:'Barlow Condensed',sans-serif}
+.mono{font-family:var(--mono)}
+.gold{color:var(--gold)}
+.blue{color:var(--blue)}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.muted{color:var(--text2)}
+.dim{color:var(--text3)}
+
+/* ── top ticker ─────────────────────────────────────────────────── */
+.ticker{
+  background:var(--gold);
+  color:#000;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:.08em;
+  padding:6px 0;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.ticker-inner{
+  display:inline-block;
+  animation:ticker 40s linear infinite;
+}
+.ticker-item{display:inline-block;padding:0 40px}
+.ticker-item::after{content:"·";margin-left:40px;opacity:.5}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── header ─────────────────────────────────────────────────────── */
+header{
+  background:linear-gradient(180deg,#0A1929 0%,var(--bg) 100%);
+  border-bottom:1px solid var(--border);
+  padding:28px 40px 22px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;
+  gap:24px;
+}
+.header-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.18em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.header-eyebrow::before{
+  content:'';
+  display:inline-block;
+  width:24px;height:2px;
+  background:var(--gold);
+}
+.header-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:48px;
+  font-weight:900;
+  line-height:.95;
+  letter-spacing:-.01em;
+  text-transform:uppercase;
+  color:#fff;
+}
+.header-title span{color:var(--gold)}
+.header-sub{
+  font-size:13px;
+  color:var(--text2);
+  margin-top:10px;
+  display:flex;align-items:center;gap:16px;
+}
+.live-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,59,92,.15);
+  border:1px solid rgba(255,59,92,.4);
+  border-radius:100px;
+  padding:3px 10px;
+  font-size:11px;font-weight:600;
+  color:var(--red);
+  letter-spacing:.06em;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--red);
+  animation:pulse 1.4s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.header-meta{
+  text-align:right;
+  font-size:12px;
+  color:var(--text3);
+  line-height:1.8;
+}
+.header-meta strong{color:var(--text2);font-weight:500}
+
+/* ── kpi strip ──────────────────────────────────────────────────── */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  border-bottom:1px solid var(--border);
+}
+.kpi-cell{
+  padding:18px 24px;
+  border-right:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+  transition:background .2s;
+}
+.kpi-cell:last-child{border-right:none}
+.kpi-cell::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:2px;
+  opacity:0;
+  transition:opacity .2s;
+}
+.kpi-cell:hover{background:var(--surface1)}
+.kpi-cell:hover::before{opacity:1}
+.kpi-cell.blue::before{background:var(--blue)}
+.kpi-cell.gold::before{background:var(--gold)}
+.kpi-cell.green::before{background:var(--green)}
+.kpi-cell.red::before{background:var(--red)}
+.kpi-cell.purple::before{background:var(--purple)}
+.kpi-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.kpi-val{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:36px;font-weight:800;line-height:1;
+  margin-bottom:4px;
+}
+.kpi-sub{font-size:11.5px;color:var(--text2)}
+
+/* ── main grid ──────────────────────────────────────────────────── */
+.main{padding:32px 40px;display:flex;flex-direction:column;gap:32px}
+
+/* ── section header ─────────────────────────────────────────────── */
+.section-head{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.section-mark{width:3px;border-radius:2px;align-self:stretch;min-height:16px}
+.section-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text2);
+}
+.section-rule{flex:1;height:1px;background:var(--border)}
+.section-count{font-size:11px;color:var(--text3);font-family:var(--mono)}
+
+/* ── player cards ───────────────────────────────────────────────── */
+.player-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+}
+
+.player-card{
+  background:var(--surface1);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+  position:relative;
+}
+.player-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--border2);
+  box-shadow:0 16px 40px rgba(0,0,0,.5);
+}
+
+.player-jersey{
+  height:140px;
+  position:relative;
+  display:flex;
+  align-items:center;justify-content:center;
+  overflow:hidden;
+}
+/* jersey gradient will be set inline */
+.jersey-stripes{
+  position:absolute;inset:0;
+  opacity:.12;
+  background-image:repeating-linear-gradient(
+    -45deg,
+    transparent,transparent 8px,
+    rgba(255,255,255,.8) 8px,rgba(255,255,255,.8) 10px
+  );
+}
+.jersey-silhouette{
+  position:relative;z-index:2;
+  width:90px;height:110px;
+}
+
+/* SVG silhouette paths drawn below */
+.jersey-num{
+  position:absolute;
+  top:10px;right:12px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:900;
+  line-height:1;
+  opacity:.9;
+  z-index:3;
+}
+.jersey-country-badge{
+  position:absolute;
+  bottom:8px;left:10px;
+  font-size:18px;
+  z-index:3;
+}
+.wc-goals-badge{
+  position:absolute;
+  bottom:8px;right:10px;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(4px);
+  border-radius:100px;
+  padding:2px 8px;
+  font-size:10px;font-weight:600;
+  color:var(--gold);
+  z-index:3;
+  font-family:var(--mono);
+}
+
+.player-body{padding:14px 14px 16px}
+.player-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.02em;
+  color:#fff;line-height:1;margin-bottom:2px;
+}
+.player-country{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.05em;margin-bottom:12px}
+
+.stat-row{display:flex;gap:6px;margin-bottom:12px}
+.stat-pill{
+  flex:1;
+  background:var(--surface2);
+  border-radius:8px;
+  padding:8px 6px;
+  text-align:center;
+}
+.stat-pill-val{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:700;
+  line-height:1;margin-bottom:2px;
+}
+.stat-pill-lbl{font-size:9.5px;color:var(--text3);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+
+.rating-row{margin-top:2px}
+.rating-label-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.rating-text{font-size:10px;color:var(--text3)}
+.rating-val{font-size:10px;font-weight:600;font-family:var(--mono)}
+.bar-track{background:var(--surface3);border-radius:100px;height:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+
+.wc-dots{display:flex;align-items:center;gap:4px;margin-top:10px}
+.wc-dot-label{font-size:10px;color:var(--text3);margin-right:2px}
+.wc-dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.wc-dot.empty{background:var(--surface3)}
+
+/* ── two col layout ─────────────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* ── prediction cards ───────────────────────────────────────────── */
+.pred-card{
+  background:var(--surface1);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.pred-card:hover{border-color:var(--border2)}
+.pred-card-accent{
+  position:absolute;top:0;left:0;right:0;height:3px;
+}
+.pred-flag{font-size:28px;margin-bottom:8px}
+.pred-team{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:800;text-transform:uppercase;
+  color:#fff;margin-bottom:2px;
+}
+.pred-role{
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.pred-pct-row{display:flex;align-items:baseline;gap:4px;margin-bottom:8px}
+.pred-pct{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:40px;font-weight:900;line-height:1;
+}
+.pred-pct-sym{font-size:16px;font-weight:600;opacity:.7}
+.pred-note{font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5}
+.pred-risk{
+  font-size:10.5px;color:var(--text3);
+  margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--border);
+  line-height:1.4;
+}
+
+/* ── form chart card ────────────────────────────────────────────── */
+.chart-card{
+  background:var(--surface1);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+}
+.form-row{
+  display:flex;align-items:center;
+  gap:12px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+}
+.form-row:last-child{border-bottom:none}
+.form-rank{
+  font-family:var(--mono);
+  font-size:10px;color:var(--text3);
+  width:16px;text-align:center;flex-shrink:0;
+}
+.form-team{font-size:13px;font-weight:500;width:82px;flex-shrink:0}
+.form-bar-track{flex:1;background:var(--surface3);border-radius:100px;height:8px;overflow:hidden}
+.form-bar-fill{height:100%;border-radius:100px;transition:width 1.2s ease}
+.form-score{
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  width:28px;text-align:right;flex-shrink:0;
+}
+
+/* ── match grid ─────────────────────────────────────────────────── */
+.match-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.match-card{
+  background:var(--surface1);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:10px;
+  transition:background .15s;
+}
+.match-card:hover{background:var(--surface2)}
+.match-team{font-size:12.5px;font-weight:600;color:var(--text)}
+.match-team.right{text-align:right}
+.match-score{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:4px 10px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:700;
+  color:var(--gold);
+  text-align:center;
+  white-space:nowrap;
+}
+.match-win .match-score{
+  background:rgba(0,201,122,.1);
+  border-color:rgba(0,201,122,.25);
+  color:var(--green);
+}
+.match-draw .match-score{
+  background:rgba(155,109,255,.1);
+  border-color:rgba(155,109,255,.25);
+  color:var(--purple);
+}
+.match-date{
+  font-size:10px;color:var(--text3);
+  grid-column:1/-1;
+  display:flex;align-items:center;gap:6px;
+  margin-top:-2px;
+}
+.match-date::before{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.match-date::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ── history bars ───────────────────────────────────────────────── */
+.hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hist-row{
+  background:var(--surface1);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+}
+.hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hist-team{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;text-transform:uppercase;
+}
+.hist-pct{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+}
+.hist-bar-track{background:var(--surface3);border-radius:100px;height:7px;overflow:hidden}
+.hist-bar-fill{height:100%;border-radius:100px}
+.hist-sub{font-size:10px;color:var(--text3);margin-top:5px}
+
+/* ── scroll-reveal ──────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ── footer ─────────────────────────────────────────────────────── */
+footer{
+  border-top:1px solid var(--border);
+  padding:20px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--text3);
+}
+.footer-logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:700;color:var(--text2);
+  letter-spacing:.06em;
+}
+.footer-logo span{color:var(--gold)}
+
+/* ── tooltip ─────────────────────────────────────────────────────── */
+.tooltip-wrap{position:relative;display:inline-block}
+.tooltip{
+  position:absolute;bottom:calc(100%+8px);left:50%;transform:translateX(-50%);
+  background:var(--surface3);border:1px solid var(--border2);
+  border-radius:8px;padding:8px 12px;
+  font-size:11px;color:var(--text);line-height:1.5;
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:opacity .15s;z-index:10;
+}
+.tooltip-wrap:hover .tooltip{opacity:1}
+
+/* ── table ──────────────────────────────────────────────────────── */
+.standings-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.standings-table th{
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);padding:6px 12px;border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.standings-table td{
+  padding:9px 12px;border-bottom:1px solid var(--border);
+}
+.standings-table tr:last-child td{border-bottom:none}
+.standings-table tr:hover td{background:var(--surface2)}
+.pos-num{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+}
+
+/* ── player detail modal ─────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface1);border:1px solid var(--border2);
+  border-radius:20px;width:480px;max-width:90vw;
+  overflow:hidden;
+  transform:scale(.95);transition:transform .25s;
+}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-hero{
+  height:180px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.modal-hero .jersey-stripes{opacity:.15}
+.modal-hero-content{position:relative;z-index:2;text-align:center}
+.modal-hero-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:80px;font-weight:900;line-height:1;opacity:.18;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  color:#fff;pointer-events:none;
+}
+.modal-hero-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:32px;font-weight:900;text-transform:uppercase;
+  color:#fff;line-height:1;
+}
+.modal-hero-flag{font-size:28px;margin-bottom:8px}
+.modal-body{padding:24px}
+.modal-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.modal-stat{background:var(--surface2);border-radius:10px;padding:12px;text-align:center}
+.modal-stat-val{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:800;margin-bottom:3px;
+}
+.modal-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.modal-bio{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px}
+.modal-attr-row{display:flex;flex-direction:column;gap:8px}
+.modal-attr{display:flex;align-items:center;gap:10px}
+.modal-attr-name{font-size:11px;color:var(--text3);width:90px;flex-shrink:0}
+.modal-attr-bar{flex:1;background:var(--surface3);border-radius:100px;height:6px;overflow:hidden}
+.modal-attr-fill{height:100%;border-radius:100px}
+.modal-attr-val{font-family:var(--mono);font-size:11px;width:28px;text-align:right;flex-shrink:0}
+.modal-close{
+  position:absolute;top:14px;right:14px;z-index:5;
+  background:rgba(0,0,0,.4);border:none;border-radius:50%;
+  width:32px;height:32px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;transition:background .15s;
+}
+.modal-close:hover{background:rgba(0,0,0,.7)}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker-inner"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="header-eyebrow">Football Intelligence · ABTalks Day 19 Project</div>
+    <div class="header-title condensed">FIFA World Cup<br><span>2026</span> Dashboard</div>
+    <div class="header-sub">
+      <span class="live-badge"><span class="live-dot"></span>LIVE · Group Stage</span>
+      <span class="muted">21 matches played · 27 remaining</span>
+      <span class="muted">Last updated Jun 17, 2026</span>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div><strong>Host nations</strong></div>
+    <div>🇺🇸 USA · 🇲🇽 Mexico · 🇨🇦 Canada</div>
+    <div style="margin-top:8px"><strong>Teams</strong> 48</div>
+    <div><strong>Matches</strong> 104 total</div>
+    <div><strong>Groups</strong> A–L (12)</div>
+  </div>
+</header>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-cell gold">
+    <div class="kpi-label">Top Scorer</div>
+    <div class="kpi-val gold condensed">25</div>
+    <div class="kpi-sub">E. Haaland · Norway</div>
+  </div>
+  <div class="kpi-cell blue">
+    <div class="kpi-label">Top Assists</div>
+    <div class="kpi-val blue condensed">12</div>
+    <div class="kpi-sub">L. Messi · Argentina</div>
+  </div>
+  <div class="kpi-cell green">
+    <div class="kpi-label">Peak Rating</div>
+    <div class="kpi-val green condensed">96</div>
+    <div class="kpi-sub">L. Messi · Workbook</div>
+  </div>
+  <div class="kpi-cell red">
+    <div class="kpi-label">Goals This WC</div>
+    <div class="kpi-val red condensed">63</div>
+    <div class="kpi-sub">Across 21 matches</div>
+  </div>
+  <div class="kpi-cell purple">
+    <div class="kpi-label">Nations</div>
+    <div class="kpi-val condensed" style="color:var(--purple)">48</div>
+    <div class="kpi-sub">Biggest WC ever</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- STAR PLAYERS -->
+  <section class="reveal">
+    <div class="section-head">
+      <div class="section-mark" style="background:var(--gold)"></div>
+      <div class="section-title">Star Players</div>
+      <div class="section-rule"></div>
+      <div class="section-count">5 PLAYERS</div>
+    </div>
+    <div class="player-grid" id="player-grid"></div>
+  </section>
+
+  <!-- PREDICTIONS + FORM -->
+  <section class="reveal">
+    <div class="two-col">
+      <!-- Predictions -->
+      <div>
+        <div class="section-head">
+          <div class="section-mark" style="background:var(--blue)"></div>
+          <div class="section-title">Tournament Predictions</div>
+          <div class="section-rule"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px" id="pred-cards"></div>
+      </div>
+      <!-- Form Chart -->
+      <div>
+        <div class="section-head">
+          <div class="section-mark" style="background:var(--green)"></div>
+          <div class="section-title">Contender Form Scores</div>
+          <div class="section-rule"></div>
+        </div>
+        <div class="chart-card" id="form-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE RESULTS -->
+  <section class="reveal">
+    <div class="section-head">
+      <div class="section-mark" style="background:var(--red)"></div>
+      <div class="section-title condensed">Live Group Stage Results</div>
+      <div class="section-rule"></div>
+      <div class="section-count">9 SHOWN</div>
+    </div>
+    <div class="match-grid" id="match-grid"></div>
+  </section>
+
+  <!-- STANDINGS + HISTORY -->
+  <section class="reveal">
+    <div class="two-col">
+      <!-- Standings Table -->
+      <div>
+        <div class="section-head">
+          <div class="section-mark" style="background:var(--purple)"></div>
+          <div class="section-title">Group A Standings</div>
+          <div class="section-rule"></div>
+        </div>
+        <div class="chart-card" style="padding:0">
+          <table class="standings-table" id="standings-table"></table>
+        </div>
+      </div>
+      <!-- Historical Win Rates -->
+      <div>
+        <div class="section-head">
+          <div class="section-mark" style="background:var(--orange)"></div>
+          <div class="section-title">Historical Win Rates</div>
+          <div class="section-rule"></div>
+        </div>
+        <div class="hist-grid" id="hist-grid"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AB<span>TALKS</span> · Football Intelligence</div>
+  <div>Data sourced from ABTalks World Cup Workbook · June 2026</div>
+  <div>Day 19 Project · FIFA World Cup 2026™</div>
+</footer>
+
+<!-- PLAYER DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hero" id="modal-hero">
+      <div class="jersey-stripes"></div>
+      <div class="modal-hero-num" id="modal-num"></div>
+      <div class="modal-hero-content">
+        <div class="modal-hero-flag" id="modal-flag"></div>
+        <div class="modal-hero-name" id="modal-name"></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px" id="modal-pos"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stats-grid" id="modal-stats"></div>
+      <div class="modal-bio" id="modal-bio"></div>
+      <div class="modal-attr-row" id="modal-attrs"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── DATA ─────────────────────────────────────────────────────── */
+const PLAYERS = [
+  {
+    key:"messi", name:"Messi", full:"Lionel Messi", country:"Argentina", flag:"🇦🇷",
+    pos:"Forward", num:"10", goals:20, assists:12, rating:96, age:38, caps:180, wc_goals:5,
+    bg:"#005BBB", bg2:"#74ACDF", tc:"#FFFFFF",
+    bio:"The GOAT at 39. Five World Cups, now the all-time leading scorer in 2026. Messi's vision and assists (12) remain the engine of Argentina's title charge.",
+    attrs:{Pace:72,Dribbling:98,Passing:97,Shooting:92,Vision:99,Leadership:95}
+  },
+  {
+    key:"mbappe", name:"Mbappé", full:"Kylian Mbappé", country:"France", flag:"🇫🇷",
+    pos:"Forward", num:"10", goals:22, assists:8, rating:95, age:27, caps:90, wc_goals:3,
+    bg:"#002395", bg2:"#1A3A8A", tc:"#FFFFFF",
+    bio:"The fastest attacker in the tournament. Mbappé's 22 goals make him the outright Golden Boot leader. France's back-to-back finalist record rests on his shoulders.",
+    attrs:{Pace:99,Dribbling:95,Passing:82,Shooting:94,Vision:87,Leadership:80}
+  },
+  {
+    key:"ronaldo", name:"Ronaldo", full:"C. Ronaldo", country:"Portugal", flag:"🇵🇹",
+    pos:"Forward", num:"7", goals:18, assists:5, rating:94, age:41, caps:212, wc_goals:0,
+    bg:"#006600", bg2:"#008000", tc:"#FFD700",
+    bio:"The most capped player in history. At 41, Ronaldo's relentless hunger drives Portugal. The GOAT debate rages on as he chases one final World Cup crown.",
+    attrs:{Pace:80,Dribbling:89,Passing:78,Shooting:97,Vision:82,Leadership:99}
+  },
+  {
+    key:"haaland", name:"Haaland", full:"E. Haaland", country:"Norway", flag:"🇳🇴",
+    pos:"Forward", num:"9", goals:25, assists:4, rating:94, age:25, caps:35, wc_goals:2,
+    bg:"#EF2B2D", bg2:"#B82020", tc:"#FFFFFF",
+    bio:"The goal machine. Haaland leads all players with 25 goals and is Norway's dark-horse weapon. Pure striker instinct at the peak of his powers.",
+    attrs:{Pace:90,Dribbling:80,Passing:65,Shooting:99,Vision:70,Leadership:78}
+  },
+  {
+    key:"bellingham", name:"Bellingham", full:"J. Bellingham", country:"England", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    pos:"Midfielder", num:"5", goals:10, assists:9, rating:91, age:23, caps:55, wc_goals:1,
+    bg:"#CF081F", bg2:"#9E0618", tc:"#FFFFFF",
+    bio:"England's heartbeat. Bellingham's combination of 10 goals and 9 assists from midfield makes him the most complete player in the tournament at just 23.",
+    attrs:{Pace:85,Dribbling:88,Passing:89,Shooting:86,Vision:90,Leadership:87}
+  }
+];
+
+const PREDICTIONS = [
+  {team:"Argentina",flag:"🇦🇷",pct:73,col:"#0A84FF",role:"Predicted Winner",note:"FIFA #1 · Form 92 · Dominant 3-0 opener · Messi in historic form",risk:"Squad depth · Tight knockout bracket"},
+  {team:"France",flag:"🇫🇷",pct:61,col:"#9B6DFF",role:"Runner-up",note:"FIFA #3 · 2 finals in a row · Mbappé (22G) leading scorer",risk:"Most goals conceded (8) among contenders"},
+  {team:"Morocco",flag:"🇲🇦",pct:38,col:"#00C97A",role:"Dark Horse",note:"Best defensive record · Drew Brazil · 2022 semi-finalist pedigree",risk:"Tougher knockout draw · FIFA #12"},
+];
+
+const CONTENDERS = [
+  {team:"Argentina",form:92,col:"#0A84FF"},
+  {team:"Spain",    form:91,col:"#E67E22"},
+  {team:"France",   form:90,col:"#9B6DFF"},
+  {team:"England",  form:89,col:"#CF081F"},
+  {team:"Brazil",   form:88,col:"#00C97A"},
+  {team:"Germany",  form:87,col:"#A0A0A0"},
+  {team:"Morocco",  form:86,col:"#F5C400"},
+];
+
+const MATCHES = [
+  {t1:"Germany",    s:"7–1", t2:"Curaçao",    date:"Jun 14", type:"win"},
+  {t1:"Argentina",  s:"3–0", t2:"Algeria",     date:"Jun 16", type:"win"},
+  {t1:"USA",        s:"4–1", t2:"Paraguay",    date:"Jun 13", type:"win"},
+  {t1:"France",     s:"2–0", t2:"Senegal",     date:"Jun 16", type:"win"},
+  {t1:"Sweden",     s:"5–1", t2:"Tunisia",     date:"Jun 15", type:"win"},
+  {t1:"Brazil",     s:"1–1", t2:"Morocco",     date:"Jun 13", type:"draw"},
+  {t1:"Netherlands",s:"2–2", t2:"Japan",       date:"Jun 14", type:"draw"},
+  {t1:"Spain",      s:"0–0", t2:"Cape Verde",  date:"Jun 15", type:"draw"},
+  {t1:"Austria",    s:"3–1", t2:"Jordan",      date:"Jun 16", type:"win"},
+];
+
+const STANDINGS = [
+  {team:"Germany",    p:3, w:1,d:0,l:0, gf:7,ga:1,gd:"+6",pts:3},
+  {team:"USA",        p:2, w:1,d:0,l:1, gf:5,ga:3,gd:"+2",pts:3},
+  {team:"Curaçao",   p:1, w:0,d:0,l:1, gf:1,ga:7,gd:"−6",pts:0},
+];
+
+const HIST = [
+  {team:"Brazil",    pct:70,col:"#F7D116"},
+  {team:"Argentina", pct:68,col:"#74ACDF"},
+  {team:"France",    pct:62,col:"#002395"},
+  {team:"Spain",     pct:60,col:"#C60B1E"},
+  {team:"England",   pct:58,col:"#CF081F"},
+  {team:"Germany",   pct:56,col:"#A0A0A0"},
+];
+
+const TICKER_ITEMS = [
+  "🏆 Argentina leads Group J with 3-0 win over Algeria",
+  "⚽ Haaland leads Golden Boot with 25 goals",
+  "🔥 Messi tops assists chart with 12",
+  "🇩🇪 Germany scores 7 past Curaçao in biggest win so far",
+  "🇲🇦 Morocco hold Brazil 1-1 in thriller",
+  "🇫🇷 France comfortable 2-0 winners vs Senegal",
+  "📊 63 goals in 21 group stage games = 3.0 avg",
+  "🌍 48 nations competing — biggest World Cup ever",
+];
+
+/* ── TICKER ────────────────────────────────────────────────────── */
+const ticker = document.getElementById('ticker-inner');
+const all = [...TICKER_ITEMS, ...TICKER_ITEMS];
+ticker.innerHTML = all.map(t => `<span class="ticker-item">${t}</span>`).join('');
+
+/* ── PLAYER CARDS ──────────────────────────────────────────────── */
+function makeSVGFigure(col) {
+  return `
+  <svg viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:110px">
+    <!-- head -->
+    <ellipse cx="45" cy="20" rx="14" ry="16" fill="${col}" opacity=".9"/>
+    <!-- hair -->
+    <ellipse cx="45" cy="8" rx="13" ry="9" fill="rgba(0,0,0,.35)"/>
+    <!-- neck -->
+    <rect x="40" y="34" width="10" height="10" rx="3" fill="${col}" opacity=".85"/>
+    <!-- body / jersey -->
+    <path d="M20 44 Q10 50 12 75 L30 73 L30 105 L60 105 L60 73 L78 75 Q80 50 70 44 Q60 38 45 38 Q30 38 20 44Z" fill="${col}" opacity=".95"/>
+    <!-- sleeves -->
+    <path d="M20 44 Q10 50 8 65 L22 67 L24 48Z" fill="${col}" opacity=".8"/>
+    <path d="M70 44 Q80 50 82 65 L68 67 L66 48Z" fill="${col}" opacity=".8"/>
+    <!-- shorts -->
+    <rect x="28" y="100" width="15" height="20" rx="3" fill="rgba(0,0,0,.4)"/>
+    <rect x="47" y="100" width="15" height="20" rx="3" fill="rgba(0,0,0,.4)"/>
+    <!-- socks -->
+    <rect x="29" y="118" width="13" height="14" rx="3" fill="${col}" opacity=".7"/>
+    <rect x="48" y="118" width="13" height="14" rx="3" fill="${col}" opacity=".7"/>
+  </svg>`;
+}
+
+const playerGrid = document.getElementById('player-grid');
+PLAYERS.forEach(p => {
+  const maxWCGoals = 5;
+  const card = document.createElement('div');
+  card.className = 'player-card';
+  card.onclick = () => openModal(p);
+  card.innerHTML = `
+    <div class="player-jersey" style="background:linear-gradient(135deg,${p.bg} 0%,${p.bg2} 100%)">
+      <div class="jersey-stripes"></div>
+      <div class="jersey-silhouette">${makeSVGFigure(p.tc)}</div>
+      <div class="jersey-num" style="color:${p.tc};text-shadow:0 2px 8px rgba(0,0,0,.3)">${p.num}</div>
+      <div class="jersey-country-badge">${p.flag}</div>
+      <div class="wc-goals-badge">⚽ ${p.wc_goals} WC26</div>
+    </div>
+    <div class="player-body">
+      <div class="player-name">${p.name}</div>
+      <div class="player-country">${p.country} · ${p.pos} · Age ${p.age}</div>
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="stat-pill-val gold">${p.goals}</div>
+          <div class="stat-pill-lbl">Goals</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-val blue">${p.assists}</div>
+          <div class="stat-pill-lbl">Assists</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-val" style="color:${p.bg2 || '#fff'}">${p.caps}</div>
+          <div class="stat-pill-lbl">Caps</div>
+        </div>
+      </div>
+      <div class="rating-row">
+        <div class="rating-label-row">
+          <span class="rating-text">Overall Rating</span>
+          <span class="rating-val">${p.rating}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" data-w="${p.rating}" style="width:0%;background:linear-gradient(90deg,${p.bg},${p.bg2 || p.bg})"></div>
+        </div>
+      </div>
+      <div class="wc-dots">
+        <span class="wc-dot-label">WC26 goals</span>
+        ${Array.from({length:maxWCGoals},(_,i)=>`<div class="wc-dot${i<p.wc_goals?'':' empty'}"></div>`).join('')}
+      </div>
+    </div>
+  `;
+  playerGrid.appendChild(card);
+});
+
+/* ── PREDICTIONS ───────────────────────────────────────────────── */
+const predContainer = document.getElementById('pred-cards');
+PREDICTIONS.forEach(pred => {
+  const div = document.createElement('div');
+  div.className = 'pred-card';
+  div.innerHTML = `
+    <div class="pred-card-accent" style="background:linear-gradient(90deg,${pred.col},transparent)"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="pred-flag">${pred.flag}</div>
+        <div class="pred-team condensed">${pred.team}</div>
+        <div class="pred-role" style="color:${pred.col}">${pred.role}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="pred-pct-row">
+          <div class="pred-pct condensed" style="color:${pred.col}">${pred.pct}</div>
+          <div class="pred-pct-sym" style="color:${pred.col}">%</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">Confidence</div>
+      </div>
+    </div>
+    <div class="bar-track" style="margin-top:12px;height:6px">
+      <div class="bar-fill" data-w="${pred.pct}" style="width:0%;background:${pred.col}"></div>
+    </div>
+    <div class="pred-note">${pred.note}</div>
+    <div class="pred-risk">⚠ ${pred.risk}</div>
+  `;
+  predContainer.appendChild(div);
+});
+
+/* ── FORM CHART ────────────────────────────────────────────────── */
+const formChart = document.getElementById('form-chart');
+formChart.innerHTML = CONTENDERS.map((c,i) => `
+  <div class="form-row">
+    <div class="form-rank dim">${i+1}</div>
+    <div class="form-team">${c.team}</div>
+    <div class="form-bar-track">
+      <div class="form-bar-fill" data-w="${c.form}" style="width:0%;background:${c.col}"></div>
+    </div>
+    <div class="form-score" style="color:${c.col}">${c.form}</div>
+  </div>
+`).join('');
+
+/* ── MATCHES ───────────────────────────────────────────────────── */
+const matchGrid = document.getElementById('match-grid');
+MATCHES.forEach(m => {
+  const div = document.createElement('div');
+  div.className = `match-card match-${m.type}`;
+  div.innerHTML = `
+    <div class="match-date">${m.date}</div>
+    <div class="match-team">${m.t1}</div>
+    <div class="match-score">${m.s}</div>
+    <div class="match-team right">${m.t2}</div>
+  `;
+  matchGrid.appendChild(div);
+});
+
+/* ── STANDINGS ─────────────────────────────────────────────────── */
+const table = document.getElementById('standings-table');
+table.innerHTML = `
+  <thead>
+    <tr>
+      <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th>
+      <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${STANDINGS.map((r,i)=>`
+    <tr>
+      <td class="pos-num">${i+1}</td>
+      <td style="font-weight:600">${r.team}</td>
+      <td class="dim">${r.p}</td>
+      <td class="green" style="font-weight:600">${r.w}</td>
+      <td class="dim">${r.d}</td>
+      <td class="red dim">${r.l}</td>
+      <td>${r.gf}</td>
+      <td class="dim">${r.ga}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r.gd}</td>
+      <td style="font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--gold)">${r.pts}</td>
+    </tr>`).join('')}
+  </tbody>
+`;
+
+/* ── HISTORICAL ────────────────────────────────────────────────── */
+const histGrid = document.getElementById('hist-grid');
+HIST.forEach(h => {
+  const div = document.createElement('div');
+  div.className = 'hist-row';
+  div.innerHTML = `
+    <div class="hist-header">
+      <div class="hist-team condensed" style="color:${h.col}">${h.team}</div>
+      <div class="hist-pct mono" style="color:${h.col}">${h.pct}%</div>
+    </div>
+    <div class="hist-bar-track">
+      <div class="hist-bar-fill" data-w="${h.pct}" style="width:0%;background:${h.col}"></div>
+    </div>
+    <div class="hist-sub">Win rate · last 50 matches</div>
+  `;
+  histGrid.appendChild(div);
+});
+
+/* ── MODAL ─────────────────────────────────────────────────────── */
+function openModal(p) {
+  document.getElementById('modal-flag').textContent = p.flag;
+  document.getElementById('modal-name').textContent = p.full;
+  document.getElementById('modal-pos').textContent = `${p.pos} · ${p.country}`;
+  document.getElementById('modal-num').textContent = p.num;
+  const hero = document.getElementById('modal-hero');
+  hero.style.background = `linear-gradient(135deg,${p.bg} 0%,${p.bg2||p.bg} 100%)`;
+
+  document.getElementById('modal-stats').innerHTML = [
+    {v:p.goals,    l:"Goals",   c:"var(--gold)"},
+    {v:p.assists,  l:"Assists", c:"var(--blue)"},
+    {v:p.rating,   l:"Rating",  c:"var(--green)"},
+    {v:p.caps,     l:"Caps",    c:"var(--purple)"},
+  ].map(s=>`
+    <div class="modal-stat">
+      <div class="modal-stat-val condensed" style="color:${s.c}">${s.v}</div>
+      <div class="modal-stat-lbl">${s.l}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('modal-bio').textContent = p.bio;
+
+  document.getElementById('modal-attrs').innerHTML = Object.entries(p.attrs).map(([k,v])=>`
+    <div class="modal-attr">
+      <div class="modal-attr-name dim">${k}</div>
+      <div class="modal-attr-bar">
+        <div class="modal-attr-fill" style="width:${v}%;background:linear-gradient(90deg,${p.bg},${p.bg2||p.bg})"></div>
+      </div>
+      <div class="modal-attr-val" style="color:${p.bg2||p.bg}">${v}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if(e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+/* ── SCROLL REVEAL + BAR ANIMATE ───────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      // animate bars
+      entry.target.querySelectorAll('[data-w]').forEach(el => {
+        setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 200);
+      });
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Also animate bars inside player cards immediately
+setTimeout(() => {
+  document.querySelectorAll('.player-card [data-w]').forEach(el => {
+    el.style.width = el.dataset.w + '%';
+  });
+}, 400);
+</script>
+</body>
+</html>
