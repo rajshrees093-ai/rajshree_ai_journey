@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DeskDoc — Customer & MVP Blueprint</title>
+<style>
+  :root{
+    --navy:#1F2A44;
+    --blue:#2E5EAA;
+    --blue-light:#EAF0FB;
+    --green:#1E7A46;
+    --green-light:#E4F5EA;
+    --amber:#B9770E;
+    --amber-light:#FCF0DA;
+    --red:#B23B3B;
+    --red-light:#FBEAEA;
+    --ink:#1A1E27;
+    --grey:#5B6472;
+    --line:#E1E5EC;
+    --paper:#FFFFFF;
+    --canvas:#F5F7FA;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--canvas); color:var(--ink);
+    font-family:"Georgia","Iowan Old Style",serif;
+    line-height:1.55;
+  }
+  .utility, table, th, td, .badge, .tag, .meta, .score-label, nav{
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  .page{max-width:920px; margin:0 auto; padding:0 24px 80px;}
+
+  /* Cover */
+  .cover{
+    background:linear-gradient(160deg, var(--navy) 0%, #223258 55%, var(--blue) 100%);
+    color:#fff; padding:72px 48px 56px; margin:0 0 8px; border-radius:0 0 18px 18px;
+    position:relative; overflow:hidden;
+  }
+  .cover::after{
+    content:""; position:absolute; right:-60px; top:-60px; width:280px; height:280px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.15);
+  }
+  .cover::before{
+    content:""; position:absolute; right:20px; top:40px; width:180px; height:180px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.12);
+  }
+  .eyebrow{
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    text-transform:uppercase; letter-spacing:.14em; font-size:12px; color:#B9C6E8;
+    margin:0 0 14px;
+  }
+  .cover h1{font-size:44px; margin:0 0 6px; font-weight:600; letter-spacing:-0.01em;}
+  .cover .sub{font-size:20px; color:#CFDAF2; margin:0 0 22px; font-style:italic;}
+  .cover .meta{font-size:13px; color:#AEBEDD;}
+  .cover .meta strong{color:#fff;}
+
+  nav.toc{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:22px 26px; margin:-36px 0 40px; box-shadow:0 6px 20px rgba(31,42,68,.06);
+  }
+  nav.toc h2{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--grey); margin:0 0 12px;}
+  nav.toc ol{columns:2; column-gap:32px; margin:0; padding-left:18px; font-size:14px;}
+  nav.toc li{margin-bottom:7px;}
+  nav.toc a{color:var(--blue); text-decoration:none;}
+  nav.toc a:hover{text-decoration:underline;}
+
+  section{margin:0 0 46px;}
+  h2.section-title{
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:22px; color:var(--navy); font-weight:700; margin:0 0 4px;
+    padding-bottom:10px; border-bottom:2px solid var(--blue);
+    display:flex; align-items:baseline; gap:10px;
+  }
+  h2.section-title .num{color:var(--blue); font-weight:600; font-size:15px;}
+  h3.sub{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--blue); font-size:16px; margin:22px 0 8px;}
+  p{font-size:16px; margin:12px 0;}
+  p.lead{font-size:17px;}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 4px; font-size:14px;}
+  th, td{border:1px solid var(--line); padding:10px 14px; text-align:left; vertical-align:top;}
+  th{background:var(--blue-light); color:var(--navy); font-weight:700; font-size:13px;}
+  tr:nth-child(even) td{background:#FAFBFD;}
+  td.fill-green{background:var(--green-light) !important; font-weight:700; color:var(--green);}
+  td.fill-blue{background:var(--blue-light) !important; font-weight:700; color:var(--blue);}
+  td.fill-amber{background:var(--amber-light) !important; font-weight:700; color:var(--amber);}
+  td.fill-red{background:var(--red-light) !important; font-weight:700; color:var(--red);}
+  td.center{text-align:center;}
+
+  ul.plain{margin:10px 0; padding-left:22px; font-size:16px;}
+  ul.plain li{margin-bottom:7px;}
+
+  ol.actions{margin:10px 0; padding-left:22px; font-size:16px; counter-reset:none;}
+  ol.actions li{margin-bottom:9px;}
+
+  .summary-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:4px 0; margin:16px 0 20px; overflow:hidden;
+  }
+  .summary-card table{margin:0;}
+  .summary-card td:first-child{width:190px; font-weight:700; font-family:-apple-system,sans-serif; font-size:13px; color:var(--navy); background:var(--blue-light);}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:14px 0;}
+  .panel{border:1px solid var(--line); border-radius:10px; padding:18px 20px; background:var(--paper);}
+  .panel.build{border-left:4px solid var(--green);}
+  .panel.skip{border-left:4px solid var(--red);}
+  .panel h4{margin:0 0 8px; font-family:-apple-system,sans-serif; font-size:14px; text-transform:uppercase; letter-spacing:.06em;}
+  .panel.build h4{color:var(--green);}
+  .panel.skip h4{color:var(--red);}
+
+  .moscow{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0;}
+  .moscow .m{border-radius:10px; padding:16px 18px; font-size:14px;}
+  .moscow .m h4{margin:0 0 6px; font-family:-apple-system,sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:.05em;}
+  .moscow .must{background:var(--green-light);} .moscow .must h4{color:var(--green);}
+  .moscow .should{background:var(--blue-light);} .moscow .should h4{color:var(--blue);}
+  .moscow .could{background:var(--amber-light);} .moscow .could h4{color:var(--amber);}
+  .moscow .wont{background:var(--red-light);} .moscow .wont h4{color:var(--red);}
+
+  .scorebar-wrap{margin:10px 0 18px;}
+  .scorebar-row{display:grid; grid-template-columns:180px 1fr 46px; align-items:center; gap:14px; margin:10px 0; font-size:14px;}
+  .scorebar-row .label{font-family:-apple-system,sans-serif; color:var(--navy); font-weight:600;}
+  .scorebar-track{background:#EDF0F5; border-radius:20px; height:12px; overflow:hidden;}
+  .scorebar-fill{height:100%; border-radius:20px; background:linear-gradient(90deg, var(--blue), var(--navy));}
+  .scorebar-row .val{font-family:-apple-system,sans-serif; font-weight:700; color:var(--navy); text-align:right;}
+
+  .verdict-box{
+    display:flex; align-items:center; gap:16px; background:var(--amber-light);
+    border:1px solid #EFD9A8; border-radius:12px; padding:20px 24px; margin:16px 0;
+  }
+  .verdict-dot{width:20px; height:20px; border-radius:50%; background:var(--amber); flex-shrink:0;}
+  .verdict-box .label{font-family:-apple-system,sans-serif; font-weight:800; font-size:18px; color:var(--amber); letter-spacing:.02em;}
+
+  .footnote{font-size:12.5px; color:var(--grey); font-style:italic; border-top:1px solid var(--line); padding-top:14px; margin-top:50px;}
+
+  @media (max-width: 640px){
+    .cover{padding:52px 24px 40px;}
+    .cover h1{font-size:32px;}
+    nav.toc ol{columns:1;}
+    .grid2, .moscow{grid-template-columns:1fr;}
+    .scorebar-row{grid-template-columns:120px 1fr 40px;}
+  }
+
+  @media print{
+    body{background:#fff;}
+    .cover{border-radius:0; margin:0;}
+    nav.toc{box-shadow:none;}
+    section{margin-bottom:28px; page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover">
+    <p class="eyebrow">Customer & MVP Blueprint</p>
+    <h1>DeskDoc</h1>
+    <p class="sub">Turning validated pain into a buildable MVP</p>
+    <p class="meta">Built on the <strong>Day 22 Startup Validation Report</strong> &nbsp;·&nbsp; July 2026 &nbsp;·&nbsp; Confidential</p>
+  </div>
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#summary">Executive Summary</a></li>
+      <li><a href="#icp">Ideal Customer Profile</a></li>
+      <li><a href="#persona">Buyer Persona</a></li>
+      <li><a href="#pain">Top 10 Pain Points</a></li>
+      <li><a href="#journey">Customer Journey</a></li>
+      <li><a href="#objections">Objections & Triggers</a></li>
+      <li><a href="#mvp">MVP Recommendation</a></li>
+      <li><a href="#moscow">MoSCoW Prioritization</a></li>
+      <li><a href="#pricing">Pricing Hypothesis</a></li>
+      <li><a href="#risks">Top 5 Risks</a></li>
+      <li><a href="#plan">30-Day MVP Plan</a></li>
+      <li><a href="#actions">Founder Action Sheet</a></li>
+      <li><a href="#scores">Scores</a></li>
+      <li><a href="#verdict">Final Verdict</a></li>
+    </ol>
+  </nav>
+
+  <section id="summary">
+    <h2 class="section-title"><span class="num">01</span> Executive Summary</h2>
+    <p class="lead">DeskDoc auto-generates and maintains internal documentation — SOPs, onboarding guides, process docs — by passively observing Slack, meetings, and tool usage. The target buyer is an Ops or People lead at a Series A–B startup with 15–100 employees.</p>
+    <p>Day 22 validated the <em>problem</em>: 75% pain-confirmation across 12 interviews. It did not validate the <em>solution</em>. This blueprint turns that signal into a buildable MVP — what to build first, what to explicitly leave out, how to price it, and the concrete next 30 days.</p>
+    <div class="summary-card">
+      <table>
+        <tr><td>Target Customer</td><td>Ops/People leads, Series A–B, 15–100 employees, remote-first</td></tr>
+        <tr><td>MVP Scope</td><td>Narrow onboarding-doc generator — Slack + calendar, single team</td></tr>
+        <tr><td>Pricing Hypothesis</td><td>$299–$499/month flat (≤50 employees), usage-based tier above</td></tr>
+        <tr><td>Biggest Open Risk</td><td>Unproven auto-synthesis accuracy at usable quality</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="icp">
+    <h2 class="section-title"><span class="num">02</span> Ideal Customer Profile</h2>
+    <table>
+      <tr><th style="width:180px">Attribute</th><th>Profile</th></tr>
+      <tr><td>Company size</td><td>15–100 employees</td></tr>
+      <tr><td>Stage</td><td>Series A–B, VC-backed</td></tr>
+      <tr><td>Work model</td><td>Remote-first or hybrid</td></tr>
+      <tr><td>Stack</td><td>Slack, Zoom/Meet, Notion (or similar) already in use</td></tr>
+      <tr><td>Trigger event</td><td>Hiring surge or recent senior departure</td></tr>
+      <tr><td>Geography</td><td>US (Phase 1) → UK, Canada (Phase 2)</td></tr>
+    </table>
+  </section>
+
+  <section id="persona">
+    <h2 class="section-title"><span class="num">03</span> Buyer Persona</h2>
+    <table>
+      <tr><th style="width:180px">"Ops Olivia"</th><th>Head of Ops/People, or founder wearing the Ops hat</th></tr>
+      <tr><td>Goals</td><td>Faster onboarding, less tribal-knowledge dependency, audit-ready processes</td></tr>
+      <tr><td>Frustrations</td><td>No time to write docs; docs stale within weeks; repeated Slack interruptions</td></tr>
+      <tr><td>Budget</td><td>Discretionary tooling budget, ~$10–15K/yr</td></tr>
+      <tr><td>Discovery channels</td><td>Peer Slack communities, LinkedIn Ops groups, G2</td></tr>
+    </table>
+  </section>
+
+  <section id="pain">
+    <h2 class="section-title"><span class="num">04</span> Top 10 Customer Pain Points</h2>
+    <ul class="plain">
+      <li>New hires take 3–6 weeks longer to become productive without current docs.</li>
+      <li>Senior staff repeatedly interrupted to answer already-documented questions.</li>
+      <li>Documentation is perpetually deprioritized — no clear owner.</li>
+      <li>Knowledge walks out the door when a key employee leaves.</li>
+      <li>Docs go stale within weeks of being written.</li>
+      <li>No visibility into which docs are outdated vs. current.</li>
+      <li>Manual doc-writing feels like a chore disconnected from "real work."</li>
+      <li>Scaling teams outpaces the team's ability to document processes.</li>
+      <li>Compliance/audit prep (SOC 2, investor diligence) exposes documentation gaps under time pressure.</li>
+      <li>Remote/async teams can't rely on hallway knowledge-transfer to compensate.</li>
+    </ul>
+  </section>
+
+  <section id="journey">
+    <h2 class="section-title"><span class="num">05</span> Customer Journey</h2>
+    <table>
+      <tr><th style="width:140px">Stage</th><th>What Happens</th></tr>
+      <tr><td><strong>Awareness</strong></td><td>Finds DeskDoc via an Ops community, LinkedIn post, or peer referral after venting about stale docs.</td></tr>
+      <tr><td><strong>Consideration</strong></td><td>Compares vs. "just use Notion better"; weighs data-privacy and integration effort.</td></tr>
+      <tr><td><strong>Purchase</strong></td><td>Runs a scoped pilot (Slack + calendar connected); converts to paid after seeing accurate, low-effort docs.</td></tr>
+      <tr><td><strong>Retention</strong></td><td>Expands company-wide as docs stay current automatically; becomes a reference/case-study customer.</td></tr>
+    </table>
+  </section>
+
+  <section id="objections">
+    <h2 class="section-title"><span class="num">06</span> Objections & Buying Triggers</h2>
+    <h3 class="sub">Common Objections</h3>
+    <table>
+      <tr><th style="width:260px">Objection</th><th>Response Strategy</th></tr>
+      <tr><td>"We already have Notion."</td><td>Position as complementary: Notion is where docs live, DeskDoc is how they get written and stay current.</td></tr>
+      <tr><td>"Privacy concerns reading Slack/meetings."</td><td>Granular opt-in scoping, redaction controls, transparent retention policy.</td></tr>
+      <tr><td>"Too early / too small a team."</td><td>Reframe as hiring-scale insurance — cheapest to adopt before pain compounds.</td></tr>
+    </table>
+    <h3 class="sub">Buying Triggers</h3>
+    <ul class="plain">
+      <li>Hiring surge — e.g., doubling headcount within 6 months.</li>
+      <li>A senior employee's departure exposes a documentation gap.</li>
+      <li>A failed audit, SOC 2 process, or investor diligence request surfaces missing SOPs.</li>
+    </ul>
+  </section>
+
+  <section id="mvp">
+    <h2 class="section-title"><span class="num">07</span> MVP Recommendation</h2>
+    <div class="grid2">
+      <div class="panel build">
+        <h4>Build First</h4>
+        <p style="margin:0; font-size:15px;">A narrow, high-precision onboarding-doc generator: connect one Slack workspace + calendar, auto-generate onboarding SOPs for a single team, and flag when they go stale. Precision over breadth.</p>
+      </div>
+      <div class="panel skip">
+        <h4>Don't Build Yet</h4>
+        <ul class="plain" style="margin:0; font-size:15px;">
+          <li>Full company-wide, all-source knowledge base</li>
+          <li>Native mobile app</li>
+          <li>Integrations beyond Slack + Calendar</li>
+          <li>Enterprise SSO / SOC 2 tooling</li>
+        </ul>
+      </div>
+    </div>
+    <h3 class="sub">Success Metrics (First 90 Days)</h3>
+    <table>
+      <tr><th>Metric</th><th>Target</th></tr>
+      <tr><td>Pilot customers onboarded</td><td>5–8 companies</td></tr>
+      <tr><td>Doc accuracy (human-rated)</td><td>≥ 80% usable without edits</td></tr>
+      <tr><td>Time saved vs. manual (self-reported)</td><td>≥ 3 hrs/week per Ops lead</td></tr>
+      <tr><td>Pilot-to-paid conversion</td><td>≥ 30%</td></tr>
+    </table>
+  </section>
+
+  <section id="moscow">
+    <h2 class="section-title"><span class="num">08</span> MoSCoW Prioritization</h2>
+    <div class="moscow">
+      <div class="m must"><h4>Must Have</h4>Slack + calendar connection; auto-generated onboarding docs; staleness flagging; single-workspace scope.</div>
+      <div class="m should"><h4>Should Have</h4>Notion export/sync; opt-in channel scoping controls; basic accuracy feedback loop.</div>
+      <div class="m could"><h4>Could Have</h4>Multi-team support; Zoom/Meet native integration; Slack bot for doc Q&A.</div>
+      <div class="m wont"><h4>Won't Have (v1)</h4>Full knowledge-base replacement; mobile app; SOC 2/enterprise SSO; multi-language support.</div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2 class="section-title"><span class="num">09</span> Pricing Hypothesis</h2>
+    <p>Seat-based or flat team pricing, anchored to the Day 22 SAM ACV assumption (~$10K/yr average). Hypothesis: <strong>$299–$499/month flat fee</strong> for teams up to 50 employees — predictable budgeting appeals to Ops leads — with a usage-based enterprise tier above 100 employees. This is untested: validate directly in Week 1 interviews before finalizing.</p>
+  </section>
+
+  <section id="risks">
+    <h2 class="section-title"><span class="num">10</span> Top 5 Risks</h2>
+    <table>
+      <tr><th style="width:240px">Risk</th><th style="width:90px">Severity</th><th>Mitigation</th></tr>
+      <tr><td>Auto-synthesis accuracy too low for trust</td><td class="fill-red center">High</td><td>Narrow scope to onboarding docs only; human-in-loop review before v1 launch.</td></tr>
+      <tr><td>Data privacy objections block adoption</td><td class="fill-red center">High</td><td>Opt-in-only scoping; publish a plain-language data policy before pilot.</td></tr>
+      <tr><td>Sample size too small to justify build</td><td class="fill-amber center">Medium</td><td>Expand to 30+ interviews and a paid pilot before scaling engineering.</td></tr>
+      <tr><td>Incumbents (Notion/Guru) ship similar AI feature</td><td class="fill-amber center">Medium</td><td>Move fast on the passive-capture wedge; explore integration vs. competition.</td></tr>
+      <tr><td>First-time founder execution gap</td><td class="fill-amber center">Medium</td><td>Bring on a technical advisor/co-founder with applied NLP experience.</td></tr>
+    </table>
+  </section>
+
+  <section id="plan">
+    <h2 class="section-title"><span class="num">11</span> 30-Day MVP Plan</h2>
+    <table>
+      <tr><th style="width:90px">Week</th><th style="width:190px">Focus</th><th>Key Actions</th></tr>
+      <tr><td><strong>1</strong></td><td>Validate pricing + scope</td><td>15 more interviews; test pricing sensitivity directly; confirm onboarding-docs-only scope resonates.</td></tr>
+      <tr><td><strong>2</strong></td><td>Build narrow prototype</td><td>Slack + calendar connector; generate one onboarding doc from real data for internal test.</td></tr>
+      <tr><td><strong>3</strong></td><td>Pilot with real users</td><td>Onboard 3–5 target companies; measure doc accuracy and time saved against success metrics.</td></tr>
+      <tr><td><strong>4</strong></td><td>Decision checkpoint</td><td>Review pilot data against MVP success metrics; decide scale, iterate, or pivot.</td></tr>
+    </table>
+  </section>
+
+  <section id="actions">
+    <h2 class="section-title"><span class="num">12</span> Founder Action Sheet</h2>
+    <ol class="actions">
+      <li>Run 15 additional customer interviews, focused on pricing sensitivity.</li>
+      <li>Draft a one-page data-privacy policy before any pilot begins.</li>
+      <li>Scope and build the narrow onboarding-doc prototype (Slack + calendar only).</li>
+      <li>Recruit a technical advisor with applied NLP/LLM experience.</li>
+      <li>Identify and shortlist 8–10 pilot-candidate companies from your network.</li>
+      <li>Define and instrument the 4 success metrics before pilot launch.</li>
+      <li>Test the two pricing tiers directly in interviews, not just stated willingness-to-pay.</li>
+      <li>Build a simple feedback loop (thumbs up/down) into the prototype.</li>
+      <li>Prepare a short case-study template to capture pilot results as they land.</li>
+      <li>Set a hard Week-4 decision date — commit full-time, iterate, or pivot per Day 22's pivot options.</li>
+    </ol>
+  </section>
+
+  <section id="scores">
+    <h2 class="section-title"><span class="num">13</span> Scores (0–100)</h2>
+    <div class="scorebar-wrap">
+      <div class="scorebar-row">
+        <div class="label">Customer Clarity</div>
+        <div class="scorebar-track"><div class="scorebar-fill" style="width:78%"></div></div>
+        <div class="val">78</div>
+      </div>
+      <div class="scorebar-row">
+        <div class="label">Problem Severity</div>
+        <div class="scorebar-track"><div class="scorebar-fill" style="width:74%"></div></div>
+        <div class="val">74</div>
+      </div>
+      <div class="scorebar-row">
+        <div class="label">PMF Potential</div>
+        <div class="scorebar-track"><div class="scorebar-fill" style="width:58%"></div></div>
+        <div class="val">58</div>
+      </div>
+      <div class="scorebar-row">
+        <div class="label">MVP Readiness</div>
+        <div class="scorebar-track"><div class="scorebar-fill" style="width:52%"></div></div>
+        <div class="val">52</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="verdict">
+    <h2 class="section-title"><span class="num">14</span> Final Verdict</h2>
+    <div class="verdict-box">
+      <div class="verdict-dot"></div>
+      <div class="label">PROMISING BUT UNVALIDATED</div>
+    </div>
+    <p>Customer understanding is strong and the problem is real, but PMF and MVP readiness remain unproven — no prototype, no pilot, no direct pricing test yet. Proceed with the 30-day MVP plan above before scaling investment or fundraising on this evidence.</p>
+    <p class="footnote">This report builds on the Day 22 Startup Validation Report and is a planning aid, not investment advice. Figures are directional and should be re-verified against pilot data.</p>
+  </section>
+
+</div>
+</body>
+</html>
