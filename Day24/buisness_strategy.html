@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DeskDoc — Business Strategy Dashboard</title>
+<style>
+  :root{
+    --navy:#1F2A44; --blue:#2E5EAA; --blue-light:#EAF0FB;
+    --green:#1E7A46; --green-light:#E4F5EA;
+    --amber:#B9770E; --amber-light:#FCF0DA;
+    --red:#B23B3B; --red-light:#FBEAEA;
+    --ink:#1A1E27; --grey:#5B6472; --line:#E1E5EC;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#fff; font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink);}
+  .board{width:850px; min-height:1100px; margin:0 auto; padding:34px 38px 30px; background:#fff;}
+
+  .head{
+    background:linear-gradient(135deg, var(--navy), var(--blue));
+    color:#fff; border-radius:14px; padding:22px 28px; margin-bottom:18px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .head h1{margin:0; font-size:24px; font-weight:700;}
+  .head p{margin:3px 0 0; font-size:12.5px; color:#CFDAF2;}
+  .head .badge{background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.35); border-radius:20px; padding:7px 16px; font-size:12px; font-weight:700; letter-spacing:.03em;}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  .card{border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:#fff;}
+  .card h3{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--blue); display:flex; align-items:center; gap:6px;}
+  .card h3 .dot{width:7px; height:7px; border-radius:50%; background:var(--blue); display:inline-block;}
+  .card p, .card li{font-size:11.5px; line-height:1.45; margin:0;}
+  .card ul{margin:0; padding-left:15px;}
+  .card li{margin-bottom:3px;}
+
+  .full{grid-column:1 / -1;}
+
+  /* Business model mini canvas */
+  .bm-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;}
+  .bm-cell{background:var(--blue-light); border-radius:7px; padding:7px 8px; font-size:10px;}
+  .bm-cell b{display:block; color:var(--navy); font-size:9.5px; text-transform:uppercase; margin-bottom:2px;}
+
+  /* GTM flow */
+  .flow{display:flex; align-items:stretch; gap:6px;}
+  .flow .step{flex:1; background:var(--blue-light); border-radius:8px; padding:9px 8px; text-align:center;}
+  .flow .step .n{font-size:9px; color:var(--blue); font-weight:800; letter-spacing:.06em;}
+  .flow .step .t{font-size:10.5px; font-weight:700; color:var(--navy); margin:2px 0;}
+  .flow .step .d{font-size:9px; color:var(--grey);}
+  .flow .arrow{align-self:center; color:var(--blue); font-size:16px; font-weight:700;}
+
+  /* revenue streams */
+  .rev-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); font-size:11px;}
+  .rev-row:last-child{border-bottom:none;}
+  .rev-row .amt{font-weight:800; color:var(--green); font-size:12px;}
+
+  /* first 100 users funnel */
+  .funnel-row{display:grid; grid-template-columns:110px 1fr 40px; align-items:center; gap:8px; margin-bottom:6px; font-size:10.5px;}
+  .funnel-track{background:#EDF0F5; border-radius:6px; height:14px; overflow:hidden;}
+  .funnel-fill{height:100%; background:linear-gradient(90deg, var(--blue), var(--navy)); border-radius:6px;}
+  .funnel-row .val{font-weight:800; color:var(--navy); text-align:right;}
+
+  /* moat */
+  .moat-tag{display:inline-block; background:var(--green-light); color:var(--green); font-size:10px; font-weight:700; padding:4px 9px; border-radius:12px; margin:2px 3px 2px 0;}
+  .moat-warn{font-size:10.5px; color:var(--amber); margin-top:6px; font-style:italic;}
+
+  /* risks */
+  .risk-row{display:flex; gap:8px; align-items:flex-start; margin-bottom:6px; font-size:10.5px;}
+  .risk-sev{flex-shrink:0; font-size:9px; font-weight:800; padding:2px 7px; border-radius:9px;}
+  .risk-sev.high{background:var(--red-light); color:var(--red);}
+  .risk-sev.med{background:var(--amber-light); color:var(--amber);}
+
+  /* scorecards */
+  .score-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px;}
+  .score-card{background:var(--blue-light); border-radius:10px; padding:10px 6px; text-align:center;}
+  .score-card .num{font-size:22px; font-weight:800; color:var(--navy);}
+  .score-card .lbl{font-size:8.5px; color:var(--blue); text-transform:uppercase; letter-spacing:.04em; margin-top:2px;}
+
+  .verdict{
+    display:flex; align-items:center; gap:14px; background:var(--amber-light);
+    border:1px solid #EFD9A8; border-radius:12px; padding:16px 20px; margin-top:4px;
+  }
+  .verdict .dot{width:18px; height:18px; border-radius:50%; background:var(--amber); flex-shrink:0;}
+  .verdict .txt b{display:block; font-size:16px; color:var(--amber); letter-spacing:.02em;}
+  .verdict .txt span{font-size:10.5px; color:var(--grey);}
+
+  .foot{margin-top:14px; font-size:9px; color:var(--grey); text-align:center; font-style:italic;}
+</style>
+</head>
+<body>
+<div class="board">
+
+  <div class="head">
+    <div>
+      <h1>DeskDoc — Business Strategy Dashboard</h1>
+      <p>Built on Day 22 Validation + Day 23 MVP Blueprint · July 2026</p>
+    </div>
+    <div class="badge">🟡 VALIDATE</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="dot"></span>Business Model</h3>
+      <div class="bm-grid">
+        <div class="bm-cell"><b>Segment</b>Series A–B, 15–100 employees, remote-first</div>
+        <div class="bm-cell"><b>Value Prop</b>Docs that write & stay current automatically</div>
+        <div class="bm-cell"><b>Channels</b>Referral, Ops communities, LinkedIn</div>
+        <div class="bm-cell"><b>Relationship</b>High-touch pilot → self-serve</div>
+        <div class="bm-cell"><b>Revenue</b>Flat SaaS subscription</div>
+        <div class="bm-cell"><b>Cost</b>AI/API compute + founder time</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>Revenue Streams</h3>
+      <div class="rev-row"><span>Core plan · ≤50 employees</span><span class="amt">$299–$499/mo</span></div>
+      <div class="rev-row"><span>Enterprise tier · 100+ employees</span><span class="amt">Usage-based</span></div>
+      <div class="rev-row"><span>SOM (Yr 3, from Day 22)</span><span class="amt">~$8.6M ARR</span></div>
+      <div class="rev-row"><span>Validation status</span><span class="amt" style="color:var(--amber)">Untested</span></div>
+    </div>
+
+    <div class="card full">
+      <h3><span class="dot"></span>Go-To-Market Flow</h3>
+      <div class="flow">
+        <div class="step"><div class="n">PHASE 1</div><div class="t">Founder Network</div><div class="d">5–8 pilots · 0–30 days</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="n">PHASE 2</div><div class="t">Community + Content</div><div class="d">Case studies · 30–90 days</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="n">PHASE 3</div><div class="t">Partnerships + Paid</div><div class="d">Scale · 90+ days</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>First 100 Users Plan</h3>
+      <div class="funnel-row"><span>Pilot (network)</span><div class="funnel-track"><div class="funnel-fill" style="width:8%"></div></div><span class="val">~8</span></div>
+      <div class="funnel-row"><span>Warm referral</span><div class="funnel-track"><div class="funnel-fill" style="width:20%"></div></div><span class="val">~20</span></div>
+      <div class="funnel-row"><span>Community-driven</span><div class="funnel-track"><div class="funnel-fill" style="width:40%"></div></div><span class="val">~40</span></div>
+      <div class="funnel-row"><span>Content-driven</span><div class="funnel-track"><div class="funnel-fill" style="width:30%"></div></div><span class="val">~30</span></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>Competitive Moat</h3>
+      <span class="moat-tag">Data moat (org-specific)</span>
+      <span class="moat-tag">Workflow lock-in</span>
+      <span class="moat-tag">Early-mover speed</span>
+      <div class="moat-warn">⚠ None proven yet — depend on shipped product + accuracy data.</div>
+    </div>
+
+    <div class="card full">
+      <h3><span class="dot"></span>Key Risks</h3>
+      <div class="risk-row"><span class="risk-sev high">HIGH</span><span>Auto-synthesis accuracy too low for user trust</span></div>
+      <div class="risk-row"><span class="risk-sev high">HIGH</span><span>Data-privacy objections block adoption</span></div>
+      <div class="risk-row"><span class="risk-sev med">MED</span><span>No repeatable acquisition channel proven at scale</span></div>
+      <div class="risk-row"><span class="risk-sev med">MED</span><span>Pricing untested — only 5/12 interviewees confirmed willingness to pay</span></div>
+    </div>
+
+    <div class="card full">
+      <h3><span class="dot"></span>Investment Scorecard</h3>
+      <div class="score-grid">
+        <div class="score-card"><div class="num">55</div><div class="lbl">Viability</div></div>
+        <div class="score-card"><div class="num">52</div><div class="lbl">Revenue</div></div>
+        <div class="score-card"><div class="num">48</div><div class="lbl">GTM</div></div>
+        <div class="score-card"><div class="num">45</div><div class="lbl">Competitive</div></div>
+        <div class="score-card"><div class="num">35</div><div class="lbl">Investor Ready</div></div>
+      </div>
+    </div>
+
+    <div class="card full">
+      <div class="verdict">
+        <div class="dot"></div>
+        <div class="txt">
+          <b>🟡 VALIDATE — Overall Score 47/100</b>
+          <span>Real problem, plausible model — pricing and distribution must be proven with real pilots before this is investable.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">DeskDoc Business Strategy Report · Confidential · Planning aid, not investment advice</div>
+</div>
+</body>
+</html>
