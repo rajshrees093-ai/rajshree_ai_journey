@@ -758,6 +758,15 @@ function buildStageActions(stageId){
   const wrap = document.createElement("div");
   wrap.className = "stage-actions";
 
+  if (stageId === "intake"){
+    wrap.innerHTML = `<div style="font-size:12px;color:var(--ink-soft);margin-bottom:6px;">Case is ready to be picked up by the provider's office for review.</div>`;
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "➡️ Send to Provider for Review";
+    btn.addEventListener("click", () => advanceTo("necessity"));
+    wrap.appendChild(btn);
+  }
+
   if (stageId === "necessity"){
     wrap.innerHTML = `
       <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;">
@@ -772,10 +781,18 @@ function buildStageActions(stageId){
       state.necessityDone = true;
       state.daysElapsed += 1;
       state.history.push({stage:"Medical Necessity Review", note:"Provider confirmed medical necessity against payer criteria."});
-      setEducation("The provider reviewed the payer's medical necessity criteria and confirmed the case qualifies clinically. This step exists to prevent submitting requests that will be auto-denied for lacking clinical justification. Now drag the case into Document Collection.");
+      setEducation("The provider reviewed the payer's medical necessity criteria and confirmed the case qualifies clinically. This step exists to prevent submitting requests that will be auto-denied for lacking clinical justification.");
       renderAll();
     });
     wrap.appendChild(btn);
+
+    if (state.necessityDone){
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "btn secondary";
+      nextBtn.textContent = "➡️ Continue to Document Collection";
+      nextBtn.addEventListener("click", () => advanceTo("documents"));
+      wrap.appendChild(nextBtn);
+    }
   }
 
   if (stageId === "documents"){
@@ -802,8 +819,14 @@ function buildStageActions(stageId){
     if (allDocsChecked()){
       const hint = document.createElement("div");
       hint.style.cssText = "font-size:11.5px;color:var(--green);margin-top:4px;";
-      hint.textContent = "All required documents attached — drag the case to Submit to Payer.";
+      hint.textContent = "All required documents attached.";
       wrap.appendChild(hint);
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "btn secondary";
+      nextBtn.textContent = "➡️ Continue to Submit to Payer";
+      nextBtn.addEventListener("click", () => advanceTo("submit"));
+      wrap.appendChild(nextBtn);
     }
   }
 
