@@ -6,39 +6,92 @@
 <title>Prior Authorization Story Simulator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  /* Healthcare education design system: calm blues/teals, generous whitespace,
-     rounded chat bubbles, centered italic narration for non-dialogue beats. */
-  body{ font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  #chat-feed{ scroll-behavior: smooth; }
-  .bubble{ animation: rise .28s ease both; }
-  @keyframes rise{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
-  .narration{ animation: fade .35s ease both; }
+  /* ============================================================
+     PROFESSIONAL HEALTHCARE EDUCATION DESIGN SYSTEM
+     Palette: deep navy + teal accents on a warm slate-white canvas.
+     Typography: system sans for UI, a touch of letter-spacing on
+     labels/eyebrows for an editorial, clinical-education feel.
+     ============================================================ */
+  :root{
+    --navy:#0F2A4A;
+    --navy-deep:#0A1F38;
+    --teal:#0F766E;
+    --teal-soft:#CCFBF1;
+    --slate-bg:#F4F6F9;
+    --card:#FFFFFF;
+    --border:#E2E8F0;
+    --ink:#1E293B;
+    --ink-soft:#64748B;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--slate-bg);
+    color: var(--ink);
+  }
+  #chat-feed{ scroll-behavior:smooth; }
+  .bubble{ animation: rise .3s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes rise{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .narration{ animation: fade .4s ease both; }
   @keyframes fade{ from{opacity:0;} to{opacity:1;} }
-  .choice-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .choice-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .avatar{
+    width:30px; height:30px; border-radius:9999px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; flex-shrink:0;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.15);
+  }
+  .step-dot{
+    width:9px; height:9px; border-radius:9999px; flex-shrink:0;
+    transition: background .25s ease, transform .25s ease;
+  }
+  .brand-mark{
+    width:38px; height:38px; border-radius:10px;
+    background: linear-gradient(135deg, var(--teal), #14b8a6);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .card-shell{
+    box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 20px 40px -12px rgba(15,23,42,.18);
+  }
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:#CBD5E1; border-radius:8px; }
 </style>
 </head>
-<body class="bg-sky-50 min-h-screen text-slate-800">
+<body class="min-h-screen">
 
-<div class="max-w-2xl mx-auto min-h-screen flex flex-col shadow-xl bg-white">
+<div class="max-w-3xl mx-auto min-h-screen flex flex-col bg-white card-shell">
 
-  <!-- HEADER + PROGRESS BAR -->
-  <header class="bg-blue-900 text-white px-5 py-4 sticky top-0 z-20">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-base font-bold">🩺 Prior Authorization Story Simulator</h1>
-        <p class="text-xs text-blue-200 mt-0.5">Rahul's journey to getting Humira approved</p>
+  <!-- HEADER -->
+  <header class="text-white sticky top-0 z-20" style="background: linear-gradient(135deg, var(--navy-deep), var(--navy));">
+    <div class="px-6 pt-5 pb-4">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="brand-mark">🩺</div>
+          <div>
+            <h1 class="text-[15px] font-bold tracking-tight leading-tight">Prior Authorization Story Simulator</h1>
+            <p class="text-[11.5px] text-slate-300 mt-0.5">An interactive healthcare-education walkthrough</p>
+          </div>
+        </div>
+        <span id="chapter-badge" class="text-[10.5px] font-semibold bg-white/10 border border-white/15 rounded-full px-3 py-1.5 font-mono whitespace-nowrap tracking-wide">CH. 1 / 8</span>
       </div>
-      <span id="chapter-badge" class="text-[11px] bg-white/10 border border-white/20 rounded-full px-3 py-1 font-mono whitespace-nowrap">Chapter 1 / 8</span>
+
+      <!-- PROGRESS BAR -->
+      <div class="flex items-center gap-2 mt-4" id="progress-bar"></div>
+      <p id="chapter-title-label" class="text-[11px] text-teal-300 font-semibold mt-2 tracking-wide uppercase"></p>
     </div>
-    <div class="flex gap-1 mt-3" id="progress-bar"></div>
   </header>
 
   <!-- CHAT FEED (append-only) -->
-  <main id="chat-feed" class="flex-1 overflow-y-auto px-4 py-5 space-y-3 bg-sky-50"></main>
+  <main id="chat-feed" class="flex-1 overflow-y-auto px-5 py-6 space-y-4" style="background: var(--slate-bg);"></main>
 
   <!-- CONTROLS -->
-  <footer class="border-t border-slate-200 bg-white px-4 py-4 space-y-2" id="controls"></footer>
+  <footer class="border-t px-5 py-4 space-y-2 bg-white" style="border-color: var(--border);" id="controls"></footer>
 
+  <!-- DISCLAIMER -->
+  <div class="text-center text-[10.5px] text-slate-400 py-2 border-t" style="border-color: var(--border);">
+    Educational simulation only · StarCare Health is a fictional, illustrative example payer
+  </div>
 </div>
 
 <script>
@@ -46,8 +99,8 @@
    CHARACTERS
    ===================================================================== */
 const CHAR = {
-  rahul:  { name:"Rahul",  emoji:"👦", side:"left",  bubble:"bg-white border border-slate-200 text-slate-800", label:"text-slate-500" },
-  priya:  { name:"Priya",  emoji:"👧", side:"right", bubble:"bg-teal-600 text-white",                          label:"text-teal-700" },
+  rahul: { name:"Rahul", emoji:"👦", side:"left",  avatarBg:"bg-slate-200", bubble:"bg-white border border-slate-200 text-slate-800", label:"text-slate-500" },
+  priya: { name:"Priya", emoji:"👧", side:"right", avatarBg:"bg-teal-100", bubble:"bg-teal-700 text-white", label:"text-teal-700" },
 };
 
 /* =====================================================================
@@ -57,7 +110,6 @@ const CHAR = {
    ===================================================================== */
 const SCENES = [
 
-/* ---------------- CHAPTER 1: DOCTOR VISIT ---------------- */
 {
   title: "Chapter 1: The Doctor Visit",
   lines: [
@@ -75,7 +127,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 2: INSURANCE ROADBLOCK ---------------- */
 {
   title: "Chapter 2: The Insurance Roadblock",
   lines: [
@@ -94,7 +145,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 3: WHAT IS PA? ---------------- */
 {
   title: "Chapter 3: What Is Prior Authorization?",
   lines: [
@@ -113,7 +163,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 4: INSURANCE REVIEW ---------------- */
 {
   title: "Chapter 4: Inside the Insurance Review",
   lines: [
@@ -135,7 +184,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 5: DENIAL ---------------- */
 {
   title: "Chapter 5: The Denial",
   lines: [
@@ -155,7 +203,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 6: APPEAL ---------------- */
 {
   title: "Chapter 6: Filing the Appeal",
   lines: [
@@ -170,11 +217,10 @@ const SCENES = [
     { label:"\"How long will the appeal take?\"",
       response:[{who:"priya", text:"Appeals typically take longer than the original request — often 1-2 additional weeks, since the payer has to re-review everything plus the new documentation."}] },
     { label:"\"What if the appeal is denied too?\"",
-      response:[{who:"priya", text:"If that happened, there'd usually be a further option like an independent external review. But let's see how this one goes first.\""}] }
+      response:[{who:"priya", text:"If that happened, there'd usually be a further option like an independent external review. But let's see how this one goes first."}] }
   ]
 },
 
-/* ---------------- CHAPTER 7: APPROVAL ---------------- */
 {
   title: "Chapter 7: Approval",
   lines: [
@@ -193,7 +239,6 @@ const SCENES = [
   ]
 },
 
-/* ---------------- CHAPTER 8: TAKEAWAYS (final, no choices) ---------------- */
 {
   title: "Chapter 8: Takeaways",
   lines: [
@@ -217,25 +262,38 @@ const chatFeed = document.getElementById("chat-feed");
 const controls = document.getElementById("controls");
 const progressBar = document.getElementById("progress-bar");
 const chapterBadge = document.getElementById("chapter-badge");
+const chapterTitleLabel = document.getElementById("chapter-title-label");
 
 /* =====================================================================
-   PROGRESS BAR — built once with createElement, updated via classList
+   PROGRESS BAR — dots with connecting lines, built with createElement
    ===================================================================== */
 function buildProgressBar(){
   progressBar.innerHTML = ""; // controls chrome only, never the chat feed
   SCENES.forEach((_, i) => {
-    const seg = document.createElement("div");
-    seg.className = "h-1.5 flex-1 rounded-full bg-white/20";
-    seg.dataset.seg = i;
-    progressBar.appendChild(seg);
+    if (i > 0){
+      const line = document.createElement("div");
+      line.className = "h-[2px] flex-1 bg-white/15";
+      line.dataset.line = i;
+      progressBar.appendChild(line);
+    }
+    const dot = document.createElement("div");
+    dot.className = "step-dot bg-white/20";
+    dot.dataset.seg = i;
+    progressBar.appendChild(dot);
   });
 }
 function updateProgressBar(){
-  const segs = progressBar.querySelectorAll("[data-seg]");
-  segs.forEach((seg, i) => {
-    seg.className = "h-1.5 flex-1 rounded-full " + (i <= sceneIndex ? "bg-emerald-400" : "bg-white/20");
+  const dots = progressBar.querySelectorAll("[data-seg]");
+  const lines = progressBar.querySelectorAll("[data-line]");
+  dots.forEach((dot, i) => {
+    dot.className = "step-dot " + (i <= sceneIndex ? "bg-teal-400 scale-125" : "bg-white/20");
   });
-  chapterBadge.textContent = `Chapter ${sceneIndex + 1} / ${SCENES.length}`;
+  lines.forEach((line, i) => {
+    // line[i] sits between dot i and dot i+1
+    line.className = "h-[2px] flex-1 " + (i < sceneIndex ? "bg-teal-400" : "bg-white/15");
+  });
+  chapterBadge.textContent = `CH. ${sceneIndex + 1} / ${SCENES.length}`;
+  chapterTitleLabel.textContent = SCENES[sceneIndex].title.replace(/^Chapter \d+: /, "");
 }
 
 /* =====================================================================
@@ -243,38 +301,60 @@ function updateProgressBar(){
    assignment on the chat container at any point.
    ===================================================================== */
 function appendChapterHeading(title){
-  const h = document.createElement("div");
-  h.className = "narration text-center text-[11px] font-bold uppercase tracking-wide text-blue-700 pt-2";
-  h.textContent = title;
-  chatFeed.appendChild(h);
+  const wrap = document.createElement("div");
+  wrap.className = "narration flex items-center gap-3 pt-2 pb-1";
+
+  const lineL = document.createElement("div");
+  lineL.className = "h-px flex-1 bg-slate-300";
+  const lineR = document.createElement("div");
+  lineR.className = "h-px flex-1 bg-slate-300";
+
+  const label = document.createElement("span");
+  label.className = "text-[11px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap";
+  label.textContent = title;
+
+  wrap.appendChild(lineL);
+  wrap.appendChild(label);
+  wrap.appendChild(lineR);
+  chatFeed.appendChild(wrap);
   scrollChatToBottom();
+}
+
+function buildAvatar(meta){
+  const av = document.createElement("div");
+  av.className = "avatar " + meta.avatarBg;
+  av.textContent = meta.emoji;
+  return av;
 }
 
 function appendLine(entry){
   if (entry.who === "narrator" || entry.who === "doctor"){
     const p = document.createElement("p");
-    p.className = "narration text-center italic text-sm text-slate-500 px-6";
+    p.className = "narration text-center italic text-[13px] text-slate-500 px-8 py-1";
     p.textContent = entry.text;
     chatFeed.appendChild(p);
   } else {
     const meta = CHAR[entry.who];
     const row = document.createElement("div");
-    row.className = "flex " + (meta.side === "left" ? "justify-start" : "justify-end");
+    row.className = "flex items-end gap-2.5 " + (meta.side === "left" ? "justify-start" : "justify-end flex-row-reverse");
+
+    const avatar = buildAvatar(meta);
 
     const col = document.createElement("div");
-    col.className = "max-w-[80%] flex flex-col " + (meta.side === "left" ? "items-start" : "items-end");
+    col.className = "max-w-[76%] flex flex-col " + (meta.side === "left" ? "items-start" : "items-end");
 
     const nameTag = document.createElement("span");
-    nameTag.className = "text-[11px] font-semibold mb-1 " + meta.label;
-    nameTag.textContent = `${meta.emoji} ${meta.name}`;
+    nameTag.className = "text-[10.5px] font-semibold mb-1 tracking-wide " + meta.label;
+    nameTag.textContent = meta.name.toUpperCase();
 
     const bubble = document.createElement("div");
-    bubble.className = "bubble rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm " + meta.bubble +
+    bubble.className = "bubble rounded-2xl px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm " + meta.bubble +
       (meta.side === "left" ? " rounded-bl-sm" : " rounded-br-sm");
     bubble.textContent = entry.text;
 
     col.appendChild(nameTag);
     col.appendChild(bubble);
+    row.appendChild(avatar);
     row.appendChild(col);
     chatFeed.appendChild(row);
   }
@@ -282,20 +362,23 @@ function appendLine(entry){
 }
 
 function appendUserChoiceEcho(label){
-  // Shows the player's selected choice as a Rahul-side bubble so the
-  // conversation reads naturally, since Rahul is the player's avatar.
+  const meta = CHAR.rahul;
   const row = document.createElement("div");
-  row.className = "flex justify-start";
+  row.className = "flex items-end gap-2.5 justify-start";
+
+  const avatar = buildAvatar(meta);
+
   const col = document.createElement("div");
-  col.className = "max-w-[80%] flex flex-col items-start";
+  col.className = "max-w-[76%] flex flex-col items-start";
   const nameTag = document.createElement("span");
-  nameTag.className = "text-[11px] font-semibold mb-1 " + CHAR.rahul.label;
-  nameTag.textContent = `${CHAR.rahul.emoji} ${CHAR.rahul.name}`;
+  nameTag.className = "text-[10.5px] font-semibold mb-1 tracking-wide " + meta.label;
+  nameTag.textContent = meta.name.toUpperCase();
   const bubble = document.createElement("div");
-  bubble.className = "bubble rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed shadow-sm bg-blue-100 border border-blue-200 text-blue-900";
+  bubble.className = "bubble rounded-2xl rounded-bl-sm px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm bg-blue-50 border border-blue-200 text-blue-900";
   bubble.textContent = label.replace(/^Ask (Dr\. Patel|Priya): /, "");
   col.appendChild(nameTag);
   col.appendChild(bubble);
+  row.appendChild(avatar);
   row.appendChild(col);
   chatFeed.appendChild(row);
   scrollChatToBottom();
@@ -306,9 +389,8 @@ function scrollChatToBottom(){
 }
 
 /* =====================================================================
-   CONTROLS (footer) — continue button, choice buttons, restart, etc.
-   This is the ONE area allowed to be rebuilt wholesale each step since
-   it is not the append-only chat feed.
+   CONTROLS (footer) — rebuilt on each step; this is NOT the append-only
+   chat feed, so full replacement here is fine.
    ===================================================================== */
 function clearControls(){
   while (controls.firstChild) controls.removeChild(controls.firstChild);
@@ -317,7 +399,8 @@ function clearControls(){
 function renderContinueButton(){
   clearControls();
   const btn = document.createElement("button");
-  btn.className = "w-full bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold py-3 rounded-xl transition";
+  btn.className = "w-full text-white text-[13.5px] font-semibold py-3 rounded-xl transition shadow-sm hover:shadow-md";
+  btn.style.background = "linear-gradient(135deg, var(--navy), var(--navy-deep))";
   btn.textContent = "Continue ▸";
   btn.addEventListener("click", showNextLine);
   controls.appendChild(btn);
@@ -326,13 +409,15 @@ function renderContinueButton(){
 function renderChoices(scene){
   clearControls();
   const label = document.createElement("p");
-  label.className = "text-xs font-semibold text-slate-500 mb-1";
+  label.className = "text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1";
   label.textContent = "What does Rahul ask next?";
   controls.appendChild(label);
 
   scene.choices.forEach(choice => {
     const btn = document.createElement("button");
-    btn.className = "choice-btn w-full text-left bg-sky-50 hover:bg-sky-100 border border-sky-200 text-slate-800 text-sm font-medium py-2.5 px-4 rounded-xl transition mb-2";
+    btn.className = "choice-btn w-full text-left border text-slate-800 text-[13.5px] font-medium py-2.5 px-4 rounded-xl transition mb-2 hover:border-teal-400 hover:bg-teal-50";
+    btn.style.borderColor = "var(--border)";
+    btn.style.background = "#FBFCFE";
     btn.textContent = choice.label;
     btn.addEventListener("click", () => selectChoice(choice, btn));
     controls.appendChild(btn);
@@ -342,7 +427,7 @@ function renderChoices(scene){
 function renderNextChapterButton(isLast){
   clearControls();
   const btn = document.createElement("button");
-  btn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3 rounded-xl transition";
+  btn.className = "w-full bg-teal-700 hover:bg-teal-800 text-white text-[13.5px] font-semibold py-3 rounded-xl transition shadow-sm hover:shadow-md";
   btn.textContent = isLast ? "View Final Takeaways ▸" : "Next Chapter ▸";
   btn.addEventListener("click", goToNextChapter);
   controls.appendChild(btn);
@@ -351,7 +436,8 @@ function renderNextChapterButton(isLast){
 function renderRestartButton(){
   clearControls();
   const btn = document.createElement("button");
-  btn.className = "w-full bg-blue-900 hover:bg-blue-950 text-white text-sm font-semibold py-3 rounded-xl transition";
+  btn.className = "w-full text-white text-[13.5px] font-semibold py-3 rounded-xl transition shadow-sm hover:shadow-md";
+  btn.style.background = "linear-gradient(135deg, var(--navy), var(--navy-deep))";
   btn.textContent = "🔄 Restart Story";
   btn.addEventListener("click", restartStory);
   controls.appendChild(btn);
@@ -371,7 +457,6 @@ function showNextLine(){
       if (scene.choices){
         renderChoices(scene);
       } else {
-        // Final chapter has no choices — show restart directly.
         renderRestartButton();
       }
     }
@@ -379,7 +464,6 @@ function showNextLine(){
 }
 
 function selectChoice(choice, clickedBtn){
-  // Disable all choice buttons once one is picked.
   Array.from(controls.querySelectorAll(".choice-btn")).forEach(b => b.disabled = true);
   appendUserChoiceEcho(choice.label);
   choice.response.forEach(appendLine);
