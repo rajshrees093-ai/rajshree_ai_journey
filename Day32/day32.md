@@ -26,14 +26,7 @@ Open `think-like-a-marketing-strategist.html` in any browser. It loads React, Re
 - **For personal brands specifically:** authenticity, consistency, and niche clarity are the compounding levers — a personal brand can't outsource its story, and trying to appeal to everyone quietly makes you memorable to no one.
 
 ## Screenshots
-_Add screenshots here from your own run-through, e.g.:_
-- `screenshot-welcome.png` — Welcome screen
-- `screenshot-audience.png` — Audience understanding
-- `screenshot-platforms.png` — Platform selection with fit explanations
-- `screenshot-pillars.png` — Content pillar selection
-- `screenshot-roadmap.png` — 30-day roadmap
-- `screenshot-event.png` — Randomized marketing event + response
-- `screenshot-report.png` — Final Growth Report
+
 
 ## Files in this folder
 - `think-like-a-marketing-strategist.html` — the complete app
