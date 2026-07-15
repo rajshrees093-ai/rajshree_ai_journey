@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Pattern Explorer</title>
+<style>
+  :root{
+    --bg: #1B1F2A;
+    --bg-soft: #222739;
+    --surface: #262C40;
+    --surface-2: #2E3550;
+    --border: #3A4160;
+    --text: #EAE7E0;
+    --text-dim: #A7ACC4;
+    --accent: #8FA998;      /* sage - calm mode primary */
+    --accent-2: #D4B483;    /* soft gold */
+    --accent-warm: #C97B63; /* dusty clay - stress mode primary */
+    --focus: #E4C9A8;
+    --radius: 14px;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --dur: 420ms;
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  body.stress-mode{
+    --accent: #C97B63;
+    --accent-2: #E4A672;
+    --focus: #E9B98E;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background: radial-gradient(circle at 20% -10%, var(--bg-soft), var(--bg) 60%);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ambient drifting orbs */
+  .ambient{
+    position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .ambient span{
+    position:absolute; border-radius:50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%);
+    filter: blur(6px);
+    animation: drift 26s var(--ease) infinite;
+    opacity:.5;
+  }
+  .ambient span:nth-child(1){ width:340px; height:340px; top:-80px; left:-60px; animation-duration: 30s; }
+  .ambient span:nth-child(2){ width:260px; height:260px; bottom:-60px; right:-40px; animation-duration: 24s; animation-delay: -6s;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent-2) 35%, transparent), transparent 70%);}
+  .ambient span:nth-child(3){ width:180px; height:180px; top:40%; right:10%; animation-duration: 34s; animation-delay: -12s; }
+
+  @keyframes drift{
+    0%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(30px,-24px) scale(1.08); }
+    100%{ transform: translate(0,0) scale(1); }
+  }
+
+  .app{
+    position:relative; z-index:1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+    min-height:100vh;
+    display:flex; flex-direction:column;
+  }
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom: 28px;
+  }
+  .brand{
+    font-family: var(--serif); font-size: 1.25rem; letter-spacing:.02em;
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand .mark{
+    width:26px; height:26px; border-radius:50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent));
+    flex-shrink:0;
+  }
+  .mode-pill{
+    font-family: var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;
+    padding: 5px 10px; border-radius: 999px; border:1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  /* progress */
+  .progress-track{
+    display:flex; gap:8px; margin-bottom: 34px;
+  }
+  .progress-track .seg{
+    flex:1; height:4px; border-radius:3px; background: var(--surface-2);
+    overflow:hidden; position:relative;
+  }
+  .progress-track .seg i{
+    display:block; height:100%; width:0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width var(--dur) var(--ease);
+  }
+  .progress-track .seg.done i{ width:100%; }
+  .progress-track .seg.active i{ width:50%; }
+
+  main{ flex:1; position:relative; }
+
+  .screen{
+    animation: rise var(--dur) var(--ease);
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  h1{ font-family: var(--serif); font-weight:400; font-size: clamp(1.7rem, 4vw, 2.3rem); margin:0 0 10px; letter-spacing:.01em; }
+  h2{ font-family: var(--serif); font-weight:400; font-size: 1.5rem; margin: 0 0 6px; }
+  .eyebrow{
+    font-family: var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.12em;
+    color: var(--accent-2); margin-bottom:10px; display:block;
+  }
+  p.lead{ color: var(--text-dim); max-width: 56ch; }
+
+  /* buttons */
+  button{ font-family: inherit; cursor:pointer; }
+  .btn{
+    appearance:none; border:1px solid var(--border); background: var(--surface);
+    color: var(--text); padding: 12px 20px; border-radius: 10px; font-size: .95rem;
+    transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+  }
+  .btn:hover{ border-color: var(--accent); transform: translateY(-1px); }
+  .btn:focus-visible, a:focus-visible, [tabindex]:focus-visible{
+    outline: 2px solid var(--focus); outline-offset: 3px;
+  }
+  .btn.primary{
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--accent-2)));
+    color: #171B24; border-color: transparent; font-weight:600;
+  }
+  .btn.primary:hover{ filter: brightness(1.06); }
+  .btn.ghost{ background: transparent; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+
+  .row{ display:flex; gap:12px; flex-wrap:wrap; }
+
+  /* start screen */
+  .mode-choice{
+    display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin: 26px 0 30px;
+  }
+  @media (max-width:520px){ .mode-choice{ grid-template-columns: 1fr; } }
+  .mode-card{
+    text-align:left; padding: 20px; border-radius: var(--radius);
+    border:1px solid var(--border); background: var(--surface);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .mode-card strong{ font-family: var(--serif); font-size:1.1rem; font-weight:400; }
+  .mode-card span{ color: var(--text-dim); font-size:.88rem; }
+  .mode-card[aria-pressed="true"]{
+    border-color: var(--accent); background: var(--surface-2);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .mode-card .dot{ width:10px; height:10px; border-radius:50%; background: var(--accent); opacity:0; transition: opacity .2s; }
+  .mode-card[aria-pressed="true"] .dot{ opacity:1; }
+
+  /* scenario cards (chapter 1) */
+  .scenario-card{
+    background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; margin-top: 10px;
+  }
+  .scenario-count{ color: var(--text-dim); font-size:.82rem; font-family: var(--mono); margin-bottom: 14px; }
+  .options{ display:flex; flex-direction:column; gap:10px; margin-top: 18px; }
+  .opt-btn{
+    text-align:left; padding: 14px 16px; border-radius: 10px;
+    border:1px solid var(--border); background: var(--bg-soft); color:var(--text);
+    transition: border-color .18s, background .18s, transform .18s;
+  }
+  .opt-btn:hover{ border-color: var(--accent); background: var(--surface-2); }
+  .opt-btn.selected{ border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface-2)); }
+
+  /* sortable lists (chapter 2 & 3) */
+  .sort-hint{ color: var(--text-dim); font-size: .85rem; margin: 6px 0 16px; }
+  ul.sortable{
+    list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;
+  }
+  ul.sortable li{
+    display:flex; align-items:center; gap:12px;
+    background: var(--surface); border:1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor:grab; user-select:none; touch-action: none;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  ul.sortable li:focus-visible{ outline: 2px solid var(--focus); outline-offset:2px; }
+  ul.sortable li.grabbed{
+    border-color: var(--accent); background: var(--surface-2);
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  }
+  ul.sortable li.dragging{ opacity:.5; }
+  ul.sortable li .handle{ color: var(--text-dim); font-family: var(--mono); font-size:.9rem; flex-shrink:0; width:1.4em; text-align:center; }
+  ul.sortable li .rank{
+    font-family: var(--mono); font-size:.78rem; color: var(--bg); background: var(--accent);
+    width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  ul.sortable li .label{ flex:1; }
+  .sr-live{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* chapter nav */
+  .chapter-nav{ display:flex; justify-content:space-between; margin-top: 26px; }
+
+  /* reflection */
+  .journal{
+    background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 26px;
+  }
+  .bars{ display:flex; flex-direction:column; gap:14px; margin: 18px 0 24px; }
+  .bar-row .bar-label{
+    display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:5px; color: var(--text-dim);
+  }
+  .bar-row .bar-label b{ color: var(--text); font-weight:600; }
+  .bar-track{ height:9px; border-radius: 6px; background: var(--bg-soft); overflow:hidden; }
+  .bar-track i{
+    display:block; height:100%; width:0%; border-radius:6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 900ms var(--ease);
+  }
+
+  .orbit-wrap{ display:flex; justify-content:center; margin: 18px 0 8px; }
+  .orbit-wrap svg{ max-width: 320px; width:100%; height:auto; }
+
+  .insight{ margin-top: 18px; padding-top:18px; border-top:1px dashed var(--border); }
+  .insight p{ color: var(--text-dim); }
+  .insight strong{ color: var(--accent-2); font-family: var(--serif); font-weight:400; font-size:1.1rem; }
+
+  .compare{ margin-top:26px; padding-top:22px; border-top:1px solid var(--border); }
+  .compare .orbit-pair{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  .compare .orbit-pair figure{ margin:0; text-align:center; }
+  .compare figcaption{ font-family: var(--mono); font-size:.75rem; color: var(--text-dim); margin-top:6px; text-transform:uppercase; letter-spacing:.06em; }
+
+  footer.actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top: 28px; }
+
+  .disclaimer{
+    font-size:.78rem; color: var(--text-dim); margin-top: 34px; padding-top:16px;
+    border-top:1px solid var(--border); max-width: 60ch;
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: .001ms !important; animation-iteration-count:1 !important; transition-duration: .001ms !important; }
+    .ambient span{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span> Cognitive Pattern Explorer</div>
+    <span class="mode-pill" id="modePill">Calm Mode</span>
+  </header>
+
+  <div class="progress-track" id="progressTrack" aria-hidden="true">
+    <div class="seg" data-step="1"><i></i></div>
+    <div class="seg" data-step="2"><i></i></div>
+    <div class="seg" data-step="3"><i></i></div>
+    <div class="seg" data-step="4"><i></i></div>
+  </div>
+
+  <main id="main" aria-live="polite"></main>
+
+  <p class="disclaimer">This experience is educational and reflective only. It is not a psychological assessment and does not diagnose or clinically evaluate mental health. Your patterns can shift day to day &mdash; treat every result as a gentle mirror, not a label.</p>
+</div>
+
+<div class="sr-live" role="status" id="srLive"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------
+     DATA
+  --------------------------------------------------------- */
+  const TENDENCIES = {
+    analytical:  { name: "Analytical Thinker", blurb: "You tend to slow down, gather facts, and look for the logic before you commit to a decision. Structure and evidence help you feel steady." },
+    emotional:   { name: "Emotional Intuitive", blurb: "You often lead with how something feels before you reason it out. Your gut reactions carry real information for you, and you trust them." },
+    overthinking:{ name: "Overthinking Loop Style", blurb: "You often revisit a decision from several angles, sometimes circling back even after choosing. This suggests a strong desire to get things exactly right." },
+    action:      { name: "Action-First Decision Maker", blurb: "You tend to move quickly, decide, and adjust course as new information arrives, rather than waiting for certainty." },
+    balanced:    { name: "Balanced Reflective Thinker", blurb: "You tend to hold logic and feeling together, checking in with both before and after a decision, and adjusting your approach to fit the moment." }
+  };
+
+  // Chapter 1 — everyday scenarios. Each option maps to {t: tendencyKey, w: weight}
+  const SCENARIOS = [
+    {
+      calm:   "A friend texts to cancel your plans for tonight, last minute.",
+      stress: "A friend cancels on you fifteen minutes before you were meant to leave.",
+      options: [
+        { text: "You ask what happened and quietly note the pattern for later.", t:"analytical" },
+        { text: "You feel a pang of disappointment before you even reply.", t:"emotional" },
+        { text: "You wonder if it's something you did, and keep replaying the message.", t:"overthinking" },
+        { text: "You shrug, text back 'no worries', and make a new plan on the spot.", t:"action" }
+      ]
+    },
+    {
+      calm:   "You receive unexpected feedback on something you've been working on.",
+      stress: "You get blunt, critical feedback on your work minutes before a deadline.",
+      options: [
+        { text: "You reread it carefully, separating what's useful from what's just opinion.", t:"analytical" },
+        { text: "Your first reaction is a wave of feeling before you register the words.", t:"emotional" },
+        { text: "You start rewriting the same paragraph in your head, again and again.", t:"overthinking" },
+        { text: "You make one quick change and move on to the next task.", t:"action" }
+      ]
+    },
+    {
+      calm:   "Your group can't agree on where to eat dinner tonight.",
+      stress: "Everyone is hungry, irritable, and waiting on you to pick a restaurant now.",
+      options: [
+        { text: "You pull up reviews and compare a few options before suggesting one.", t:"analytical" },
+        { text: "You go with whichever place sounds most appealing in the moment.", t:"emotional" },
+        { text: "You keep weighing pros and cons long after everyone else has decided.", t:"overthinking" },
+        { text: "You just pick somewhere and start walking.", t:"action" }
+      ]
+    },
+    {
+      calm:   "Halfway through cooking dinner for guests, you realize a key ingredient is missing.",
+      stress: "Guests are due in twenty minutes and a key ingredient is missing.",
+      options: [
+        { text: "You calmly think through substitutes based on what's in the pantry.", t:"analytical" },
+        { text: "You feel a flash of stress, then trust your instinct on what to swap in.", t:"emotional" },
+        { text: "You mentally rerun the recipe over and over, unsure which fix is safest.", t:"overthinking" },
+        { text: "You grab the closest substitute and keep cooking without pausing.", t:"action" }
+      ]
+    },
+    {
+      calm:   "Right after sending an important email, you spot a small mistake in it.",
+      stress: "You spot the mistake seconds after hitting send, right before a big meeting.",
+      options: [
+        { text: "You assess how much it actually matters before deciding whether to follow up.", t:"analytical" },
+        { text: "You feel a jolt of embarrassment that colors how you respond next.", t:"emotional" },
+        { text: "You keep re-reading the sent email, imagining how it might be received.", t:"overthinking" },
+        { text: "You fire off a quick correction and move straight on.", t:"action" }
+      ]
+    }
+  ];
+
+  // Chapter 2 — priority cards to rank (drag). Top = highest priority.
+  const PRIORITY_CARDS = [
+    { id:"facts",   label:"Getting the facts right",          t:"analytical" },
+    { id:"gut",     label:"Trusting my gut feeling",            t:"emotional" },
+    { id:"angles",  label:"Weighing every possible angle",      t:"overthinking" },
+    { id:"speed",   label:"Moving quickly and adjusting later", t:"action" },
+    { id:"balance", label:"Keeping perspective and balance",    t:"balanced" }
+  ];
+
+  // Chapter 3 — timeline steps to sequence (drag). Position matters: earlier = more central.
+  const TIMELINE_STEPS = [
+    { id:"notice",  label:"Notice something needs a decision", t:"balanced" },
+    { id:"gather",  label:"Gather information",                 t:"analytical" },
+    { id:"feel",    label:"Check how it feels",                 t:"emotional" },
+    { id:"loop",    label:"Run it through my head multiple times", t:"overthinking" },
+    { id:"decide",  label:"Decide and act",                     t:"action" },
+    { id:"reflect", label:"Reflect afterward on what worked",   t:"balanced" }
+  ];
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  const state = {
+    mode: "calm",
+    step: 0, // 0 start, 1..3 chapters, 4 reflection
+    scenarioIndex: 0,
+    scores: { analytical:0, emotional:0, overthinking:0, action:0, balanced:0 },
+    chapterScores: [null,null,null], // per-chapter breakdown snapshots
+    priorityOrder: null,
+    timelineOrder: null,
+    history: [] // stores previous completed journals for comparison
+  };
+
+  const $main = document.getElementById("main");
+  const $modePill = document.getElementById("modePill");
+  const $progress = document.getElementById("progressTrack");
+  const $srLive = document.getElementById("srLive");
+
+  function announce(msg){ $srLive.textContent = msg; }
+
+  function addScore(t, w){
+    if(!t) return;
+    state.scores[t] = (state.scores[t]||0) + w;
+  }
+
+  function snapshotChapter(idx){
+    state.chapterScores[idx] = Object.assign({}, state.scores);
+  }
+
+  function resetForReplay(){
+    state.history.push({
+      mode: state.mode,
+      scores: Object.assign({}, state.scores)
+    });
+    state.mode = state.mode === "calm" ? "stress" : "calm";
+    document.body.classList.toggle("stress-mode", state.mode === "stress");
+    $modePill.textContent = state.mode === "calm" ? "Calm Mode" : "Stress Mode";
+    state.step = 1;
+    state.scenarioIndex = 0;
+    state.scores = { analytical:0, emotional:0, overthinking:0, action:0, balanced:0 };
+    state.chapterScores = [null,null,null];
+    state.priorityOrder = null;
+    state.timelineOrder = null;
+    render();
+  }
+
+  /* ---------------------------------------------------------
+     PROGRESS BAR
+  --------------------------------------------------------- */
+  function updateProgress(){
+    const segs = $progress.querySelectorAll(".seg");
+    segs.forEach((seg, i)=>{
+      const stepNum = i+1;
+      seg.classList.remove("active","done");
+      if(state.step > stepNum) seg.classList.add("done");
+      else if(state.step === stepNum) seg.classList.add("active");
+    });
+    $progress.style.visibility = state.step === 0 ? "hidden" : "visible";
+  }
+
+  /* ---------------------------------------------------------
+     GENERIC SORTABLE LIST (mouse drag + touch + keyboard)
+  --------------------------------------------------------- */
+  function makeSortable(ulEl, onReorder){
+    let dragEl = null;
+    let grabbedEl = null; // keyboard-grabbed item
+
+    function getItems(){ return Array.from(ulEl.querySelectorAll("li")); }
+
+    function refreshRanks(){
+      getItems().forEach((li, i)=>{
+        const rankEl = li.querySelector(".rank");
+        if(rankEl) rankEl.textContent = i+1;
+      });
+    }
+
+    function getDragAfterElement(container, y){
+      const els = Array.from(container.querySelectorAll("li:not(.dragging)"));
+      return els.reduce((closest, child)=>{
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height/2;
+        if(offset < 0 && offset > closest.offset){
+          return { offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: -Infinity }).element;
+    }
+
+    getItems().forEach(li=>{
+      li.setAttribute("draggable","true");
+      li.setAttribute("tabindex","0");
+      li.setAttribute("role","option");
+      li.setAttribute("aria-grabbed","false");
+
+      // Mouse / desktop drag
+      li.addEventListener("dragstart", (e)=>{
+        dragEl = li;
+        li.classList.add("dragging");
+        try{ e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", li.dataset.id); }catch(err){}
+      });
+      li.addEventListener("dragend", ()=>{
+        li.classList.remove("dragging");
+        dragEl = null;
+        refreshRanks();
+        onReorder(getItems().map(x=>x.dataset.id));
+      });
+
+      // Touch fallback
+      let touchOffsetY = 0;
+      li.addEventListener("touchstart", (e)=>{
+        dragEl = li;
+        li.classList.add("dragging");
+        touchOffsetY = e.touches[0].clientY;
+      }, { passive:true });
+
+      li.addEventListener("touchmove", (e)=>{
+        if(!dragEl) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const after = getDragAfterElement(ulEl, touch.clientY);
+        if(after == null) ulEl.appendChild(dragEl);
+        else ulEl.insertBefore(dragEl, after);
+      }, { passive:false });
+
+      li.addEventListener("touchend", ()=>{
+        if(!dragEl) return;
+        dragEl.classList.remove("dragging");
+        dragEl = null;
+        refreshRanks();
+        onReorder(getItems().map(x=>x.dataset.id));
+      });
+
+      // Keyboard reordering
+      li.addEventListener("keydown", (e)=>{
+        const items = getItems();
+        const idx = items.indexOf(li);
+
+        if(e.key === " " || e.key === "Enter"){
+          e.preventDefault();
+          if(grabbedEl === li){
+            // drop
+            li.classList.remove("grabbed");
+            li.setAttribute("aria-grabbed","false");
+            grabbedEl = null;
+            announce(li.querySelector(".label").textContent + " placed at position " + (idx+1));
+            onReorder(getItems().map(x=>x.dataset.id));
+          } else {
+            grabbedEl = li;
+            li.classList.add("grabbed");
+            li.setAttribute("aria-grabbed","true");
+            announce(li.querySelector(".label").textContent + " picked up. Use arrow keys to move, space to drop.");
+          }
+        } else if(grabbedEl === li && (e.key === "ArrowUp" || e.key === "ArrowDown")){
+          e.preventDefault();
+          const dir = e.key === "ArrowUp" ? -1 : 1;
+          const targetIdx = idx + dir;
+          if(targetIdx >= 0 && targetIdx < items.length){
+            if(dir === -1) ulEl.insertBefore(li, items[targetIdx]);
+            else ulEl.insertBefore(items[targetIdx], li);
+            refreshRanks();
+            li.focus();
+            announce("Moved to position " + (getItems().indexOf(li)+1));
+          }
+        }
+      });
+    });
+
+    ulEl.addEventListener("dragover", (e)=>{
+      e.preventDefault();
+      if(!dragEl) return;
+      const after = getDragAfterElement(ulEl, e.clientY);
+      if(after == null) ulEl.appendChild(dragEl);
+      else ulEl.insertBefore(dragEl, after);
+    });
+
+    refreshRanks();
+  }
+
+  /* ---------------------------------------------------------
+     SCREENS
+  --------------------------------------------------------- */
+  function render(){
+    updateProgress();
+    if(state.step === 0) return renderStart();
+    if(state.step === 1) return renderChapter1();
+    if(state.step === 2) return renderChapter2();
+    if(state.step === 3) return renderChapter3();
+    if(state.step === 4) return renderReflection();
+  }
+
+  function renderStart(){
+    $main.innerHTML = `
+      <div class="screen">
+        <span class="eyebrow">Before you begin</span>
+        <h1>Explore how you naturally think.</h1>
+        <p class="lead">Over three short chapters, you'll respond to everyday moments, sort your priorities, and map your own decision process. There are no right answers &mdash; only patterns worth noticing.</p>
+
+        <div class="mode-choice" role="group" aria-label="Choose a mode">
+          <button class="mode-card" id="pickCalm" aria-pressed="${state.mode==='calm'}">
+            <span class="dot" aria-hidden="true"></span>
+            <strong>Calm Mode</strong>
+            <span>Unhurried, everyday scenarios. Take your time with each one.</span>
+          </button>
+          <button class="mode-card" id="pickStress" aria-pressed="${state.mode==='stress'}">
+            <span class="dot" aria-hidden="true"></span>
+            <strong>Stress Mode</strong>
+            <span>The same moments, under time pressure. See how urgency shifts your instincts.</span>
+          </button>
+        </div>
+
+        <button class="btn primary" id="beginBtn">Begin the exploration</button>
+      </div>
+    `;
+    document.getElementById("pickCalm").onclick = ()=> setMode("calm");
+    document.getElementById("pickStress").onclick = ()=> setMode("stress");
+    document.getElementById("beginBtn").onclick = ()=>{ state.step = 1; render(); };
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    document.body.classList.toggle("stress-mode", mode === "stress");
+    $modePill.textContent = mode === "calm" ? "Calm Mode" : "Stress Mode";
+    render();
+  }
+
+  function renderChapter1(){
+    const s = SCENARIOS[state.scenarioIndex];
+    const text = state.mode === "calm" ? s.calm : s.stress;
+    $main.innerHTML = `
+      <div class="screen">
+        <span class="eyebrow">Chapter 1 &middot; Discover Your Thinking Style</span>
+        <h2>How would you respond?</h2>
+        <div class="scenario-card">
+          <div class="scenario-count">Scenario ${state.scenarioIndex+1} of ${SCENARIOS.length}</div>
+          <p style="font-size:1.05rem;">${text}</p>
+          <div class="options" role="group" aria-label="Choose how you'd respond">
+            ${s.options.map((o,i)=>`<button class="opt-btn" data-i="${i}">${o.text}</button>`).join("")}
+          </div>
+        </div>
+      </div>
+    `;
+    $main.querySelectorAll(".opt-btn").forEach(btn=>{
+      btn.onclick = ()=>{
+        const i = +btn.dataset.i;
+        addScore(s.options[i].t, 3);
+        if(state.scenarioIndex < SCENARIOS.length - 1){
+          state.scenarioIndex++;
+          render();
+        } else {
+          snapshotChapter(0);
+          state.step = 2;
+          render();
+        }
+      };
+    });
+  }
+
+  function renderChapter2(){
+    const order = state.priorityOrder || PRIORITY_CARDS.map(c=>c.id);
+    $main.innerHTML = `
+      <div class="screen">
+        <span class="eyebrow">Chapter 2 &middot; Choose Your Priorities</span>
+        <h2>Drag to rank what matters most when you decide.</h2>
+        <p class="sort-hint">Top = highest priority. Drag with your mouse or finger, or focus a card and press space to pick it up, arrow keys to move it, and space again to drop it.</p>
+        <ul class="sortable" id="priorityList" role="listbox" aria-label="Rank your decision priorities">
+          ${order.map(id=>{
+            const c = PRIORITY_CARDS.find(x=>x.id===id);
+            return `<li data-id="${c.id}"><span class="rank">1</span><span class="handle">&#8942;&#8942;</span><span class="label">${c.label}</span></li>`;
+          }).join("")}
+        </ul>
+        <div class="chapter-nav">
+          <button class="btn ghost" id="backBtn">Back</button>
+          <button class="btn primary" id="nextBtn">Continue</button>
+        </div>
+      </div>
+    `;
+    const list = document.getElementById("priorityList");
+    makeSortable(list, (ids)=>{ state.priorityOrder = ids; });
+    state.priorityOrder = order;
+
+    document.getElementById("backBtn").onclick = ()=>{ state.step = 1; state.scenarioIndex = SCENARIOS.length-1; render(); };
+    document.getElementById("nextBtn").onclick = ()=>{
+      const finalOrder = state.priorityOrder || order;
+      finalOrder.forEach((id, i)=>{
+        const c = PRIORITY_CARDS.find(x=>x.id===id);
+        const weight = PRIORITY_CARDS.length - i; // top gets most points
+        addScore(c.t, weight);
+      });
+      snapshotChapter(1);
+      state.step = 3;
+      render();
+    };
+  }
+
+  function renderChapter3(){
+    const order = state.timelineOrder || TIMELINE_STEPS.map(c=>c.id);
+    $main.innerHTML = `
+      <div class="screen">
+        <span class="eyebrow">Chapter 3 &middot; Map Your Thinking</span>
+        <h2>Arrange these steps in the order they usually happen for you.</h2>
+        <p class="sort-hint">Place what happens first at the top of your timeline.</p>
+        <ul class="sortable" id="timelineList" role="listbox" aria-label="Arrange your thinking sequence">
+          ${order.map(id=>{
+            const c = TIMELINE_STEPS.find(x=>x.id===id);
+            return `<li data-id="${c.id}"><span class="rank">1</span><span class="handle">&#8942;&#8942;</span><span class="label">${c.label}</span></li>`;
+          }).join("")}
+        </ul>
+        <div class="chapter-nav">
+          <button class="btn ghost" id="backBtn">Back</button>
+          <button class="btn primary" id="nextBtn">See my Reflection Journal</button>
+        </div>
+      </div>
+    `;
+    const list = document.getElementById("timelineList");
+    makeSortable(list, (ids)=>{ state.timelineOrder = ids; });
+    state.timelineOrder = order;
+
+    document.getElementById("backBtn").onclick = ()=>{ state.step = 2; render(); };
+    document.getElementById("nextBtn").onclick = ()=>{
+      const finalOrder = state.timelineOrder || order;
+      const n = finalOrder.length;
+      finalOrder.forEach((id, i)=>{
+        const c = TIMELINE_STEPS.find(x=>x.id===id);
+        const weight = n - i; // earlier steps weighted more
+        addScore(c.t, weight);
+      });
+      snapshotChapter(2);
+      state.step = 4;
+      render();
+    };
+  }
+
+  /* ---------------------------------------------------------
+     REFLECTION JOURNAL
+  --------------------------------------------------------- */
+  function computePercentages(scores){
+    const total = Object.values(scores).reduce((a,b)=>a+b, 0) || 1;
+    const pct = {};
+    Object.keys(scores).forEach(k=>{ pct[k] = Math.round((scores[k]/total)*100); });
+    return pct;
+  }
+
+  function orbitSVG(pct, colorA, colorB, size){
+    size = size || 260;
+    const cx = size/2, cy = size/2, R = size*0.36;
+    const keys = ["analytical","emotional","overthinking","action","balanced"];
+    const n = keys.length;
+    const points = keys.map((k,i)=>{
+      const angle = (Math.PI*2*i/n) - Math.PI/2;
+      const r = R * (0.25 + 0.75*(pct[k]/100));
+      const x = cx + r*Math.cos(angle);
+      const y = cy + r*Math.sin(angle);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+    const gridRings = [0.35,0.6,0.85,1].map(f=>{
+      const pts = keys.map((k,i)=>{
+        const angle = (Math.PI*2*i/n) - Math.PI/2;
+        const x = cx + R*f*Math.cos(angle);
+        const y = cy + R*f*Math.sin(angle);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+      return `<polygon points="${pts}" fill="none" stroke="${colorB}" stroke-opacity="0.18" />`;
+    }).join("");
+    const labels = keys.map((k,i)=>{
+      const angle = (Math.PI*2*i/n) - Math.PI/2;
+      const x = cx + (R+22)*Math.cos(angle);
+      const y = cy + (R+22)*Math.sin(angle);
+      const short = { analytical:"Analytical", emotional:"Emotional", overthinking:"Looping", action:"Action", balanced:"Balanced" }[k];
+      return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="10" fill="${colorB}" font-family="monospace">${short}</text>`;
+    }).join("");
+    return `
+      <svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Radial chart of your thinking tendencies">
+        ${gridRings}
+        <polygon points="${points}" fill="${colorA}" fill-opacity="0.35" stroke="${colorA}" stroke-width="2" />
+        ${labels}
+      </svg>
+    `;
+  }
+
+  function renderReflection(){
+    const pct = computePercentages(state.scores);
+    const sorted = Object.keys(pct).sort((a,b)=>pct[b]-pct[a]);
+    const top = sorted[0], second = sorted[1];
+    const colorA = state.mode === "calm" ? "#8FA998" : "#C97B63";
+    const colorB = "#A7ACC4";
+
+    let compareHTML = "";
+    if(state.history.length){
+      const prev = state.history[state.history.length-1];
+      const prevPct = computePercentages(prev.scores);
+      compareHTML = `
+        <div class="compare">
+          <h2 style="font-size:1.15rem;">Comparing modes</h2>
+          <p class="lead" style="margin-top:2px;">Here's how your pattern shifted between the two runs.</p>
+          <div class="orbit-pair">
+            <figure>
+              ${orbitSVG(prevPct, prev.mode==='calm' ? '#8FA998' : '#C97B63', colorB, 220)}
+              <figcaption>${prev.mode === 'calm' ? 'Calm Mode' : 'Stress Mode'}</figcaption>
+            </figure>
+            <figure>
+              ${orbitSVG(pct, colorA, colorB, 220)}
+              <figcaption>${state.mode === 'calm' ? 'Calm Mode' : 'Stress Mode'} (just now)</figcaption>
+            </figure>
+          </div>
+        </div>
+      `;
+    }
+
+    $main.innerHTML = `
+      <div class="screen">
+        <span class="eyebrow">Your Reflection Journal</span>
+        <h1>What this exploration suggests about you</h1>
+        <div class="journal">
+          <div class="orbit-wrap">${orbitSVG(pct, colorA, colorB)}</div>
+
+          <div class="bars">
+            ${sorted.map(k=>`
+              <div class="bar-row">
+                <div class="bar-label"><span>${TENDENCIES[k].name}</span><b>${pct[k]}%</b></div>
+                <div class="bar-track"><i style="width:${pct[k]}%"></i></div>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="insight">
+            <p><strong>${TENDENCIES[top].name}</strong></p>
+            <p>${TENDENCIES[top].blurb}</p>
+            <p>You also showed shades of <strong style="font-family:var(--sans); color:var(--text);">${TENDENCIES[second].name}</strong> &mdash; ${TENDENCIES[second].blurb.toLowerCase()}</p>
+            <p>This run was completed in <strong style="font-family:var(--sans); color:var(--text);">${state.mode === 'calm' ? 'Calm Mode' : 'Stress Mode'}</strong>. ${state.mode === 'stress' ? "Under time pressure, patterns like this often sharpen or simplify &mdash; notice if this differs from how you show up when there's no rush." : "Without time pressure, this likely reflects your more considered, default approach."}</p>
+          </div>
+
+          ${compareHTML}
+        </div>
+
+        <footer class="actions">
+          <button class="btn primary" id="replayBtn">Replay in ${state.mode === 'calm' ? 'Stress' : 'Calm'} Mode</button>
+          <button class="btn ghost" id="restartBtn">Start over</button>
+        </footer>
+      </div>
+    `;
+
+    document.getElementById("replayBtn").onclick = resetForReplay;
+    document.getElementById("restartBtn").onclick = ()=>{
+      state.history = [];
+      state.step = 0;
+      state.scenarioIndex = 0;
+      state.scores = { analytical:0, emotional:0, overthinking:0, action:0, balanced:0 };
+      state.chapterScores = [null,null,null];
+      state.priorityOrder = null;
+      state.timelineOrder = null;
+      render();
+    };
+  }
+
+  // init
+  render();
+})();
+</script>
+</body>
+</html>
