@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lexicon — Typing Speed Studio</title>
+<style>
+:root{
+  --bg:#12141a;
+  --bg-2:#0d0f14;
+  --surface:#1b1e27;
+  --surface-2:#232733;
+  --surface-3:#2a2f3d;
+  --border:#2e3340;
+  --border-soft:#252a36;
+  --text:#eae6da;
+  --text-dim:#9aa0ad;
+  --text-faint:#5c6270;
+  --good:#5fbf7a;
+  --bad:#d1596b;
+  --extra:#c98a3f;
+  --accent-business:#5089c6;
+  --accent-academic:#5b9463;
+  --accent-medical:#c9576b;
+  --accent-legal:#a35a3f;
+  --accent-creative:#8571c9;
+  --accent-programming:#3fa7a0;
+  --accent:#5089c6;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Noto Serif",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"SFMono-Regular","Consolas","Liberation Mono",Menlo,Courier,monospace;
+  --radius:10px;
+  --radius-sm:6px;
+}
+[data-theme="light"]{
+  --bg:#f2ede1;
+  --bg-2:#e9e2d2;
+  --surface:#fbf8f0;
+  --surface-2:#f1ebdc;
+  --surface-3:#e6ddc9;
+  --border:#d8cfb8;
+  --border-soft:#e2dac4;
+  --text:#241f18;
+  --text-dim:#5c5546;
+  --text-faint:#8b8371;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 1200px 600px at 15% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  min-height:100vh;
+  transition:background .4s ease,color .4s ease;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:color-mix(in srgb, var(--accent) 40%, transparent);}
+a{color:inherit;}
+button{font-family:inherit;}
+.app{
+  max-width:1180px;
+  margin:0 auto;
+  padding:28px 24px 80px;
+}
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.seal{
+  width:46px;height:46px;
+  border-radius:50%;
+  border:1.5px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+  position:relative;
+  transition:all .4s ease;
+  flex:none;
+}
+.seal svg{width:22px;height:22px;}
+.seal::after{
+  content:"";
+  position:absolute;inset:-5px;
+  border:1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius:50%;
+}
+.brand-text h1{
+  font-family:var(--serif);
+  font-size:22px;
+  font-weight:600;
+  margin:0;
+  letter-spacing:.2px;
+}
+.brand-text .sub{
+  font-size:11.5px;
+  color:var(--text-faint);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-top:2px;
+}
+.top-actions{display:flex;align-items:center;gap:10px;}
+.iconbtn{
+  width:38px;height:38px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:.2s;
+}
+.iconbtn:hover{color:var(--text);border-color:var(--accent);background:var(--surface-2);}
+.iconbtn svg{width:17px;height:17px;}
+.filestrip{
+  display:flex;
+  gap:2px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.tab{
+  padding:9px 15px;
+  font-size:13px;
+  color:var(--text-dim);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:8px 8px 0 0;
+  cursor:pointer;
+  transition:.2s;
+  position:relative;
+  top:1px;
+}
+.tab.active{
+  color:var(--text);
+  background:var(--surface-2);
+  border-color:var(--accent);
+  box-shadow:0 -2px 0 var(--accent) inset;
+}
+.tab:hover{color:var(--text);}
+.panel{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:0 10px 10px 10px;
+  padding:16px 18px;
+  margin-bottom:18px;
+}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.chip{
+  padding:7px 13px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-dim);
+  font-size:12.5px;
+  cursor:pointer;
+  transition:.15s;
+  white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent);color:var(--text);}
+.chip.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+  font-weight:600;
+}
+.chip-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:var(--text-faint);
+  margin-right:6px;
+}
+
+/* ---------- STATS BAR ---------- */
+.statbar{
+  display:flex;
+  gap:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px 6px;
+  margin-bottom:16px;
+  overflow-x:auto;
+}
+.stat{
+  flex:1;
+  min-width:88px;
+  text-align:center;
+  padding:4px 8px;
+  border-right:1px solid var(--border-soft);
+}
+.stat:last-child{border-right:none;}
+.stat .v{
+  font-family:var(--mono);
+  font-size:22px;
+  font-weight:700;
+  color:var(--accent);
+  line-height:1.1;
+}
+.stat .l{
+  font-size:9.5px;
+  text-transform:uppercase;
+  letter-spacing:1.1px;
+  color:var(--text-faint);
+  margin-top:4px;
+}
+.progresswrap{
+  height:4px;
+  background:var(--border-soft);
+  border-radius:2px;
+  overflow:hidden;
+  margin-bottom:18px;
+}
+.progressbar{
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  transition:width .15s linear;
+}
+
+/* ---------- TYPING STAGE ---------- */
+.stage{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:38px 34px;
+  position:relative;
+  margin-bottom:18px;
+  min-height:180px;
+}
+.stage.locked::before{
+  content:"Click here or press any key to begin";
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter:blur(2px);
+  font-size:14px;
+  color:var(--text-dim);
+  border-radius:var(--radius);
+  z-index:5;
+  cursor:text;
+}
+.stage.paused::before{
+  content:"Paused — press Esc or click to resume";
+}
+#textDisplay{
+  font-family:var(--mono);
+  font-size:22px;
+  line-height:1.9;
+  letter-spacing:.2px;
+  color:var(--text-faint);
+  word-wrap:break-word;
+  user-select:none;
+}
+#textDisplay.focus-mode .tline{display:none;}
+#textDisplay.focus-mode .tline.active-line{display:inline;}
+.tchar{position:relative;transition:color .05s;}
+.tchar.correct{color:var(--text);}
+.tchar.incorrect{color:var(--bad);background:color-mix(in srgb, var(--bad) 16%, transparent);border-radius:2px;}
+.tchar.extra{color:var(--extra);text-decoration:underline;text-decoration-style:dotted;}
+.tchar.current{
+  border-left:2px solid var(--accent);
+  animation:blink 1s step-end infinite;
+}
+@keyframes blink{50%{border-color:transparent;}}
+.zen #textDisplay{font-size:26px;}
+.hiddenInput{
+  position:absolute;opacity:0;pointer-events:none;height:0;width:0;
+}
+.stage-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:20px;
+  font-size:12px;
+  color:var(--text-faint);
+}
+.controls{display:flex;gap:8px;}
+.pill-btn{
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--text-dim);
+  font-size:12.5px;
+  cursor:pointer;
+  transition:.15s;
+  display:flex;align-items:center;gap:6px;
+}
+.pill-btn:hover{color:var(--text);border-color:var(--accent);}
+.pill-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+kbd{
+  font-family:var(--mono);
+  font-size:10.5px;
+  padding:1px 5px;
+  border:1px solid var(--border);
+  border-radius:4px;
+  background:var(--surface-2);
+}
+
+/* ---------- CUSTOM TEXT / SETTINGS ---------- */
+textarea.customtext{
+  width:100%;
+  min-height:90px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:13.5px;
+  padding:10px 12px;
+  resize:vertical;
+}
+.settings-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:14px;
+}
+.setting-item label{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--text-faint);
+  margin-bottom:6px;
+}
+select.selstyle, input[type=range]{
+  width:100%;
+}
+select.selstyle{
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:7px 9px;
+  border-radius:var(--radius-sm);
+  font-size:13px;
+}
+
+/* ---------- HISTORY ---------- */
+.history-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.history-table th{
+  text-align:left;
+  color:var(--text-faint);
+  text-transform:uppercase;
+  font-size:10px;
+  letter-spacing:1px;
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+}
+.history-table td{
+  padding:9px 10px;
+  border-bottom:1px solid var(--border-soft);
+  font-family:var(--mono);
+}
+.history-table tr:hover td{background:var(--surface-3);}
+.badge-pb{
+  font-size:9px;
+  background:var(--good);
+  color:#08240f;
+  padding:2px 6px;
+  border-radius:4px;
+  margin-left:6px;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+
+/* ---------- ANALYTICS OVERLAY ---------- */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+  overflow-y:auto;
+  padding:40px 16px;
+  z-index:100;
+}
+.overlay.show{display:flex;}
+.dash{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  max-width:920px;
+  width:100%;
+  padding:32px;
+  animation:rise .35s ease;
+}
+@keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.dash h2{
+  font-family:var(--serif);
+  font-size:26px;
+  margin:0 0 4px;
+}
+.dash .dash-sub{color:var(--text-faint);font-size:12.5px;margin-bottom:20px;}
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:22px;
+}
+.dcard{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+}
+.dcard .v{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--accent);}
+.dcard .l{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-top:4px;}
+.section-title{
+  font-size:12px;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-faint);
+  margin:26px 0 10px;padding-top:16px;border-top:1px solid var(--border-soft);
+}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.chart-box{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.chart-box h4{margin:0 0 8px;font-size:12px;color:var(--text-dim);font-weight:600;}
+.badges{display:flex;flex-wrap:wrap;gap:8px;}
+.abadge{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:999px;
+  background:var(--surface-2);border:1px solid var(--accent);
+  font-size:11.5px;color:var(--accent);font-weight:600;
+}
+.abadge.locked{opacity:.35;border-color:var(--border);color:var(--text-faint);}
+.summary-box{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+  padding:16px;font-size:13px;line-height:1.65;color:var(--text-dim);
+}
+.summary-box b{color:var(--text);}
+.keyheat{display:flex;flex-wrap:wrap;gap:4px;font-family:var(--mono);}
+.keycap{
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  border-radius:5px;font-size:11px;background:var(--surface-3);color:var(--text-dim);border:1px solid var(--border);
+}
+.dash-actions{display:flex;gap:10px;margin-top:26px;justify-content:flex-end;}
+
+/* ---------- FOOTER / MISC ---------- */
+.footnote{text-align:center;color:var(--text-faint);font-size:11px;margin-top:30px;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+@media (max-width:720px){
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .stage{padding:24px 18px;}
+  #textDisplay{font-size:18px;}
+  .statbar{flex-wrap:wrap;}
+  .stat{min-width:30%;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s !important;transition-duration:.001s !important;}
+}
+</style>
+</head>
+<body data-theme="dark">
+<div class="app">
+
+  <div class="top">
+    <div class="brand">
+      <div class="seal" id="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" id="sealIcon"><path d="M4 19h16M6 15h2m3 0h2m3 0h2M7 15V9l5-4 5 4v6"/></svg></div>
+      <div class="brand-text">
+        <h1>Lexicon Studio</h1>
+        <div class="sub" id="caseNumber">Case No. —</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="iconbtn" id="soundToggle" title="Toggle sound effects" aria-label="Toggle sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M19 5a13 13 0 0 1 0 14M15.5 8.5a8 8 0 0 1 0 7"/></svg>
+      </button>
+      <button class="iconbtn" id="themeToggle" title="Toggle dark / light mode" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-7.54-7.54A9 9 0 0 0 12 3Z"/></svg>
+      </button>
+      <button class="iconbtn" id="historyToggle" title="Session history" aria-label="Session history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 1 0 3-6.7M3 3v5h5M12 7v5l4 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="filestrip" id="modeTabs" role="tablist" aria-label="Typing mode">
+    <div class="tab active" data-mode="time">Time</div>
+    <div class="tab" data-mode="words">Word Count</div>
+    <div class="tab" data-mode="quote">Quote</div>
+    <div class="tab" data-mode="programming">Programming</div>
+    <div class="tab" data-mode="custom">Custom Text</div>
+    <div class="tab" data-mode="adaptive">Adaptive</div>
+    <div class="tab" data-mode="focus">Focus</div>
+    <div class="tab" data-mode="zen">Zen</div>
+  </div>
+
+  <div class="panel" id="controlPanel">
+    <div class="row" id="domainRow">
+      <span class="chip-label">Domain</span>
+      <div class="chip active" data-domain="business">Business</div>
+      <div class="chip" data-domain="academic">Academic</div>
+      <div class="chip" data-domain="medical">Medical</div>
+      <div class="chip" data-domain="legal">Legal</div>
+      <div class="chip" data-domain="creative">Creative Writing</div>
+    </div>
+
+    <div class="row" id="timeRow" style="margin-top:12px;">
+      <span class="chip-label">Duration</span>
+      <div class="chip active" data-time="15">15s</div>
+      <div class="chip" data-time="30">30s</div>
+      <div class="chip" data-time="60">60s</div>
+      <div class="chip" data-time="120">120s</div>
+    </div>
+
+    <div class="row" id="wordsRow" style="margin-top:12px;display:none;">
+      <span class="chip-label">Word count</span>
+      <div class="chip active" data-words="25">25</div>
+      <div class="chip" data-words="50">50</div>
+      <div class="chip" data-words="100">100</div>
+      <div class="chip" data-words="250">250</div>
+    </div>
+
+    <div class="row" id="langRow" style="margin-top:12px;display:none;">
+      <span class="chip-label">Language</span>
+      <div class="chip active" data-lang="javascript">JavaScript</div>
+      <div class="chip" data-lang="python">Python</div>
+      <div class="chip" data-lang="html">HTML</div>
+      <div class="chip" data-lang="css">CSS</div>
+      <div class="chip" data-lang="java">Java</div>
+      <div class="chip" data-lang="cpp">C++</div>
+      <div class="chip" data-lang="sql">SQL</div>
+    </div>
+
+    <div id="customRow" style="margin-top:12px;display:none;">
+      <textarea class="customtext" id="customText" placeholder="Paste or write your own practice passage here, then press Start."></textarea>
+    </div>
+
+    <div class="row" style="margin-top:14px;">
+      <span class="chip-label">Font size</span>
+      <input type="range" id="fontSize" min="16" max="32" value="22" style="width:130px;">
+      <span class="chip-label" style="margin-left:14px;">Sound</span>
+      <div class="chip" id="soundChip">Off</div>
+      <span class="chip-label" style="margin-left:14px;">Caps lock indicator</span>
+      <div class="chip" id="capsIndicator" style="display:none;">CAPS LOCK ON</div>
+    </div>
+  </div>
+
+  <div class="statbar" id="statbar">
+    <div class="stat"><div class="v" id="statWpm">0</div><div class="l">WPM</div></div>
+    <div class="stat"><div class="v" id="statRaw">0</div><div class="l">Raw WPM</div></div>
+    <div class="stat"><div class="v" id="statCpm">0</div><div class="l">CPM</div></div>
+    <div class="stat"><div class="v" id="statAcc">100%</div><div class="l">Accuracy</div></div>
+    <div class="stat"><div class="v" id="statTime">0.0s</div><div class="l">Elapsed</div></div>
+    <div class="stat"><div class="v" id="statMistakes">0</div><div class="l">Mistakes</div></div>
+    <div class="stat"><div class="v" id="statStreak">0</div><div class="l">Streak</div></div>
+    <div class="stat"><div class="v" id="statRemain">15s</div><div class="l">Remaining</div></div>
+    <div class="stat"><div class="v" id="statPct">0%</div><div class="l">Complete</div></div>
+  </div>
+  <div class="progresswrap"><div class="progressbar" id="progressbar"></div></div>
+
+  <div class="stage locked" id="stage">
+    <div id="textDisplay" tabindex="0" aria-label="Typing text"></div>
+    <input class="hiddenInput" id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="stage-foot">
+      <div><kbd>Tab</kbd> restart &nbsp; <kbd>Esc</kbd> pause &nbsp; <kbd>Enter</kbd> new passage</div>
+      <div class="controls">
+        <button class="pill-btn" id="pauseBtn">Pause</button>
+        <button class="pill-btn primary" id="restartBtn">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Lexicon Studio — practice built for the language of your profession. All data stays on this device.</div>
+</div>
+
+<!-- HISTORY OVERLAY -->
+<div class="overlay" id="historyOverlay">
+  <div class="dash">
+    <h2>Session History</h2>
+    <div class="dash-sub">Your last 50 sessions, stored locally in this browser.</div>
+    <div style="overflow-x:auto;">
+      <table class="history-table" id="historyTable">
+        <thead><tr><th>Date</th><th>Mode</th><th>Domain</th><th>WPM</th><th>Acc</th><th>Chars</th><th>Duration</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+    <div class="dash-actions">
+      <button class="pill-btn" id="clearHistoryBtn">Clear history</button>
+      <button class="pill-btn primary" id="closeHistoryBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS OVERLAY -->
+<div class="overlay" id="dashOverlay">
+  <div class="dash">
+    <h2>Session Report</h2>
+    <div class="dash-sub" id="dashSub">—</div>
+
+    <div class="dash-grid">
+      <div class="dcard"><div class="v" id="dWpm">0</div><div class="l">WPM</div></div>
+      <div class="dcard"><div class="v" id="dRaw">0</div><div class="l">Raw WPM</div></div>
+      <div class="dcard"><div class="v" id="dAcc">0%</div><div class="l">Accuracy</div></div>
+      <div class="dcard"><div class="v" id="dCons">0%</div><div class="l">Consistency</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="chart-box">
+        <h4>WPM over time</h4>
+        <canvas id="wpmChart" width="380" height="140"></canvas>
+      </div>
+      <div class="chart-box">
+        <h4>Accuracy over time</h4>
+        <canvas id="accChart" width="380" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Character Breakdown</div>
+    <div class="dash-grid">
+      <div class="dcard"><div class="v" id="dCorrect">0</div><div class="l">Correct</div></div>
+      <div class="dcard"><div class="v" id="dIncorrect">0</div><div class="l">Incorrect</div></div>
+      <div class="dcard"><div class="v" id="dExtra">0</div><div class="l">Extra</div></div>
+      <div class="dcard"><div class="v" id="dMissed">0</div><div class="l">Missed</div></div>
+    </div>
+
+    <div class="section-title">Error Heatmap — commonly mistyped keys</div>
+    <div class="keyheat" id="keyHeat"></div>
+
+    <div class="section-title">Personal Bests &amp; Percentile</div>
+    <div class="dash-grid">
+      <div class="dcard"><div class="v" id="dPB">0</div><div class="l">Best WPM (this mode)</div></div>
+      <div class="dcard"><div class="v" id="dPercentile">—</div><div class="l">Estimated Percentile</div></div>
+      <div class="dcard"><div class="v" id="dDuration">0s</div><div class="l">Session Duration</div></div>
+      <div class="dcard"><div class="v" id="dCompletion">0%</div><div class="l">Completion</div></div>
+    </div>
+
+    <div class="section-title">Achievements</div>
+    <div class="badges" id="badgeRow"></div>
+
+    <div class="section-title">Performance Summary</div>
+    <div class="summary-box" id="summaryBox">—</div>
+
+    <div class="dash-actions">
+      <button class="pill-btn" id="retryBtn">Retry same passage</button>
+      <button class="pill-btn primary" id="nextBtn">Next passage</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   LEXICON STUDIO — Typing Speed Studio
+   Single-file vanilla JS application. No external dependencies.
+   ============================================================ */
+
+/* ---------- PASSAGE BANKS ---------- */
+const PASSAGES = {
+  business: [
+    "The quarterly review highlighted a steady increase in client retention, driven largely by faster response times and a redesigned onboarding process that reduced friction for new accounts.",
+    "Please find attached the revised proposal. We have adjusted the timeline to account for procurement delays and added a contingency budget of ten percent to cover unforeseen vendor costs.",
+    "Our team recommends postponing the product launch by two weeks to allow additional time for stress testing the payment gateway under peak holiday traffic conditions.",
+    "The board approved the merger pending regulatory clearance, with integration planning to begin immediately across finance, human resources, and information technology departments.",
+    "Effective next quarter, all departments will submit budget forecasts through the new planning portal, replacing the spreadsheet templates that were previously emailed to finance.",
+    "Customer feedback indicates strong demand for a tiered pricing model, allowing smaller clients to access core features without committing to the enterprise contract.",
+    "The supply chain disruption forced management to renegotiate delivery windows with three key vendors, ultimately preserving the production schedule for the fiscal year.",
+    "During the negotiation, both parties agreed to a phased rollout, reducing risk exposure while still meeting the client's original go-live deadline in September.",
+    "The marketing department will pilot a referral incentive program targeting existing customers, with success measured by conversion rate and average order value growth.",
+    "Leadership emphasized that transparent communication during the restructuring would be essential to maintaining employee morale and minimizing voluntary turnover this year.",
+  ],
+  academic: [
+    "The study examined the correlation between sleep duration and short term memory retention among undergraduate participants across three consecutive academic semesters.",
+    "Researchers concluded that the observed variance could not be attributed solely to sampling error, suggesting a genuine underlying effect worthy of further investigation.",
+    "This paper argues that traditional models of economic growth fail to adequately account for the depletion of non renewable natural resources over time.",
+    "The literature review synthesizes findings from twenty two peer reviewed studies published between two thousand ten and the present, focusing on cognitive development.",
+    "A control group was established to isolate the effect of the intervention from confounding variables such as prior academic performance and household income.",
+    "The dissertation proposes a novel framework for evaluating curriculum effectiveness, drawing on both quantitative test scores and qualitative classroom observation notes.",
+    "Findings suggest that spaced repetition significantly outperforms massed practice when students are assessed on long term retention rather than immediate recall.",
+    "The methodology section outlines a mixed methods approach, combining structured interviews with statistical analysis of standardized assessment data.",
+    "Critics of the theory argue that its predictive power diminishes considerably when applied outside the narrow context in which it was originally developed.",
+    "Further research is needed to determine whether these results generalize to populations outside the university setting in which the study was conducted.",
+  ],
+  medical: [
+    "The patient presented with intermittent chest pain radiating to the left arm, accompanied by shortness of breath and mild diaphoresis upon exertion.",
+    "Following the administration of the prescribed antibiotic course, the patient reported a marked reduction in fever and localized inflammation within forty eight hours.",
+    "Vital signs remained stable throughout the procedure, with blood pressure and oxygen saturation monitored continuously by the attending anesthesiologist.",
+    "The differential diagnosis included appendicitis, ovarian torsion, and gastroenteritis, prompting an urgent abdominal ultrasound to narrow the clinical picture.",
+    "Discharge instructions emphasized gradual reintroduction of physical activity, adherence to the medication schedule, and a follow up appointment within two weeks.",
+    "The nursing staff documented a consistent decline in the patient's pain score after the revised analgesic protocol was implemented on the surgical ward.",
+    "Laboratory results revealed elevated white blood cell counts, consistent with an active infection requiring immediate intravenous antibiotic therapy.",
+    "The physician explained the risks and benefits of the proposed treatment plan before obtaining informed consent from the patient and family members.",
+    "Radiographic imaging confirmed a hairline fracture of the distal radius, and the patient was fitted with a removable splint for six weeks.",
+    "Preventive screening guidelines recommend annual assessments for patients over the age of fifty with a family history of cardiovascular disease.",
+  ],
+  legal: [
+    "The plaintiff alleges that the defendant breached the terms of the agreement by failing to deliver the goods within the contractually specified window.",
+    "Pursuant to Section Twelve of the statute, any party seeking relief must file a notice of intent no later than thirty days after discovery.",
+    "The court finds that the evidence presented is insufficient to establish liability beyond a reasonable doubt and therefore grants the motion to dismiss.",
+    "Counsel for the respondent argued that the contested clause was unconscionable at the time of signing and should be rendered void as a matter of public policy.",
+    "This agreement shall be governed by and construed in accordance with the laws of the jurisdiction in which the principal office is located.",
+    "The witness testified under oath that she observed the vehicle cross the center line moments before the collision occurred at the intersection.",
+    "Failure to comply with the terms outlined herein shall constitute a material breach, entitling the non breaching party to seek immediate termination.",
+    "The appellate panel affirmed the lower court's ruling, finding no abuse of discretion in the admission of the disputed testimony at trial.",
+    "Both parties hereby acknowledge that they have read and understood the full terms of this settlement prior to affixing their signatures below.",
+    "The prosecution must demonstrate intent beyond a reasonable doubt in order to secure a conviction on the charge of aggravated fraud.",
+  ],
+  creative: [
+    "The lighthouse stood alone against the coming storm, its beam sweeping across the restless water like a slow and patient heartbeat.",
+    "She folded the letter twice before setting it on the windowsill, unsure whether the words inside deserved to be read at all.",
+    "Autumn arrived quietly that year, painting the orchard in shades of rust and gold while the old dog slept beneath the leaning fence.",
+    "In the hush after the rain, the village seemed to hold its breath, as though the streets themselves remembered every footstep that had passed.",
+    "He carried the small wooden box for years without opening it, certain that whatever waited inside would change the shape of his memory.",
+    "The market smelled of cinnamon and wet stone, and somewhere beneath the noise a violin was playing a tune no one could quite place.",
+    "Morning light fell through the curtains in thin gold ribbons, and for a moment the whole room seemed to forget its own age.",
+    "The old sailor spoke rarely of the sea, but his hands still moved as though tying knots that no longer existed anywhere but memory.",
+    "Every winter the river froze in the same crooked pattern, and every winter the children pretended it was a map to somewhere else.",
+    "She learned to read the sky the way her grandmother had, watching for the particular gray that meant the harvest should wait no longer.",
+  ],
+};
+
+const QUOTES = [
+  "Discipline is choosing between what you want now and what you want most.",
+  "Small, consistent effort compounds into results that look sudden from the outside.",
+  "The words you practice today become the sentences you write without thinking tomorrow.",
+  "Precision is not the enemy of speed; it is the foundation speed is built on.",
+  "A calm mind types faster than a rushed one ever will.",
+  "Every mistake corrected is a shortcut for the next attempt.",
+  "Fluency is simply friction removed, one repetition at a time.",
+  "The keyboard rewards patience long before it rewards speed.",
+  "Progress hides inside boring repetition, waiting to be noticed later.",
+  "Good habits are built quietly, long before anyone is watching.",
+];
+
+const CODE_SNIPPETS = {
+  javascript: [
+"function debounce(fn, delay) {\n  let timer = null;\n  return function (...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delay);\n  };\n}",
+"const users = await fetch('/api/users')\n  .then(res => res.json())\n  .catch(err => console.error('Failed to load users', err));",
+"class Stack {\n  constructor() { this.items = []; }\n  push(item) { this.items.push(item); }\n  pop() { return this.items.pop(); }\n}",
+  ],
+  python: [
+"def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1",
+"class Node:\n    def __init__(self, value):\n        self.value = value\n        self.next = None\n\n\ndef reverse_list(head):\n    prev = None\n    while head:\n        nxt = head.next\n        head.next = prev\n        prev = head\n        head = nxt\n    return prev",
+  ],
+  html: [
+"<section class=\"card\">\n  <h2>Weekly Summary</h2>\n  <p>Your account activity for the past seven days.</p>\n  <button type=\"button\">View details</button>\n</section>",
+"<form action=\"/submit\" method=\"post\">\n  <label for=\"email\">Email</label>\n  <input id=\"email\" name=\"email\" type=\"email\" required>\n  <button type=\"submit\">Subscribe</button>\n</form>",
+  ],
+  css: [
+".card {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n  gap: 1rem;\n  padding: 1.5rem;\n  border-radius: 12px;\n}",
+"@media (max-width: 640px) {\n  .nav {\n    flex-direction: column;\n    align-items: flex-start;\n  }\n}",
+  ],
+  java: [
+"public class Rectangle {\n    private final double width;\n    private final double height;\n\n    public Rectangle(double width, double height) {\n        this.width = width;\n        this.height = height;\n    }\n\n    public double area() {\n        return width * height;\n    }\n}",
+  ],
+  cpp: [
+"#include <vector>\n#include <algorithm>\n\nint findMax(std::vector<int>& nums) {\n    return *std::max_element(nums.begin(), nums.end());\n}",
+  ],
+  sql: [
+"SELECT customers.name, SUM(orders.total) AS lifetime_value\nFROM customers\nJOIN orders ON orders.customer_id = customers.id\nGROUP BY customers.name\nORDER BY lifetime_value DESC\nLIMIT 10;",
+  ],
+};
+
+const WORD_POOL = {
+  business:["revenue","strategy","client","budget","quarter","proposal","vendor","forecast","meeting","deadline","market","invoice","contract","growth","team","report","target","launch","supply","approve"],
+  academic:["research","hypothesis","analysis","citation","theory","sample","variable","evidence","journal","abstract","method","results","review","thesis","data","study","findings","academic","professor","survey"],
+  medical:["patient","symptom","diagnosis","treatment","clinic","surgery","therapy","dosage","nurse","physician","recovery","chronic","vaccine","fracture","infection","vital","clinical","referral","allergy","prescription"],
+  legal:["contract","statute","clause","plaintiff","defendant","evidence","verdict","appeal","liability","witness","testimony","counsel","jurisdiction","motion","settlement","breach","ruling","court","law","litigation"],
+  creative:["shadow","whisper","horizon","ember","silence","wander","memory","harbor","twilight","echo","garden","stranger","longing","threshold","quiet","tender","ancient","drift","hollow","wonder"],
+};
+
+/* ---------- ACHIEVEMENT DEFINITIONS ---------- */
+const ACHIEVEMENTS = [
+  {id:"first", label:"First Session", test:(s,h)=> h.length>=1},
+  {id:"acc100", label:"Flawless Run", test:(s)=> s.accuracy>=100},
+  {id:"wpm40", label:"40+ WPM", test:(s)=> s.wpm>=40},
+  {id:"wpm70", label:"70+ WPM", test:(s)=> s.wpm>=70},
+  {id:"wpm100", label:"Centurion — 100+ WPM", test:(s)=> s.wpm>=100},
+  {id:"streak5", label:"5 Session Streak", test:(s,h)=> h.length>=5},
+  {id:"marathon", label:"120s Marathon", test:(s)=> s.mode==="time" && s.durationTarget>=120},
+  {id:"allDomains", label:"Renaissance Typist", test:(s,h)=> new Set(h.map(x=>x.domain)).size>=5},
+];
+
+/* ---------- STATE ---------- */
+const state = {
+  mode: "time",
+  domain: "business",
+  timeTarget: 15,
+  wordsTarget: 25,
+  lang: "javascript",
+  customPassage: "",
+  passageChars: [],   // array of {ch, status}
+  typedCount: 0,
+  correct: 0,
+  incorrect: 0,
+  extra: 0,
+  mistakesTotal: 0,
+  streak: 0,
+  bestStreak: 0,
+  started: false,
+  paused: false,
+  finished: false,
+  startTime: 0,
+  elapsedPausedMs: 0,
+  pauseStartedAt: 0,
+  timerId: null,
+  wpmSamples: [], // {t, wpm, acc}
+  keyErrors: {},  // char -> count
+  soundOn: false,
+  fontSize: 22,
+  focusMode: false,
+  zenMode: false,
+};
+
+let audioCtx = null;
+function beep(freq, dur, vol){
+  if(!state.soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.frequency.value = freq;
+    o.type = "sine";
+    g.gain.value = vol;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+
+/* ---------- DOM REFS ---------- */
+const el = (id)=>document.getElementById(id);
+const textDisplay = el("textDisplay");
+const hiddenInput = el("hiddenInput");
+const stage = el("stage");
+
+/* ---------- HELPERS ---------- */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function pad(n){ return n<10 ? "0"+n : ""+n; }
+function nowMs(){ return performance.now(); }
+
+function generateCaseNumber(){
+  const d = new Date();
+  const code = state.domain.slice(0,3).toUpperCase();
+  return `Case No. ${code}-${d.getFullYear()}-${Math.floor(1000+Math.random()*9000)}`;
+}
+
+/* ---------- PASSAGE GENERATION ---------- */
+function buildWordListPassage(domain, count){
+  const pool = WORD_POOL[domain] || WORD_POOL.business;
+  const words = [];
+  for(let i=0;i<count;i++){ words.push(pick(pool)); }
+  return words.join(" ");
+}
+
+function generatePassage(){
+  if(state.mode === "custom"){
+    return state.customPassage.trim() || "Type your own custom passage using the box above, then press Restart to begin.";
+  }
+  if(state.mode === "quote"){
+    return pick(QUOTES);
+  }
+  if(state.mode === "programming"){
+    const snippets = CODE_SNIPPETS[state.lang] || CODE_SNIPPETS.javascript;
+    return pick(snippets);
+  }
+  if(state.mode === "words"){
+    return buildWordListPassage(state.domain, state.wordsTarget);
+  }
+  if(state.mode === "time"){
+    // long enough passage assembled from multiple sentences of the domain bank
+    const bank = PASSAGES[state.domain] || PASSAGES.business;
+    const shuffled = [...bank].sort(()=>Math.random()-0.5);
+    let text = "";
+    let target = state.timeTarget >= 60 ? 5 : (state.timeTarget>=30?3:2);
+    for(let i=0;i<target;i++){ text += shuffled[i % shuffled.length] + " "; }
+    return text.trim();
+  }
+  if(state.mode === "adaptive"){
+    // difficulty adjusts by mixing word pool + sentence based on rolling accuracy of history
+    const history = getHistory();
+    const recentAcc = history.length ? (history.slice(-5).reduce((a,s)=>a+s.accuracy,0)/Math.min(5,history.length)) : 100;
+    if(recentAcc < 90){
+      return buildWordListPassage(state.domain, 20); // simpler
+    }
+    const bank = PASSAGES[state.domain] || PASSAGES.business;
+    return pick(bank) + " " + pick(bank);
+  }
+  if(state.mode === "focus"){
+    const bank = PASSAGES[state.domain] || PASSAGES.business;
+    return [pick(bank), pick(bank), pick(bank)].join(" ");
+  }
+  if(state.mode === "zen"){
+    const bank = PASSAGES[state.domain] || PASSAGES.business;
+    return [...bank].sort(()=>Math.random()-0.5).slice(0,6).join(" ");
+  }
+  return pick(PASSAGES.business);
+}
+
+/* ---------- RENDER PASSAGE ---------- */
+function loadNewPassage(){
+  const text = generatePassage();
+  state.passageChars = text.split("").map(ch => ({ch, status:"pending"}));
+  state.typedCount = 0;
+  renderPassage();
+  el("statRemain").textContent = state.mode==="time" ? state.timeTarget+"s" : (state.mode==="words" ? state.wordsTarget+" w" : "—");
+}
+
+function renderPassage(){
+  const frag = document.createDocumentFragment();
+  const lines = groupIntoLines(state.passageChars);
+  let globalIndex = 0;
+  lines.forEach((line, li)=>{
+    const lineSpan = document.createElement("span");
+    lineSpan.className = "tline" + (li===currentLineIndex(lines)?" active-line":"");
+    line.forEach(charObj=>{
+      const span = document.createElement("span");
+      span.className = "tchar " + (charObj.status !== "pending" ? charObj.status : "") + (globalIndex===state.typedCount ? " current" : "");
+      span.textContent = charObj.ch === "\n" ? "↵\n" : charObj.ch;
+      lineSpan.appendChild(span);
+      globalIndex++;
+    });
+    frag.appendChild(lineSpan);
+  });
+  textDisplay.innerHTML = "";
+  textDisplay.appendChild(frag);
+  textDisplay.classList.toggle("focus-mode", state.mode === "focus");
+}
+
+function groupIntoLines(chars){
+  // simple wrap: split on existing \n plus soft-wrap every ~70 chars at word boundary for display grouping
+  const lines = [];
+  let current = [];
+  chars.forEach(c=>{
+    current.push(c);
+    if(c.ch === "\n"){ lines.push(current); current=[]; }
+  });
+  if(current.length) lines.push(current);
+  return lines;
+}
+function currentLineIndex(lines){
+  let count = 0;
+  for(let i=0;i<lines.length;i++){
+    count += lines[i].length;
+    if(state.typedCount < count) return i;
+  }
+  return lines.length-1;
+}
+
+/* ---------- INPUT HANDLING ---------- */
+function beginSession(){
+  if(state.started) return;
+  state.started = true;
+  state.paused = false;
+  state.finished = false;
+  state.startTime = nowMs();
+  state.elapsedPausedMs = 0;
+  stage.classList.remove("locked","paused");
+  state.timerId = setInterval(tick, 100);
+}
+
+function resetSession(newPassage=true){
+  clearInterval(state.timerId);
+  state.started = false;
+  state.paused = false;
+  state.finished = false;
+  state.typedCount = 0;
+  state.correct = 0;
+  state.incorrect = 0;
+  state.extra = 0;
+  state.mistakesTotal = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.wpmSamples = [];
+  state.keyErrors = {};
+  hiddenInput.value = "";
+  stage.classList.add("locked");
+  stage.classList.remove("paused");
+  if(newPassage) loadNewPassage();
+  else renderPassage();
+  updateStatsDisplay(0,0);
+  el("progressbar").style.width = "0%";
+  el("caseNumber").textContent = generateCaseNumber();
+}
+
+function togglePause(){
+  if(!state.started || state.finished) return;
+  state.paused = !state.paused;
+  if(state.paused){
+    state.pauseStartedAt = nowMs();
+    stage.classList.add("paused");
+    clearInterval(state.timerId);
+  } else {
+    state.elapsedPausedMs += nowMs() - state.pauseStartedAt;
+    stage.classList.remove("paused");
+    state.timerId = setInterval(tick, 100);
+    hiddenInput.focus();
+  }
+  el("pauseBtn").textContent = state.paused ? "Resume" : "Pause";
+}
+
+function elapsedSeconds(){
+  if(!state.started) return 0;
+  const raw = (nowMs() - state.startTime - state.elapsedPausedMs)/1000;
+  return Math.max(0, raw);
+}
+
+const REALISTIC_WPM_CEILING = 350; // no human sustains typing beyond this; guards against divide-by-near-zero spikes
+function computeStats(){
+  const elapsedRaw = elapsedSeconds();
+  // Below ~1s, tiny denominators produce meaningless spikes (e.g. 3 chars in 0.05s => absurd WPM).
+  // Floor the denominator at 1 second so early keystrokes report conservative, realistic numbers.
+  const elapsed = Math.max(elapsedRaw, 0.001);
+  const minutesForRate = Math.max(elapsedRaw, 1) / 60;
+  const rawWpm = Math.round(((state.correct + state.incorrect + state.extra)/5) / minutesForRate);
+  const wpm = Math.round((state.correct/5) / minutesForRate);
+  const cpm = Math.round((state.correct) / minutesForRate);
+  const totalAttempts = state.correct + state.incorrect;
+  const accuracy = totalAttempts>0 ? Math.min(100, Math.round((state.correct/totalAttempts)*1000)/10) : 100;
+  return {
+    elapsed,
+    wpm: isFinite(wpm) ? Math.min(REALISTIC_WPM_CEILING, Math.max(0,wpm)) : 0,
+    rawWpm: isFinite(rawWpm) ? Math.min(REALISTIC_WPM_CEILING, Math.max(0,rawWpm)) : 0,
+    cpm: isFinite(cpm) ? Math.min(REALISTIC_WPM_CEILING*5, Math.max(0,cpm)) : 0,
+    accuracy
+  };
+}
+
+function updateStatsDisplay(){
+  const s = computeStats();
+  el("statWpm").textContent = s.wpm;
+  el("statRaw").textContent = s.rawWpm;
+  el("statCpm").textContent = s.cpm;
+  el("statAcc").textContent = s.accuracy + "%";
+  el("statTime").textContent = s.elapsed.toFixed(1)+"s";
+  el("statMistakes").textContent = state.mistakesTotal;
+  el("statStreak").textContent = state.streak;
+  const total = state.passageChars.length || 1;
+  const pct = Math.min(100, Math.round((state.typedCount/total)*100));
+  el("statPct").textContent = pct+"%";
+  el("progressbar").style.width = pct+"%";
+
+  if(state.mode === "time"){
+    const remain = Math.max(0, state.timeTarget - s.elapsed);
+    el("statRemain").textContent = remain.toFixed(1)+"s";
+    if(remain<=0) return finishSession(s);
+  } else if(state.mode === "words"){
+    const remainWords = Math.max(0, state.wordsTarget - Math.round(state.typedCount/5.5));
+    el("statRemain").textContent = remainWords+" w";
+  } else {
+    el("statRemain").textContent = Math.max(0, total-state.typedCount)+" ch";
+  }
+  return s;
+}
+
+function tick(){
+  if(state.paused || state.finished) return;
+  const s = updateStatsDisplay();
+  if(s) state.wpmSamples.push({t: s.elapsed, wpm: s.wpm, acc: s.accuracy});
+}
+
+/* ---------- KEYSTROKE PROCESSING ---------- */
+hiddenInput.addEventListener("keydown", (e)=>{
+  if(state.finished) return;
+  if(e.key === "Escape"){ togglePause(); return; }
+  if(e.key === "Tab"){ e.preventDefault(); resetSession(true); return; }
+  if(e.key === "Enter" && (state.mode==="quote"||state.mode==="programming"||state.mode==="adaptive"||state.mode==="zen"||state.mode==="focus")){
+    e.preventDefault(); resetSession(true); return;
+  }
+  if(state.paused) return;
+
+  if(e.key === "Backspace"){
+    e.preventDefault();
+    if(state.typedCount>0){
+      state.typedCount--;
+      const c = state.passageChars[state.typedCount];
+      if(c.status==="correct") state.correct--;
+      if(c.status==="incorrect") state.incorrect--;
+      c.status = "pending";
+      renderPassage();
+    }
+    return;
+  }
+
+  if(e.key.length !== 1) return; // ignore modifier/navigation keys
+  e.preventDefault();
+
+  if(!state.started) beginSession();
+
+  const idx = state.typedCount;
+  if(idx >= state.passageChars.length){
+    // extra characters typed beyond passage length
+    state.extra++;
+    state.mistakesTotal++;
+    state.streak = 0;
+    beep(180,0.05,0.03);
+    return;
+  }
+  const target = state.passageChars[idx];
+  const isCorrect = e.key === target.ch;
+  target.status = isCorrect ? "correct" : "incorrect";
+  if(isCorrect){
+    state.correct++;
+    state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    beep(720,0.03,0.02);
+  } else {
+    state.incorrect++;
+    state.mistakesTotal++;
+    state.streak = 0;
+    state.keyErrors[target.ch] = (state.keyErrors[target.ch]||0)+1;
+    beep(160,0.06,0.04);
+  }
+  state.typedCount++;
+  renderPassage();
+  const s = updateStatsDisplay();
+
+  // completion by full passage typed (words/quote/programming/custom/focus/zen/adaptive)
+  if(state.mode !== "time" && state.typedCount >= state.passageChars.length){
+    finishSession(s);
+  }
+});
+
+stage.addEventListener("click", ()=>{ hiddenInput.focus(); if(state.paused) togglePause(); });
+textDisplay.addEventListener("click", ()=> hiddenInput.focus());
+window.addEventListener("keydown", (e)=>{
+  if(document.activeElement !== hiddenInput && !el("dashOverlay").classList.contains("show") && !el("historyOverlay").classList.contains("show")){
+    if(e.key.length===1 || e.key==="Backspace") hiddenInput.focus();
+  }
+  el("capsIndicator").style.display = e.getModifierState && e.getModifierState("CapsLock") ? "inline-block":"none";
+});
+
+/* ---------- SESSION FINISH ---------- */
+function finishSession(finalStats){
+  if(state.finished) return;
+  state.finished = true;
+  clearInterval(state.timerId);
+  stage.classList.add("locked");
+  const s = finalStats || computeStats();
+  const total = state.passageChars.length || 1;
+  const completion = Math.min(100, Math.round((state.typedCount/total)*100));
+  const consistency = computeConsistency();
+
+  const session = {
+    date: new Date().toISOString(),
+    mode: state.mode,
+    domain: state.domain,
+    durationTarget: state.mode==="time" ? state.timeTarget : null,
+    wpm: s.wpm,
+    rawWpm: s.rawWpm,
+    accuracy: s.accuracy,
+    consistency,
+    completion,
+    correct: state.correct,
+    incorrect: state.incorrect,
+    extra: state.extra,
+    missed: Math.max(0, total - state.typedCount),
+    mistakes: state.mistakesTotal,
+    duration: Math.round(s.elapsed*10)/10,
+    keyErrors: {...state.keyErrors},
+    wpmSamples: state.wpmSamples.slice(),
+  };
+
+  const history = getHistory();
+  const priorBest = getBestWpm(session.mode, session.domain, history);
+  history.push(session);
+  saveHistory(history);
+
+  showDashboard(session, history, priorBest);
+}
+
+function computeConsistency(){
+  const samples = state.wpmSamples.map(s=>s.wpm).filter(v=>v>0);
+  if(samples.length < 2) return 100;
+  const mean = samples.reduce((a,b)=>a+b,0)/samples.length;
+  const variance = samples.reduce((a,b)=>a+Math.pow(b-mean,2),0)/samples.length;
+  const sd = Math.sqrt(variance);
+  const cv = mean>0 ? sd/mean : 0;
+  return Math.max(0, Math.round((1-Math.min(cv,1))*100));
+}
+
+/* ---------- LOCAL STORAGE ---------- */
+const STORAGE_KEY = "lexiconStudio_history_v1";
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }catch(e){ return []; }
+}
+function saveHistory(h){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(h.slice(-200))); }catch(e){}
+}
+function getBestWpm(mode, domain, history){
+  const relevant = history.filter(s=>s.mode===mode && s.domain===domain);
+  if(!relevant.length) return 0;
+  return Math.max(...relevant.map(s=>s.wpm));
+}
+function percentileEstimate(wpm){
+  // rough typing-population curve, static reference distribution
+  const table = [[20,10],[30,25],[40,45],[50,60],[60,75],[70,85],[80,92],[90,96],[100,98],[120,99.5]];
+  for(const [w,p] of table){ if(wpm<=w) return p; }
+  return 99.9;
+}
+
+/* ---------- ANALYTICS DASHBOARD ---------- */
+function showDashboard(session, history, priorBest){
+  el("dashSub").textContent = `${capitalize(session.mode)} mode · ${capitalize(session.domain)} · ${new Date(session.date).toLocaleString()}`;
+  el("dWpm").textContent = session.wpm;
+  el("dRaw").textContent = session.rawWpm;
+  el("dAcc").textContent = session.accuracy+"%";
+  el("dCons").textContent = session.consistency+"%";
+  el("dCorrect").textContent = session.correct;
+  el("dIncorrect").textContent = session.incorrect;
+  el("dExtra").textContent = session.extra;
+  el("dMissed").textContent = session.missed;
+  const isPB = session.wpm > priorBest;
+  el("dPB").textContent = Math.max(session.wpm, priorBest) + (isPB ? " 🏆" : "");
+  el("dPercentile").textContent = percentileEstimate(session.wpm)+"th";
+  el("dDuration").textContent = session.duration+"s";
+  el("dCompletion").textContent = session.completion+"%";
+
+  try{
+    drawLineChart("wpmChart", session.wpmSamples.map(s=>s.wpm), getComputedStyle(document.body).getPropertyValue("--accent").trim());
+    drawLineChart("accChart", session.wpmSamples.map(s=>s.acc), getComputedStyle(document.body).getPropertyValue("--good").trim(), 100);
+  }catch(e){ /* canvas unsupported in this context — dashboard still renders without charts */ }
+
+  renderKeyHeat(session.keyErrors);
+  renderBadges(session, history);
+  renderSummary(session, history, isPB);
+
+  el("dashOverlay").classList.add("show");
+}
+
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function drawLineChart(canvasId, data, color, fixedMax){
+  const canvas = el(canvasId);
+  const ctx = canvas.getContext("2d");
+  if(!ctx) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  if(!data.length){
+    ctx.fillStyle = "#888"; ctx.font="12px sans-serif";
+    ctx.fillText("Not enough data", 10, h/2);
+    return;
+  }
+  const max = fixedMax || Math.max(...data, 10);
+  const min = 0;
+  const stepX = w / Math.max(1,(data.length-1));
+  ctx.beginPath();
+  ctx.strokeStyle = color || "#5089c6";
+  ctx.lineWidth = 2;
+  data.forEach((v,i)=>{
+    const x = i*stepX;
+    const y = h - ((v-min)/(max-min||1))*h*0.85 - 8;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // fill
+  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+  ctx.fillStyle = color ? color+"22" : "rgba(80,137,198,.15)";
+  try{ ctx.fillStyle = color; ctx.globalAlpha=0.12; ctx.fill(); ctx.globalAlpha=1; }catch(e){}
+}
+
+function renderKeyHeat(keyErrors){
+  const container = el("keyHeat");
+  container.innerHTML = "";
+  const entries = Object.entries(keyErrors).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  if(!entries.length){
+    container.innerHTML = '<span style="color:var(--text-faint);font-size:12px;">No mistyped keys — clean run.</span>';
+    return;
+  }
+  const maxCount = Math.max(...entries.map(e=>e[1]));
+  entries.forEach(([ch,count])=>{
+    const cap = document.createElement("div");
+    cap.className = "keycap";
+    const intensity = count/maxCount;
+    cap.style.background = `color-mix(in srgb, var(--bad) ${Math.round(20+intensity*60)}%, var(--surface-3))`;
+    cap.style.color = intensity>0.4 ? "#fff" : "var(--text-dim)";
+    cap.title = `${count} mistake(s)`;
+    cap.textContent = ch === " " ? "␣" : ch;
+    container.appendChild(cap);
+  });
+}
+
+function renderBadges(session, history){
+  const container = el("badgeRow");
+  container.innerHTML = "";
+  ACHIEVEMENTS.forEach(a=>{
+    const earned = a.test(session, history);
+    const div = document.createElement("div");
+    div.className = "abadge" + (earned ? "" : " locked");
+    div.innerHTML = `<span>${earned?"✓":"○"}</span><span>${a.label}</span>`;
+    container.appendChild(div);
+  });
+}
+
+function renderSummary(session, history, isPB){
+  const strengths = [];
+  const weaknesses = [];
+  if(session.accuracy>=97) strengths.push("excellent accuracy");
+  if(session.wpm>=60) strengths.push("strong raw speed");
+  if(session.consistency>=80) strengths.push("very consistent pacing");
+  if(session.accuracy<90) weaknesses.push("accuracy dipped below 90%, so slowing down slightly may raise your effective WPM");
+  if(session.consistency<60) weaknesses.push("pace varied a lot during the session — try a steadier rhythm rather than bursts");
+  if(session.rawWpm - session.wpm > 15) weaknesses.push("a wide gap between raw and net WPM suggests correcting mistakes is costing you speed");
+
+  const topErrors = Object.entries(session.keyErrors).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>`"${e[0]==" "?"space":e[0]}"`);
+
+  let html = `<b>${session.wpm} WPM</b> at <b>${session.accuracy}% accuracy</b> in ${capitalize(session.domain)} ${capitalize(session.mode)} mode. `;
+  html += isPB ? `That's a new personal best for this mode and domain. ` : `Your personal best here remains ${getBestWpm(session.mode, session.domain, history)} WPM. `;
+  if(strengths.length) html += `Strengths this run: ${strengths.join(", ")}. `;
+  if(weaknesses.length) html += `Areas to improve: ${weaknesses.join("; ")}. `;
+  if(topErrors.length) html += `Most commonly mistyped: ${topErrors.join(", ")} — a few minutes of targeted drills on these keys should help. `;
+  html += history.length>=3 ? `You've now logged ${history.length} sessions — keep the streak going.` : `Keep practicing regularly to unlock consistency trends.`;
+
+  el("summaryBox").innerHTML = html;
+}
+
+/* ---------- HISTORY TABLE ---------- */
+function renderHistoryTable(){
+  const tbody = el("historyBody");
+  const history = getHistory().slice().reverse();
+  tbody.innerHTML = "";
+  if(!history.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-faint);font-family:var(--sans);">No sessions recorded yet.</td></tr>';
+    return;
+  }
+  const bests = {};
+  history.slice().reverse().forEach(s=>{
+    const key = s.mode+"|"+s.domain;
+    if(!bests[key] || s.wpm>bests[key]) bests[key]=s.wpm;
+  });
+  history.forEach(s=>{
+    const tr = document.createElement("tr");
+    const key = s.mode+"|"+s.domain;
+    const isPB = s.wpm === bests[key];
+    tr.innerHTML = `
+      <td>${new Date(s.date).toLocaleDateString()} ${new Date(s.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${capitalize(s.mode)}</td>
+      <td>${capitalize(s.domain)}</td>
+      <td>${s.wpm}${isPB ? '<span class="badge-pb">PB</span>' : ''}</td>
+      <td>${s.accuracy}%</td>
+      <td>${s.correct}/${s.incorrect}/${s.extra}</td>
+      <td>${s.duration}s</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------- UI WIRING ---------- */
+function setAccentForDomain(){
+  const map = {business:"--accent-business",academic:"--accent-academic",medical:"--accent-medical",legal:"--accent-legal",creative:"--accent-creative",programming:"--accent-programming"};
+  const key = state.mode==="programming" ? "programming" : state.domain;
+  const varName = map[key] || "--accent-business";
+  document.documentElement.style.setProperty("--accent", `var(${varName})`);
+}
+
+const sealIcons = {
+  business:'<path d="M4 19h16M6 15h2m3 0h2m3 0h2M7 15V9l5-4 5 4v6"/>',
+  academic:'<path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5.5"/>',
+  medical:'<path d="M12 7v10M7 12h10"/><circle cx="12" cy="12" r="9"/>',
+  legal:'<path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0l-3-6ZM19 7l-3 6a3 3 0 0 0 6 0l-3-6ZM4 21h16M5 7h14"/>',
+  creative:'<path d="M20 4c-4 0-9 2-12 6-2 3-3 6-3 9 3 0 6-1 9-3 4-3 6-8 6-12Z"/><path d="M9 15 4 20"/>',
+  programming:'<path d="m8 9-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/>',
+};
+
+function updateModeVisibility(){
+  el("domainRow").style.display = ["custom","programming"].includes(state.mode) ? "none" : "flex";
+  el("timeRow").style.display = state.mode==="time" ? "flex":"none";
+  el("wordsRow").style.display = state.mode==="words" ? "flex":"none";
+  el("langRow").style.display = state.mode==="programming" ? "flex":"none";
+  el("customRow").style.display = state.mode==="custom" ? "block":"none";
+  el("seal").style.borderColor = "var(--accent)";
+  const key = state.mode==="programming" ? "programming" : state.domain;
+  document.getElementById("sealIcon").innerHTML = sealIcons[key] || sealIcons.business;
+}
+
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    state.mode = tab.dataset.mode;
+    setAccentForDomain();
+    updateModeVisibility();
+    resetSession(true);
+  });
+});
+
+document.querySelectorAll("[data-domain]").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    document.querySelectorAll("[data-domain]").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    state.domain = chip.dataset.domain;
+    setAccentForDomain();
+    updateModeVisibility();
+    resetSession(true);
+  });
+});
+document.querySelectorAll("[data-time]").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    document.querySelectorAll("[data-time]").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    state.timeTarget = parseInt(chip.dataset.time,10);
+    resetSession(true);
+  });
+});
+document.querySelectorAll("[data-words]").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    document.querySelectorAll("[data-words]").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    state.wordsTarget = parseInt(chip.dataset.words,10);
+    resetSession(true);
+  });
+});
+document.querySelectorAll("[data-lang]").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    document.querySelectorAll("[data-lang]").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    state.lang = chip.dataset.lang;
+    resetSession(true);
+  });
+});
+
+el("customText").addEventListener("input", (e)=>{
+  state.customPassage = e.target.value;
+});
+el("customText").addEventListener("blur", ()=>{
+  if(state.mode==="custom") resetSession(true);
+});
+
+el("fontSize").addEventListener("input", (e)=>{
+  state.fontSize = e.target.value;
+  textDisplay.style.fontSize = state.fontSize+"px";
+});
+
+el("pauseBtn").addEventListener("click", togglePause);
+el("restartBtn").addEventListener("click", ()=> resetSession(true));
+
+el("soundToggle").addEventListener("click", ()=>{
+  state.soundOn = !state.soundOn;
+  el("soundChip").textContent = state.soundOn ? "On" : "Off";
+  el("soundChip").classList.toggle("active", state.soundOn);
+});
+el("soundChip").addEventListener("click", ()=>{
+  state.soundOn = !state.soundOn;
+  el("soundChip").textContent = state.soundOn ? "On" : "Off";
+  el("soundChip").classList.toggle("active", state.soundOn);
+});
+
+el("themeToggle").addEventListener("click", ()=>{
+  const body = document.body;
+  const next = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  body.setAttribute("data-theme", next);
+});
+
+el("historyToggle").addEventListener("click", ()=>{
+  renderHistoryTable();
+  el("historyOverlay").classList.add("show");
+});
+el("closeHistoryBtn").addEventListener("click", ()=> el("historyOverlay").classList.remove("show"));
+el("clearHistoryBtn").addEventListener("click", ()=>{
+  if(confirm("Clear all locally stored session history? This cannot be undone.")){
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistoryTable();
+  }
+});
+el("historyOverlay").addEventListener("click", (e)=>{ if(e.target.id==="historyOverlay") el("historyOverlay").classList.remove("show"); });
+el("dashOverlay").addEventListener("click", (e)=>{ if(e.target.id==="dashOverlay") el("dashOverlay").classList.remove("show"); });
+
+el("retryBtn").addEventListener("click", ()=>{
+  el("dashOverlay").classList.remove("show");
+  resetSession(false);
+});
+el("nextBtn").addEventListener("click", ()=>{
+  el("dashOverlay").classList.remove("show");
+  resetSession(true);
+});
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape" && el("dashOverlay").classList.contains("show")){ el("dashOverlay").classList.remove("show"); }
+  if(e.key==="Escape" && el("historyOverlay").classList.contains("show")){ el("historyOverlay").classList.remove("show"); }
+});
+
+/* ---------- INIT ---------- */
+function init(){
+  setAccentForDomain();
+  updateModeVisibility();
+  resetSession(true);
+  hiddenInput.focus();
+}
+init();
+</script>
+</body>
+</html>
