@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaflet — PDF Splitter &amp; Merger</title>
+<meta name="description" content="A premium, entirely client-side PDF splitter and merger. Split, merge, rotate, watermark and compress PDFs — nothing ever leaves your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --bg:#FAFAF7; --surface:#FFFFFF; --surface-2:#F1EFE8; --surface-3:#EAE7DC;
+  --ink:#1C1B19; --ink-soft:#5B584F; --ink-faint:#8B8778;
+  --border:#E3E0D6; --border-strong:#CFCABC;
+  --accent:#2451B3; --accent-ink:#FFFFFF; --accent-soft:#E7EDFB; --accent-dim:#B9CBF2;
+  --amber:#B9781F; --amber-soft:#FBEEDB;
+  --success:#2F6E4E; --success-soft:#E4F1E9;
+  --danger:#B3402A; --danger-soft:#FBE9E4;
+  --shadow:rgba(28,27,25,0.10); --shadow-strong:rgba(28,27,25,0.18);
+  --radius-s:6px; --radius-m:10px; --radius-l:16px;
+  --font-display:'Fraunces', serif; --font-body:'Inter', sans-serif; --font-mono:'JetBrains Mono', monospace;
+}
+html[data-theme="dark"]{
+  --bg:#15171B; --surface:#1D2026; --surface-2:#23262D; --surface-3:#2A2E36;
+  --ink:#ECEAE3; --ink-soft:#A7A49B; --ink-faint:#716E66;
+  --border:#2E323A; --border-strong:#3B4049;
+  --accent:#7098EE; --accent-ink:#0F1420; --accent-soft:#232C42; --accent-dim:#3A4A72;
+  --amber:#E8B15D; --amber-soft:#332A18;
+  --success:#5CB78A; --success-soft:#1B2C22;
+  --danger:#E4785F; --danger-soft:#331F1B;
+  --shadow:rgba(0,0,0,0.35); --shadow-strong:rgba(0,0,0,0.55);
+}
+*{box-sizing:border-box;}
+html{color-scheme:light;}
+html[data-theme="dark"]{color-scheme:dark;}
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased; transition:background .3s ease, color .3s ease;
+  min-height:100vh;
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--accent-dim); color:var(--ink);}
+
+/* subtle paper grain backdrop */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+  background-image: radial-gradient(var(--border) 0.6px, transparent 0.6px);
+  background-size: 22px 22px;
+}
+html[data-theme="dark"] body::before{ opacity:.18; }
+
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 24px 80px;}
+
+/* ============================= HEADER ============================= */
+header.app-head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:24px;
+  padding:38px 0 26px; border-bottom:1px solid var(--border);
+}
+.brand{display:flex; align-items:center; gap:14px;}
+.brand-mark{
+  width:44px; height:44px; border-radius:10px; background:var(--accent); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 14px var(--shadow-strong);
+}
+.brand-mark svg{width:24px; height:24px;}
+.brand h1{
+  font-family:var(--font-display); font-weight:600; font-size:1.55rem; margin:0; letter-spacing:-.01em;
+}
+.brand p{margin:2px 0 0; color:var(--ink-soft); font-size:.86rem;}
+.head-actions{display:flex; align-items:center; gap:10px;}
+.icon-btn{
+  width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface);
+  color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:all .15s ease;
+}
+.icon-btn svg{width:18px; height:18px;}
+.icon-btn:hover{border-color:var(--border-strong); transform:translateY(-1px); box-shadow:0 3px 10px var(--shadow);}
+.icon-btn:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px;
+}
+
+/* ============================= TABS (folder-tab signature) ============================= */
+.tabbar{display:flex; gap:6px; margin-top:28px;}
+.tab{
+  position:relative; font-family:var(--font-display); font-weight:600; font-size:1.02rem;
+  padding:14px 26px 13px; background:var(--surface-2); color:var(--ink-soft); border:1px solid var(--border);
+  border-bottom:none; border-radius:12px 12px 0 0; cursor:pointer; letter-spacing:-.005em;
+  transform:translateY(3px); transition:all .18s ease;
+}
+.tab .tab-sub{display:block; font-family:var(--font-body); font-weight:500; font-size:.7rem; color:var(--ink-faint); margin-top:2px;}
+.tab[aria-selected="true"]{
+  background:var(--surface); color:var(--ink); transform:translateY(0); box-shadow:0 -4px 14px var(--shadow);
+  border-color:var(--border); z-index:2;
+}
+.tab:hover:not([aria-selected="true"]){color:var(--ink); background:var(--surface-3);}
+.tab-icon{display:inline-flex; vertical-align:-4px; margin-right:8px;}
+.tab-icon svg{width:17px; height:17px;}
+
+.panels{
+  background:var(--surface); border:1px solid var(--border); border-radius:0 12px 12px 12px;
+  box-shadow:0 8px 30px var(--shadow); padding:34px; margin-top:-1px; position:relative;
+}
+.panel{display:none; animation:fadeIn .25s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+.section-title{
+  font-family:var(--font-display); font-size:1.2rem; font-weight:600; margin:0 0 4px; letter-spacing:-.01em;
+}
+.section-hint{color:var(--ink-soft); font-size:.87rem; margin:0 0 18px;}
+
+/* ============================= DROPZONE ============================= */
+.dropzone{
+  border:2px dashed var(--border-strong); border-radius:var(--radius-l); padding:40px 24px; text-align:center;
+  background:var(--surface-2); cursor:pointer; transition:all .18s ease; position:relative;
+}
+.dropzone:hover, .dropzone.dragover{ border-color:var(--accent); background:var(--accent-soft); }
+.dropzone.dragover{ transform:scale(1.005); }
+.dz-icon{width:46px; height:46px; margin:0 auto 14px; color:var(--accent);}
+.dropzone h3{margin:0 0 6px; font-family:var(--font-display); font-size:1.1rem; font-weight:600;}
+.dropzone p{margin:0; color:var(--ink-soft); font-size:.86rem;}
+.dropzone input[type="file"]{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.dz-hint-key{
+  display:inline-block; font-family:var(--font-mono); font-size:.72rem; background:var(--surface-3);
+  border:1px solid var(--border-strong); border-radius:5px; padding:1px 6px; margin:0 2px;
+}
+
+/* ============================= FILE / DOC CARD ============================= */
+.doc-card{
+  display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--border);
+  border-radius:var(--radius-m); background:var(--surface-2); margin-top:16px;
+}
+.doc-thumb-mini{
+  width:42px; height:54px; background:var(--surface); border:1px solid var(--border-strong); border-radius:4px;
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 2px 5px var(--shadow);
+}
+.doc-thumb-mini img, .doc-thumb-mini canvas{width:100%; height:100%; object-fit:cover;}
+.doc-meta{flex:1; min-width:0;}
+.doc-meta .name{font-weight:600; font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.doc-meta .sub{font-size:.78rem; color:var(--ink-soft); font-family:var(--font-mono); margin-top:2px;}
+.doc-card .ghost-btn{flex-shrink:0;}
+
+/* ============================= BUTTONS ============================= */
+.btn{
+  font-family:var(--font-body); font-weight:600; font-size:.87rem; border-radius:9px; padding:11px 20px;
+  border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  transition:all .15s ease;
+}
+.btn svg{width:16px; height:16px;}
+.btn-primary{background:var(--accent); color:var(--accent-ink); box-shadow:0 3px 12px var(--shadow-strong);}
+.btn-primary:hover{filter:brightness(1.08); transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.45; cursor:not-allowed; transform:none; filter:none;}
+.ghost-btn{
+  background:transparent; border:1px solid var(--border-strong); color:var(--ink);
+  padding:8px 14px; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+}
+.ghost-btn:hover{background:var(--surface-3);}
+.ghost-btn svg{width:14px; height:14px;}
+.ghost-btn.danger{color:var(--danger); border-color:var(--danger-soft);}
+.ghost-btn.danger:hover{background:var(--danger-soft);}
+.text-btn{background:none; border:none; color:var(--accent); font-weight:600; font-size:.83rem; cursor:pointer; padding:4px 0;}
+.text-btn:hover{text-decoration:underline;}
+
+/* ============================= MODE PICKER ============================= */
+.mode-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr)); gap:10px; margin:18px 0 22px;}
+.mode-card{
+  border:1.5px solid var(--border); border-radius:var(--radius-m); padding:14px; cursor:pointer; background:var(--surface);
+  transition:all .15s ease;
+}
+.mode-card svg{width:20px; height:20px; color:var(--accent); margin-bottom:8px;}
+.mode-card .m-title{font-weight:700; font-size:.87rem;}
+.mode-card .m-desc{font-size:.76rem; color:var(--ink-soft); margin-top:3px; line-height:1.4;}
+.mode-card:hover{border-color:var(--border-strong);}
+.mode-card.selected{border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 1px var(--accent);}
+
+/* ============================= RANGE BUILDER ============================= */
+.range-row{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-s); margin-bottom:8px; background:var(--surface-2);
+}
+.range-row.invalid{border-color:var(--danger); background:var(--danger-soft);}
+.range-row input[type="text"], .range-row input[type="number"]{
+  font-family:var(--font-mono); font-size:.85rem; border:1px solid var(--border-strong); border-radius:6px;
+  padding:7px 9px; background:var(--surface); color:var(--ink); width:90px;
+}
+.range-row .range-label{font-family:var(--font-mono); font-size:.75rem; color:var(--ink-faint); min-width:56px;}
+.range-row .to{color:var(--ink-faint); font-size:.8rem;}
+.range-row .err-msg{color:var(--danger); font-size:.74rem; margin-left:auto; padding-right:8px;}
+.range-row input[type="text"].name-input{width:150px; font-family:var(--font-body);}
+.icon-x{background:none; border:none; color:var(--ink-faint); cursor:pointer; padding:4px; border-radius:6px;}
+.icon-x:hover{color:var(--danger); background:var(--danger-soft);}
+.icon-x svg{width:16px; height:16px; display:block;}
+
+/* ============================= THUMB GRID ============================= */
+.thumb-toolbar{display:flex; align-items:center; justify-content:space-between; margin:22px 0 12px; flex-wrap:wrap; gap:10px;}
+.thumb-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:14px; max-height:560px;
+  overflow-y:auto; padding:4px 4px 8px; border:1px solid var(--border); border-radius:var(--radius-m); background:var(--surface-2);
+}
+.thumb-card{
+  border:2px solid transparent; border-radius:var(--radius-s); background:var(--surface); padding:8px 8px 10px;
+  cursor:pointer; position:relative; transition:all .15s ease;
+}
+.thumb-card:hover{border-color:var(--border-strong);}
+.thumb-card.excluded{opacity:.35;}
+.thumb-card.selected{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
+.thumb-canvas-wrap{
+  aspect-ratio:3/4; background:var(--surface-3); border-radius:4px; overflow:hidden; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 6px var(--shadow);
+}
+.thumb-canvas-wrap canvas{width:100%; height:100%; object-fit:contain; transition:transform .2s ease;}
+.thumb-num{text-align:center; font-family:var(--font-mono); font-size:.72rem; color:var(--ink-soft); margin-top:6px;}
+.thumb-actions{position:absolute; top:4px; right:4px; display:flex; gap:3px; opacity:0; transition:opacity .12s ease;}
+.thumb-card:hover .thumb-actions, .thumb-card:focus-within .thumb-actions{opacity:1;}
+.thumb-mini-btn{
+  width:22px; height:22px; border-radius:5px; border:none; background:rgba(0,0,0,.55); color:#fff;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.thumb-mini-btn svg{width:12px; height:12px;}
+.thumb-mini-btn:hover{background:var(--accent);}
+.thumb-loading{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
+
+/* ============================= STRUCTURE PREVIEW ============================= */
+.structure-preview{
+  border:1px solid var(--border); border-radius:var(--radius-m); padding:16px 18px; background:var(--surface-2); margin:18px 0;
+}
+.structure-preview h4{margin:0 0 10px; font-size:.85rem; font-weight:700; letter-spacing:.02em; text-transform:uppercase; color:var(--ink-soft);}
+.struct-file{
+  display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; font-size:.85rem; margin-bottom:4px;
+}
+.struct-file:nth-child(odd){background:var(--surface);}
+.struct-file .badge{
+  font-family:var(--font-mono); font-size:.7rem; background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:20px; flex-shrink:0;
+}
+
+/* ============================= MERGE LIST (sortable) ============================= */
+.merge-list{margin-top:18px; display:flex; flex-direction:column; gap:8px;}
+.merge-item{
+  display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-m); background:var(--surface-2); cursor:grab; transition:all .15s ease;
+}
+.merge-item.dragging{opacity:.4;}
+.merge-item.drag-over-top{border-top:2px solid var(--accent);}
+.merge-item.drag-over-bottom{border-bottom:2px solid var(--accent);}
+.drag-handle{color:var(--ink-faint); flex-shrink:0; cursor:grab;}
+.drag-handle svg{width:16px; height:16px; display:block;}
+.merge-item .order-num{
+  font-family:var(--font-mono); font-size:.75rem; color:var(--accent); background:var(--accent-soft);
+  width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+
+/* ============================= OPTIONS PANEL ============================= */
+.options-card{border:1px solid var(--border); border-radius:var(--radius-m); padding:18px 20px; background:var(--surface-2); margin-top:20px;}
+.opt-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid var(--border);}
+.opt-row:last-child{border-bottom:none;}
+.opt-label{font-weight:600; font-size:.88rem;}
+.opt-desc{font-size:.78rem; color:var(--ink-soft); margin-top:2px; max-width:440px;}
+.opt-controls{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+.opt-controls input[type="text"]{
+  font-family:var(--font-body); font-size:.83rem; border:1px solid var(--border-strong); border-radius:6px; padding:7px 9px;
+  background:var(--surface); color:var(--ink); width:150px;
+}
+select{
+  font-family:var(--font-body); font-size:.82rem; border:1px solid var(--border-strong); border-radius:6px;
+  padding:7px 9px; background:var(--surface); color:var(--ink);
+}
+input[type="range"]{accent-color:var(--accent);}
+
+/* toggle switch */
+.switch{position:relative; display:inline-block; width:42px; height:24px; flex-shrink:0;}
+.switch input{opacity:0; width:0; height:0;}
+.slider-toggle{
+  position:absolute; cursor:pointer; inset:0; background:var(--border-strong); border-radius:24px; transition:.2s;
+}
+.slider-toggle::before{
+  content:""; position:absolute; height:18px; width:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s;
+}
+.switch input:checked + .slider-toggle{background:var(--accent);}
+.switch input:checked + .slider-toggle::before{transform:translateX(18px);}
+.switch input:focus-visible + .slider-toggle{outline:2px solid var(--accent); outline-offset:2px;}
+
+/* ============================= SUMMARY BAR ============================= */
+.summary-bar{
+  display:flex; gap:28px; flex-wrap:wrap; padding:16px 20px; border-radius:var(--radius-m); background:var(--accent-soft);
+  border:1px solid var(--accent-dim); margin-top:20px;
+}
+.summary-stat .num{font-family:var(--font-display); font-size:1.5rem; font-weight:700; color:var(--accent);}
+.summary-stat .lbl{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:600;}
+
+/* ============================= RESULTS ============================= */
+.results{margin-top:22px; display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px;}
+.result-card{
+  border:1px solid var(--border); border-radius:var(--radius-m); background:var(--surface-2); padding:14px; text-align:center;
+  animation:popIn .3s ease;
+}
+@keyframes popIn{from{opacity:0; transform:scale(.94);} to{opacity:1; transform:none;}}
+.result-thumb{
+  aspect-ratio:3/4; background:var(--surface-3); border-radius:6px; margin-bottom:10px; overflow:hidden; box-shadow:0 3px 10px var(--shadow);
+  display:flex; align-items:center; justify-content:center;
+}
+.result-thumb canvas{width:100%; height:100%; object-fit:contain;}
+.result-card .r-name{font-weight:700; font-size:.85rem; word-break:break-word;}
+.result-card .r-sub{font-size:.75rem; color:var(--ink-soft); font-family:var(--font-mono); margin:3px 0 10px;}
+.result-actions{display:flex; gap:6px; justify-content:center;}
+
+/* ============================= MISC ============================= */
+.footer-actions{display:flex; align-items:center; justify-content:space-between; margin-top:28px; flex-wrap:wrap; gap:14px;}
+.empty-state{text-align:center; padding:30px 10px; color:var(--ink-faint); font-size:.85rem;}
+.spinner{
+  width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.progress-track{height:6px; background:var(--surface-3); border-radius:6px; overflow:hidden; margin-top:14px;}
+.progress-fill{height:100%; background:var(--accent); width:0%; transition:width .25s ease; border-radius:6px;}
+
+/* overlay */
+.overlay{
+  position:fixed; inset:0; background:rgba(20,18,15,.45); backdrop-filter:blur(2px); display:none;
+  align-items:center; justify-content:center; z-index:80;
+}
+html[data-theme="dark"] .overlay{background:rgba(0,0,0,.6);}
+.overlay.show{display:flex;}
+.overlay-card{
+  background:var(--surface); border-radius:var(--radius-l); padding:28px 34px; text-align:center; min-width:260px;
+  box-shadow:0 20px 60px var(--shadow-strong); border:1px solid var(--border);
+}
+.overlay-card .spin-big{
+  width:34px; height:34px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--accent);
+  animation:spin .8s linear infinite; margin:0 auto 14px;
+}
+.overlay-card p{margin:0; font-weight:600; font-size:.9rem;}
+.overlay-card .sub{font-weight:400; color:var(--ink-soft); font-size:.78rem; margin-top:4px;}
+
+/* toasts */
+.toast-stack{position:fixed; bottom:22px; right:22px; display:flex; flex-direction:column; gap:10px; z-index:90; max-width:340px;}
+.toast{
+  background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:9px;
+  padding:12px 16px; box-shadow:0 10px 30px var(--shadow-strong); font-size:.85rem; animation:slideIn .25s ease; display:flex; gap:10px; align-items:flex-start;
+}
+.toast.error{border-left-color:var(--danger);}
+.toast.success{border-left-color:var(--success);}
+.toast svg{width:17px; height:17px; flex-shrink:0; margin-top:1px;}
+.toast.error svg{color:var(--danger);}
+.toast.success svg{color:var(--success);}
+.toast.info svg{color:var(--accent);}
+@keyframes slideIn{from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:none;}}
+
+/* shortcuts modal */
+.modal-backdrop{position:fixed; inset:0; background:rgba(20,18,15,.5); z-index:95; display:none; align-items:center; justify-content:center;}
+.modal-backdrop.show{display:flex;}
+.modal{background:var(--surface); border-radius:var(--radius-l); padding:26px 28px; width:min(420px,90vw); border:1px solid var(--border); box-shadow:0 20px 60px var(--shadow-strong);}
+.modal h3{margin:0 0 14px; font-family:var(--font-display);}
+.kbd-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:.85rem;}
+.kbd-row:last-child{border:none;}
+kbd{font-family:var(--font-mono); background:var(--surface-3); border:1px solid var(--border-strong); border-radius:5px; padding:2px 7px; font-size:.76rem;}
+
+footer.credits{text-align:center; color:var(--ink-faint); font-size:.78rem; margin-top:50px;}
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;}
+
+@media (max-width:640px){
+  .panels{padding:20px;}
+  header.app-head{flex-direction:column; gap:16px;}
+  .tab{padding:12px 16px; font-size:.9rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="app-head">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6M9 9h2"/></svg>
+      </div>
+      <div>
+        <h1>Leaflet</h1>
+        <p>PDF Splitter &amp; Merger — 100% in your browser, nothing uploaded</p>
+      </div>
+    </div>
+    <div class="head-actions">
+      <button class="icon-btn" id="shortcutsBtn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h4M14 14h4"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabbar" role="tablist" aria-label="PDF tools">
+    <button class="tab" role="tab" id="tabSplitBtn" aria-selected="true" aria-controls="splitPanel">
+      <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 13h7v7h-7z"/><path stroke-dasharray="2 3" d="M4 20L20 4"/></svg></span>Split
+      <span class="tab-sub">One PDF → many</span>
+    </button>
+    <button class="tab" role="tab" id="tabMergeBtn" aria-selected="false" aria-controls="mergePanel">
+      <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v10a3 3 0 003 3h4M7 3H4M7 3h3M17 13v8M17 21l-3-3M17 21l3-3"/></svg></span>Merge
+      <span class="tab-sub">Many PDFs → one</span>
+    </button>
+  </nav>
+
+  <main class="panels">
+
+    <!-- ============================= SPLIT PANEL ============================= -->
+    <section class="panel active" id="splitPanel" role="tabpanel" aria-labelledby="tabSplitBtn">
+      <div id="splitDropStage">
+        <h2 class="section-title">Split a PDF</h2>
+        <p class="section-hint">Upload a single PDF to preview every page and choose how to divide it.</p>
+        <div class="dropzone" id="splitDropzone" tabindex="0" role="button" aria-label="Upload PDF to split">
+          <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+          <h3>Drop a PDF here, or click to browse</h3>
+          <p>Press <span class="dz-hint-key">Ctrl/⌘</span>+<span class="dz-hint-key">O</span> anytime to open a file</p>
+          <input type="file" id="splitFileInput" accept="application/pdf" tabindex="-1">
+        </div>
+      </div>
+
+      <div id="splitWorkspace" style="display:none;">
+        <div class="doc-card">
+          <div class="doc-thumb-mini" id="splitDocThumb"></div>
+          <div class="doc-meta">
+            <div class="name" id="splitDocName">—</div>
+            <div class="sub" id="splitDocMeta">—</div>
+          </div>
+          <button class="ghost-btn danger" id="splitReplaceBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+            Remove
+          </button>
+        </div>
+
+        <h3 class="section-title" style="margin-top:26px;">Choose a split method</h3>
+        <div class="mode-grid" id="modeGrid" role="radiogroup" aria-label="Split method"></div>
+
+        <div id="modeBody"></div>
+
+        <div class="structure-preview" id="structurePreview" style="display:none;">
+          <h4>Output preview</h4>
+          <div id="structureList"></div>
+        </div>
+
+        <div class="footer-actions">
+          <span class="section-hint" id="splitValidationMsg" style="margin:0;"></span>
+          <div style="display:flex; gap:10px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:.83rem; color:var(--ink-soft); cursor:pointer;">
+              <span class="switch"><input type="checkbox" id="splitCompress"><span class="slider-toggle"></span></span>
+              Compress output
+            </label>
+            <button class="btn btn-primary" id="runSplitBtn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 13h7v7h-7z"/></svg>
+              Split PDF
+            </button>
+          </div>
+        </div>
+
+        <div id="splitResultsWrap" style="display:none;">
+          <h3 class="section-title" style="margin-top:30px;">Result files</h3>
+          <div class="results" id="splitResults"></div>
+          <div style="margin-top:16px;">
+            <button class="ghost-btn" id="downloadAllZipBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Download all as .zip
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= MERGE PANEL ============================= -->
+    <section class="panel" id="mergePanel" role="tabpanel" aria-labelledby="tabMergeBtn">
+      <h2 class="section-title">Merge PDFs</h2>
+      <p class="section-hint">Upload multiple PDFs, drag to reorder, then combine into a single document.</p>
+      <div class="dropzone" id="mergeDropzone" tabindex="0" role="button" aria-label="Upload PDFs to merge">
+        <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+        <h3>Drop PDFs here, or click to browse</h3>
+        <p>You can select multiple files at once</p>
+        <input type="file" id="mergeFileInput" accept="application/pdf" multiple tabindex="-1">
+      </div>
+
+      <div id="mergeEmptyState" class="empty-state">No files added yet — your merge queue will appear here.</div>
+      <div class="merge-list" id="mergeList"></div>
+
+      <div class="summary-bar" id="mergeSummary" style="display:none;">
+        <div class="summary-stat"><div class="num" id="sumFiles">0</div><div class="lbl">Files</div></div>
+        <div class="summary-stat"><div class="num" id="sumPages">0</div><div class="lbl">Total pages</div></div>
+        <div class="summary-stat"><div class="num" id="sumSize">0 KB</div><div class="lbl">Est. output</div></div>
+      </div>
+
+      <div class="options-card" id="mergeOptions" style="display:none;">
+        <div class="opt-row">
+          <div>
+            <div class="opt-label">Add page numbers</div>
+            <div class="opt-desc">Stamp sequential page numbers onto every page of the merged document.</div>
+          </div>
+          <div class="opt-controls">
+            <select id="pageNumPosition">
+              <option value="bottom-center">Bottom center</option>
+              <option value="bottom-right">Bottom right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="top-right">Top right</option>
+            </select>
+            <span class="switch"><input type="checkbox" id="pageNumToggle"><span class="slider-toggle"></span></span>
+          </div>
+        </div>
+        <div class="opt-row">
+          <div>
+            <div class="opt-label">Add watermark</div>
+            <div class="opt-desc">Overlay diagonal text across every page — useful for drafts and confidential copies.</div>
+          </div>
+          <div class="opt-controls">
+            <input type="text" id="watermarkText" placeholder="e.g. DRAFT" maxlength="40">
+            <span class="switch"><input type="checkbox" id="watermarkToggle"><span class="slider-toggle"></span></span>
+          </div>
+        </div>
+        <div class="opt-row">
+          <div>
+            <div class="opt-label">Compress output</div>
+            <div class="opt-desc">Re-renders each page as an optimized image to shrink file size. Best for scans and image-heavy PDFs; text becomes non-selectable.</div>
+          </div>
+          <div class="opt-controls">
+            <input type="range" id="compressQuality" min="0.3" max="0.9" step="0.1" value="0.7" style="width:90px;" disabled>
+            <span class="switch"><input type="checkbox" id="mergeCompressToggle"><span class="slider-toggle"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <span class="section-hint" id="mergeValidationMsg" style="margin:0;"></span>
+        <button class="btn btn-primary" id="runMergeBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v10a3 3 0 003 3h4M7 3H4M7 3h3M17 13v8M17 21l-3-3M17 21l3-3"/></svg>
+          Merge PDFs
+        </button>
+      </div>
+
+      <div id="mergeResultWrap" style="display:none;">
+        <h3 class="section-title" style="margin-top:30px;">Merged document</h3>
+        <div class="results" id="mergeResult"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="credits">Leaflet runs entirely client-side using pdf-lib and pdf.js — your files never leave this device.</footer>
+</div>
+
+<!-- Processing overlay -->
+<div class="overlay" id="overlay" role="status" aria-live="polite">
+  <div class="overlay-card">
+    <div class="spin-big"></div>
+    <p id="overlayText">Processing…</p>
+    <p class="sub" id="overlaySub">This stays on your device the whole time</p>
+    <div class="progress-track"><div class="progress-fill" id="overlayProgress"></div></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+<!-- Shortcuts modal -->
+<div class="modal-backdrop" id="shortcutsModal">
+  <div class="modal">
+    <h3>Keyboard shortcuts</h3>
+    <div class="kbd-row"><span>Switch tools</span><span><kbd>1</kbd> / <kbd>2</kbd></span></div>
+    <div class="kbd-row"><span>Open file browser</span><span><kbd>Ctrl/⌘</kbd> + <kbd>O</kbd></span></div>
+    <div class="kbd-row"><span>Run split / merge</span><span><kbd>Ctrl/⌘</kbd> + <kbd>Enter</kbd></span></div>
+    <div class="kbd-row"><span>Toggle dark mode</span><span><kbd>D</kbd></span></div>
+    <div class="kbd-row"><span>Close dialogs</span><span><kbd>Esc</kbd></span></div>
+    <div style="text-align:right; margin-top:16px;"><button class="ghost-btn" id="closeShortcuts">Close</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const { PDFDocument, degrees, rgb, StandardFonts } = PDFLib;
+
+/* ============================= UTILITIES ============================= */
+const $ = (sel, ctx=document) => ctx.querySelector(sel);
+const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+function fmtBytes(bytes){
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+}
+function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+function uid(){ return Math.random().toString(36).slice(2, 10); }
+
+function showToast(message, type='info'){
+  const stack = $('#toastStack');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>'
+  };
+  el.innerHTML = `${icons[type]||icons.info}<span>${message}</span>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s ease, transform .3s ease'; el.style.opacity='0'; el.style.transform='translateX(20px)'; setTimeout(()=>el.remove(),300); }, 4200);
+}
+
+function showOverlay(text, sub){
+  $('#overlayText').textContent = text || 'Processing…';
+  $('#overlaySub').textContent = sub || 'This stays on your device the whole time';
+  $('#overlayProgress').style.width = '0%';
+  $('#overlay').classList.add('show');
+}
+function setOverlayProgress(pct){ $('#overlayProgress').style.width = clamp(pct,0,100)+'%'; }
+function hideOverlay(){ $('#overlay').classList.remove('show'); }
+
+/* ============================= THEME ============================= */
+function initTheme(){
+  const saved = localStorage.getItem('leaflet-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeIcon(theme);
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('leaflet-theme', next);
+  updateThemeIcon(next);
+}
+function updateThemeIcon(theme){
+  const icon = $('#themeIcon');
+  icon.innerHTML = theme === 'dark'
+    ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+    : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+}
+$('#themeBtn').addEventListener('click', toggleTheme);
+
+/* ============================= TABS ============================= */
+function setActiveTab(name){
+  const isSplit = name === 'split';
+  $('#tabSplitBtn').setAttribute('aria-selected', isSplit);
+  $('#tabMergeBtn').setAttribute('aria-selected', !isSplit);
+  $('#splitPanel').classList.toggle('active', isSplit);
+  $('#mergePanel').classList.toggle('active', !isSplit);
+}
+$('#tabSplitBtn').addEventListener('click', ()=>setActiveTab('split'));
+$('#tabMergeBtn').addEventListener('click', ()=>setActiveTab('merge'));
+
+/* ============================= SHORTCUTS MODAL ============================= */
+function openShortcuts(){ $('#shortcutsModal').classList.add('show'); }
+function closeShortcuts(){ $('#shortcutsModal').classList.remove('show'); }
+$('#shortcutsBtn').addEventListener('click', openShortcuts);
+$('#closeShortcuts').addEventListener('click', closeShortcuts);
+$('#shortcutsModal').addEventListener('click', e => { if(e.target.id==='shortcutsModal') closeShortcuts(); });
+
+document.addEventListener('keydown', (e)=>{
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  if (e.key === 'Escape'){ closeShortcuts(); return; }
+  if (e.key === '?'){ openShortcuts(); return; }
+  if (typing) return;
+  if (e.key === '1'){ setActiveTab('split'); }
+  if (e.key === '2'){ setActiveTab('merge'); }
+  if (e.key.toLowerCase() === 'd' && !e.metaKey && !e.ctrlKey){ toggleTheme(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o'){
+    e.preventDefault();
+    const activeSplit = $('#splitPanel').classList.contains('active');
+    (activeSplit ? $('#splitFileInput') : $('#mergeFileInput')).click();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
+    e.preventDefault();
+    const activeSplit = $('#splitPanel').classList.contains('active');
+    const btn = activeSplit ? $('#runSplitBtn') : $('#runMergeBtn');
+    if (btn && !btn.disabled) btn.click();
+  }
+});
+
+/* ============================= DROPZONE FACTORY ============================= */
+function wireDropzone(zoneEl, inputEl, onFiles){
+  const open = () => inputEl.click();
+  zoneEl.addEventListener('click', open);
+  zoneEl.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
+  ['dragenter','dragover'].forEach(evt => zoneEl.addEventListener(evt, e=>{ e.preventDefault(); zoneEl.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => zoneEl.addEventListener(evt, e=>{ e.preventDefault(); zoneEl.classList.remove('dragover'); }));
+  zoneEl.addEventListener('drop', e=>{
+    const files = Array.from(e.dataTransfer.files).filter(f=>f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+    if (files.length) onFiles(files); else showToast('Only PDF files are supported.', 'error');
+  });
+  inputEl.addEventListener('change', e=>{
+    const files = Array.from(e.target.files);
+    if (files.length) onFiles(files);
+    inputEl.value = '';
+  });
+}
+
+/* ============================= PDF.js THUMBNAIL RENDERING ============================= */
+async function renderPageToCanvas(pdfjsDoc, pageNum, targetWidth=200){
+  const page = await pdfjsDoc.getPage(pageNum);
+  const baseViewport = page.getViewport({ scale: 1 });
+  const scale = targetWidth / baseViewport.width;
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  return canvas;
+}
+
+async function loadPdfjs(bytes){
+  return pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+}
+
+/* ============================= SPLIT STATE ============================= */
+const splitState = {
+  file: null, bytes: null, pdfjsDoc: null, pdfLibBytesCopy: null,
+  pageCount: 0, mode: 'ranges',
+  ranges: [], // {id, start, end, name}
+  everyN: 3,
+  afterPages: '',
+  excluded: new Set(), // page indices (0-based) removed globally
+  rotations: {}, // pageIndex(0-based) -> degrees
+  selected: new Set(), // for extract mode
+  results: []
+};
+
+const SPLIT_MODES = [
+  { id:'ranges', title:'Custom ranges', desc:'Define multiple page ranges, each becomes its own file.',
+    icon:'<path d="M4 4h6v6H4zM14 14h6v6h-6z"/><path d="M10 7h10M4 17h6"/>' },
+  { id:'everyN', title:'Every N pages', desc:'Automatically chunk the document every N pages.',
+    icon:'<path d="M3 5h4v14H3zM10 5h4v14h-4zM17 5h4v14h-4z"/>' },
+  { id:'after', title:'Split after pages', desc:'Cut the document right after specific page numbers.',
+    icon:'<path d="M4 4v16M4 12h16" stroke-dasharray="3 3"/>' },
+  { id:'extract', title:'Extract pages', desc:'Click thumbnails to pull selected pages into one new file.',
+    icon:'<path d="M9 9h6v6H9z"/><path d="M4 4h16v16H4z" stroke-dasharray="2 2"/>' }
+];
+
+function renderModeGrid(){
+  const grid = $('#modeGrid');
+  grid.innerHTML = SPLIT_MODES.map(m => `
+    <div class="mode-card ${splitState.mode===m.id?'selected':''}" role="radio" aria-checked="${splitState.mode===m.id}" tabindex="0" data-mode="${m.id}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${m.icon}</svg>
+      <div class="m-title">${m.title}</div>
+      <div class="m-desc">${m.desc}</div>
+    </div>`).join('');
+  $$('.mode-card', grid).forEach(card=>{
+    const activate = () => { splitState.mode = card.dataset.mode; renderModeGrid(); renderModeBody(); updateStructurePreview(); };
+    card.addEventListener('click', activate);
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); activate(); } });
+  });
+}
+
+function pageIsExcluded(i){ return splitState.excluded.has(i); }
+
+function renderModeBody(){
+  const body = $('#modeBody');
+  const n = splitState.pageCount;
+  if (splitState.mode === 'ranges'){
+    body.innerHTML = `
+      <h4 style="font-size:.85rem; margin:20px 0 10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Ranges</h4>
+      <div id="rangeRows"></div>
+      <button class="text-btn" id="addRangeBtn">+ Add another range</button>`;
+    renderRangeRows();
+    $('#addRangeBtn').addEventListener('click', ()=>{
+      splitState.ranges.push({ id:uid(), start:1, end: n, name:`Part ${splitState.ranges.length+1}` });
+      renderRangeRows(); updateStructurePreview();
+    });
+    if (!splitState.ranges.length){
+      splitState.ranges.push({ id:uid(), start:1, end:Math.min(1,n), name:'Part 1' });
+      renderRangeRows();
+    }
+  } else if (splitState.mode === 'everyN'){
+    body.innerHTML = `
+      <h4 style="font-size:.85rem; margin:20px 0 10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Chunk size</h4>
+      <div class="range-row">
+        <span class="range-label">Every</span>
+        <input type="number" min="1" max="${n}" value="${splitState.everyN}" id="everyNInput">
+        <span class="to">pages → ${Math.max(1,Math.ceil((n - splitState.excluded.size)/Math.max(1,splitState.everyN)))} file(s)</span>
+      </div>`;
+    $('#everyNInput').addEventListener('input', e=>{
+      splitState.everyN = clamp(parseInt(e.target.value||'1',10),1,n);
+      renderModeBody(); updateStructurePreview();
+    });
+  } else if (splitState.mode === 'after'){
+    body.innerHTML = `
+      <h4 style="font-size:.85rem; margin:20px 0 10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Split after page(s)</h4>
+      <div class="range-row">
+        <span class="range-label">Cut after</span>
+        <input type="text" id="afterInput" placeholder="e.g. 3, 7, 12" value="${splitState.afterPages}" style="width:220px;">
+      </div>
+      <p class="section-hint">Comma-separated page numbers. Document splits immediately after each listed page.</p>`;
+    $('#afterInput').addEventListener('input', e=>{ splitState.afterPages = e.target.value; updateStructurePreview(); });
+  } else if (splitState.mode === 'extract'){
+    body.innerHTML = `<p class="section-hint" style="margin-top:20px;">Click thumbnails below to select pages for extraction. Selected pages are pulled into a single new file in the order shown.</p>`;
+  }
+  renderThumbnails();
+}
+
+function renderRangeRows(){
+  const wrap = $('#rangeRows');
+  const n = splitState.pageCount;
+  wrap.innerHTML = splitState.ranges.map(r=>{
+    const invalid = !(r.start>=1 && r.end<=n && r.start<=r.end);
+    return `<div class="range-row ${invalid?'invalid':''}" data-id="${r.id}">
+      <input type="text" class="name-input" value="${r.name}" data-field="name" aria-label="Range name">
+      <span class="range-label">Pages</span>
+      <input type="number" min="1" max="${n}" value="${r.start}" data-field="start" aria-label="Start page">
+      <span class="to">to</span>
+      <input type="number" min="1" max="${n}" value="${r.end}" data-field="end" aria-label="End page">
+      ${invalid ? `<span class="err-msg">Invalid range (1–${n})</span>` : ''}
+      <button class="icon-x" data-remove="${r.id}" aria-label="Remove range"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>`;
+  }).join('') || `<p class="section-hint">No ranges yet — add one to begin.</p>`;
+
+  $$('.range-row', wrap).forEach(row=>{
+    const id = row.dataset.id;
+    $$('input', row).forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const r = splitState.ranges.find(x=>x.id===id);
+        const field = inp.dataset.field;
+        if (field === 'name') r.name = inp.value;
+        else r[field] = clamp(parseInt(inp.value||'1',10), 1, n);
+        renderRangeRows(); updateStructurePreview();
+      });
+    });
+  });
+  $$('[data-remove]', wrap).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      splitState.ranges = splitState.ranges.filter(r=>r.id!==btn.dataset.remove);
+      renderRangeRows(); updateStructurePreview();
+    });
+  });
+  updateRunSplitState();
+}
+
+/* ---- thumbnails ---- */
+async function renderThumbnails(){
+  const grid = $('#modeBody');
+  const toolbar = document.createElement('div');
+  toolbar.className = 'thumb-toolbar';
+  toolbar.innerHTML = `<h4 style="margin:0; font-size:.85rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">All pages (${splitState.pageCount})</h4>
+    <span class="section-hint" style="margin:0;">Hover a page to rotate or exclude it</span>`;
+  const grid2 = document.createElement('div');
+  grid2.className = 'thumb-grid';
+  grid2.id = 'thumbGrid';
+  grid.appendChild(toolbar);
+  grid.appendChild(grid2);
+
+  for (let i=1;i<=splitState.pageCount;i++){
+    const card = document.createElement('div');
+    const idx0 = i-1;
+    card.className = 'thumb-card';
+    card.dataset.page = i;
+    card.innerHTML = `
+      <div class="thumb-actions">
+        <button class="thumb-mini-btn" data-act="rotate" aria-label="Rotate page ${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg></button>
+        <button class="thumb-mini-btn" data-act="exclude" aria-label="Exclude page ${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="thumb-canvas-wrap"><div class="thumb-loading"><div class="spinner" style="border-color:var(--border); border-top-color:var(--accent);"></div></div></div>
+      <div class="thumb-num">Page ${i}</div>`;
+    grid2.appendChild(card);
+
+    if (splitState.mode === 'extract'){
+      card.addEventListener('click', (e)=>{
+        if (e.target.closest('.thumb-mini-btn')) return;
+        if (pageIsExcluded(idx0)) return;
+        if (splitState.selected.has(idx0)) splitState.selected.delete(idx0); else splitState.selected.add(idx0);
+        card.classList.toggle('selected');
+        updateStructurePreview(); updateRunSplitState();
+      });
+    }
+    card.querySelector('[data-act="rotate"]').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const cur = splitState.rotations[idx0] || 0;
+      splitState.rotations[idx0] = (cur + 90) % 360;
+      const canvas = card.querySelector('canvas');
+      if (canvas) canvas.style.transform = `rotate(${splitState.rotations[idx0]}deg)`;
+    });
+    card.querySelector('[data-act="exclude"]').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if (pageIsExcluded(idx0)) splitState.excluded.delete(idx0); else splitState.excluded.add(idx0);
+      card.classList.toggle('excluded');
+      updateStructurePreview();
+    });
+    if (splitState.selected.has(idx0)) card.classList.add('selected');
+    if (pageIsExcluded(idx0)) card.classList.add('excluded');
+  }
+
+  // lazy render via IntersectionObserver
+  const io = new IntersectionObserver(async (entries)=>{
+    for (const entry of entries){
+      if (entry.isIntersecting){
+        const card = entry.target;
+        io.unobserve(card);
+        const pageNum = parseInt(card.dataset.page,10);
+        try{
+          const canvas = await renderPageToCanvas(splitState.pdfjsDoc, pageNum, 220);
+          const idx0 = pageNum-1;
+          if (splitState.rotations[idx0]) canvas.style.transform = `rotate(${splitState.rotations[idx0]}deg)`;
+          const wrap = card.querySelector('.thumb-canvas-wrap');
+          wrap.innerHTML = '';
+          wrap.appendChild(canvas);
+        }catch(err){ /* ignore individual failures */ }
+      }
+    }
+  }, { root: grid2, rootMargin: '200px' });
+  $$('.thumb-card', grid2).forEach(c=>io.observe(c));
+}
+
+/* ---- structure preview / validation ---- */
+function computeSplitPlan(){
+  const n = splitState.pageCount;
+  const active = (i)=>!pageIsExcluded(i);
+  let plan = []; // array of {name, pages:[0-based indices]}
+  if (splitState.mode === 'ranges'){
+    splitState.ranges.forEach((r,idx)=>{
+      const valid = r.start>=1 && r.end<=n && r.start<=r.end;
+      if (!valid) return;
+      const pages = [];
+      for (let p=r.start; p<=r.end; p++){ if (active(p-1)) pages.push(p-1); }
+      if (pages.length) plan.push({ name: (r.name||`Part ${idx+1}`).trim() || `Part ${idx+1}`, pages });
+    });
+  } else if (splitState.mode === 'everyN'){
+    const activePages = []; for (let i=0;i<n;i++) if (active(i)) activePages.push(i);
+    for (let i=0;i<activePages.length;i+=splitState.everyN){
+      plan.push({ name:`Part ${plan.length+1}`, pages: activePages.slice(i,i+splitState.everyN) });
+    }
+  } else if (splitState.mode === 'after'){
+    const cuts = splitState.afterPages.split(',').map(s=>parseInt(s.trim(),10)).filter(x=>!isNaN(x) && x>=1 && x<n).sort((a,b)=>a-b);
+    const activePages = []; for (let i=0;i<n;i++) if (active(i)) activePages.push(i);
+    let boundaries = [0, ...cuts, n];
+    boundaries = [...new Set(boundaries)].sort((a,b)=>a-b);
+    for (let i=0;i<boundaries.length-1;i++){
+      const pages = activePages.filter(p=>p>=boundaries[i] && p<boundaries[i+1]);
+      if (pages.length) plan.push({ name:`Part ${plan.length+1}`, pages });
+    }
+  } else if (splitState.mode === 'extract'){
+    const pages = [...splitState.selected].filter(active).sort((a,b)=>a-b);
+    if (pages.length) plan.push({ name:'Extracted pages', pages });
+  }
+  return plan;
+}
+
+function updateStructurePreview(){
+  const plan = computeSplitPlan();
+  const wrap = $('#structurePreview');
+  const list = $('#structureList');
+  if (!plan.length){ wrap.style.display='none'; updateRunSplitState(); return; }
+  wrap.style.display='block';
+  list.innerHTML = plan.map(f=>`<div class="struct-file"><span class="badge">${f.pages.length}p</span><span>${f.name}</span><span style="margin-left:auto; color:var(--ink-faint); font-family:var(--font-mono); font-size:.72rem;">pages ${f.pages.map(p=>p+1).join(', ')}</span></div>`).join('');
+  updateRunSplitState();
+}
+
+function updateRunSplitState(){
+  const plan = computeSplitPlan();
+  const btn = $('#runSplitBtn');
+  const msg = $('#splitValidationMsg');
+  const hasInvalidRange = splitState.mode==='ranges' && splitState.ranges.some(r=>!(r.start>=1 && r.end<=splitState.pageCount && r.start<=r.end));
+  if (!plan.length){
+    btn.disabled = true;
+    msg.textContent = hasInvalidRange ? 'Fix invalid ranges before splitting.' : 'Define at least one valid output above.';
+  } else if (hasInvalidRange){
+    btn.disabled = false;
+    msg.textContent = `${plan.length} output file(s) will be created — some invalid ranges will be skipped.`;
+  } else {
+    btn.disabled = false;
+    msg.textContent = `Ready — ${plan.length} output file(s) will be created.`;
+  }
+}
+
+/* ---- load split file ---- */
+async function handleSplitFile(file){
+  try{
+    showOverlay('Reading PDF…', file.name);
+    const buf = await file.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const pdfjsDoc = await loadPdfjs(bytes);
+    splitState.file = file; splitState.bytes = bytes; splitState.pdfjsDoc = pdfjsDoc;
+    splitState.pageCount = pdfjsDoc.numPages;
+    splitState.ranges = []; splitState.excluded = new Set(); splitState.rotations = {}; splitState.selected = new Set();
+    splitState.mode = 'ranges'; splitState.results = [];
+
+    $('#splitDocName').textContent = file.name;
+    $('#splitDocMeta').textContent = `${splitState.pageCount} page${splitState.pageCount!==1?'s':''} · ${fmtBytes(file.size)}`;
+    const thumbCanvas = await renderPageToCanvas(pdfjsDoc, 1, 90);
+    $('#splitDocThumb').innerHTML=''; $('#splitDocThumb').appendChild(thumbCanvas);
+
+    $('#splitDropStage').style.display='none';
+    $('#splitWorkspace').style.display='block';
+    $('#splitResultsWrap').style.display='none';
+    renderModeGrid(); renderModeBody(); updateStructurePreview();
+    hideOverlay();
+    showToast(`Loaded "${file.name}" — ${splitState.pageCount} pages detected.`, 'success');
+  }catch(err){
+    hideOverlay();
+    console.error(err);
+    showToast('Could not read that PDF. It may be corrupted or password-protected.', 'error');
+  }
+}
+wireDropzone($('#splitDropzone'), $('#splitFileInput'), files=>handleSplitFile(files[0]));
+$('#splitReplaceBtn').addEventListener('click', ()=>{
+  splitState.file=null;
+  $('#splitWorkspace').style.display='none';
+  $('#splitDropStage').style.display='block';
+});
+
+/* ---- compression (rasterize) ---- */
+async function rasterizeCompress(bytes, quality=0.7, onProgress){
+  const srcDoc = await loadPdfjs(bytes);
+  const outDoc = await PDFDocument.create();
+  const total = srcDoc.numPages;
+  for (let i=1;i<=total;i++){
+    const page = await srcDoc.getPage(i);
+    const viewport1 = page.getViewport({ scale: 1 });
+    const renderScale = 1.6;
+    const viewport = page.getViewport({ scale: renderScale });
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    const jpgBytes = Uint8Array.from(atob(dataUrl.split(',')[1]), c=>c.charCodeAt(0));
+    const jpgImage = await outDoc.embedJpg(jpgBytes);
+    const newPage = outDoc.addPage([viewport1.width, viewport1.height]);
+    newPage.drawImage(jpgImage, { x:0, y:0, width:viewport1.width, height:viewport1.height });
+    if (onProgress) onProgress(i/total*100);
+  }
+  return outDoc.save();
+}
+
+/* ---- run split ---- */
+$('#runSplitBtn').addEventListener('click', async ()=>{
+  const plan = computeSplitPlan();
+  if (!plan.length) return;
+  try{
+    showOverlay('Splitting PDF…', `Building ${plan.length} file(s)`);
+    const results = [];
+    for (let f=0; f<plan.length; f++){
+      const item = plan[f];
+      const srcDoc = await PDFDocument.load(splitState.bytes.slice(0));
+      const outDoc = await PDFDocument.create();
+      const copied = await outDoc.copyPages(srcDoc, item.pages);
+      copied.forEach((p, i)=>{
+        const idx0 = item.pages[i];
+        const rot = splitState.rotations[idx0];
+        if (rot) p.setRotation(degrees(rot));
+        outDoc.addPage(p);
+      });
+      let outBytes = await outDoc.save();
+      if ($('#splitCompress').checked){
+        outBytes = await rasterizeCompress(outBytes, 0.7);
+      }
+      const name = `${(item.name||'part').replace(/[^\w\- ]/g,'').trim() || 'part'}.pdf`;
+      results.push({ name, bytes: outBytes, pages: item.pages.length });
+      setOverlayProgress((f+1)/plan.length*100);
+    }
+    splitState.results = results;
+    await renderSplitResults(results);
+    hideOverlay();
+    showToast(`Split complete — ${results.length} file(s) ready to download.`, 'success');
+  }catch(err){
+    hideOverlay(); console.error(err);
+    showToast('Something went wrong while splitting this PDF.', 'error');
+  }
+});
+
+async function renderSplitResults(results){
+  const wrap = $('#splitResults');
+  wrap.innerHTML = '';
+  $('#splitResultsWrap').style.display='block';
+  for (const r of results){
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `<div class="result-thumb"></div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-sub">${r.pages} page${r.pages!==1?'s':''} · ${fmtBytes(r.bytes.byteLength||r.bytes.length)}</div>
+      <div class="result-actions">
+        <button class="ghost-btn" data-act="preview">Preview</button>
+        <button class="ghost-btn" data-act="download">Download</button>
+      </div>`;
+    wrap.appendChild(card);
+    try{
+      const doc = await loadPdfjs(r.bytes);
+      const canvas = await renderPageToCanvas(doc, 1, 200);
+      card.querySelector('.result-thumb').appendChild(canvas);
+    }catch(e){}
+    const blob = new Blob([r.bytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    card.querySelector('[data-act="download"]').addEventListener('click', ()=>{
+      const a = document.createElement('a'); a.href=url; a.download=r.name; a.click();
+    });
+    card.querySelector('[data-act="preview"]').addEventListener('click', ()=>{ window.open(url,'_blank'); });
+  }
+}
+
+$('#downloadAllZipBtn').addEventListener('click', async ()=>{
+  if (!splitState.results.length) return;
+  showOverlay('Packaging files…','Creating .zip archive');
+  const zip = new JSZip();
+  splitState.results.forEach(r=>zip.file(r.name, r.bytes));
+  const blob = await zip.generateAsync({ type:'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='split-output.zip'; a.click();
+  hideOverlay();
+});
+
+/* ============================= MERGE STATE ============================= */
+const mergeState = { items: [] }; // {id, file, bytes, pageCount, name, size}
+
+function updateMergeSummary(){
+  const n = mergeState.items.length;
+  $('#mergeEmptyState').style.display = n ? 'none' : 'block';
+  $('#mergeSummary').style.display = n ? 'flex' : 'none';
+  $('#mergeOptions').style.display = n ? 'block' : 'none';
+  const totalPages = mergeState.items.reduce((s,i)=>s+i.pageCount,0);
+  const totalSize = mergeState.items.reduce((s,i)=>s+i.size,0);
+  $('#sumFiles').textContent = n;
+  $('#sumPages').textContent = totalPages;
+  $('#sumSize').textContent = fmtBytes(totalSize);
+  $('#runMergeBtn').disabled = n < 2;
+  $('#mergeValidationMsg').textContent = n===0 ? 'Add at least two PDFs to merge.' : n===1 ? 'Add one more PDF to enable merging.' : `Ready — ${n} files will be combined in the order shown.`;
+}
+
+async function addMergeFiles(files){
+  for (const file of files){
+    try{
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      const doc = await loadPdfjs(bytes);
+      mergeState.items.push({ id:uid(), file, bytes, pageCount:doc.numPages, name:file.name, size:file.size, pdfjsDoc:doc });
+    }catch(e){ showToast(`Skipped "${file.name}" — couldn't be read as a PDF.`, 'error'); }
+  }
+  renderMergeList();
+  updateMergeSummary();
+}
+wireDropzone($('#mergeDropzone'), $('#mergeFileInput'), addMergeFiles);
+
+async function renderMergeList(){
+  const list = $('#mergeList');
+  list.innerHTML = '';
+  mergeState.items.forEach((item, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'merge-item';
+    row.draggable = true;
+    row.dataset.id = item.id;
+    row.innerHTML = `
+      <span class="order-num">${idx+1}</span>
+      <span class="drag-handle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/></svg></span>
+      <div class="doc-thumb-mini" data-thumb></div>
+      <div class="doc-meta">
+        <div class="name">${item.name}</div>
+        <div class="sub">${item.pageCount} page${item.pageCount!==1?'s':''} · ${fmtBytes(item.size)}</div>
+      </div>
+      <button class="icon-x" data-remove aria-label="Remove ${item.name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+    list.appendChild(row);
+    renderPageToCanvas(item.pdfjsDoc, 1, 80).then(c=>{ row.querySelector('[data-thumb]').appendChild(c); }).catch(()=>{});
+    row.querySelector('[data-remove]').addEventListener('click', ()=>{
+      mergeState.items = mergeState.items.filter(i=>i.id!==item.id);
+      renderMergeList(); updateMergeSummary();
+    });
+  });
+  wireMergeDragDrop();
+}
+
+function wireMergeDragDrop(){
+  const rows = $$('.merge-item');
+  let draggedId = null;
+  rows.forEach(row=>{
+    row.addEventListener('dragstart', ()=>{ draggedId = row.dataset.id; row.classList.add('dragging'); });
+    row.addEventListener('dragend', ()=>{ row.classList.remove('dragging'); rows.forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom')); });
+    row.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const rect = row.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height/2;
+      row.classList.toggle('drag-over-top', before);
+      row.classList.toggle('drag-over-bottom', !before);
+    });
+    row.addEventListener('dragleave', ()=> row.classList.remove('drag-over-top','drag-over-bottom'));
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      row.classList.remove('drag-over-top','drag-over-bottom');
+      const targetId = row.dataset.id;
+      if (draggedId === targetId) return;
+      const fromIdx = mergeState.items.findIndex(i=>i.id===draggedId);
+      const toIdx = mergeState.items.findIndex(i=>i.id===targetId);
+      const [moved] = mergeState.items.splice(fromIdx,1);
+      const rect = row.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height/2;
+      let insertAt = mergeState.items.findIndex(i=>i.id===targetId);
+      if (!before) insertAt += 1;
+      mergeState.items.splice(insertAt,0,moved);
+      renderMergeList(); updateMergeSummary();
+    });
+  });
+}
+
+/* watermark/page-number toggle enables */
+$('#watermarkToggle').addEventListener('change', e=>{ $('#watermarkText').disabled = !e.target.checked; });
+$('#mergeCompressToggle').addEventListener('change', e=>{ $('#compressQuality').disabled = !e.target.checked; });
+
+function positionFor(name, pageWidth, pageHeight, textWidth, margin=28){
+  switch(name){
+    case 'bottom-right': return { x: pageWidth - textWidth - margin, y: margin };
+    case 'bottom-left': return { x: margin, y: margin };
+    case 'top-right': return { x: pageWidth - textWidth - margin, y: pageHeight - margin };
+    default: return { x: (pageWidth - textWidth)/2, y: margin };
+  }
+}
+
+$('#runMergeBtn').addEventListener('click', async ()=>{
+  if (mergeState.items.length < 2) return;
+  try{
+    showOverlay('Merging PDFs…', `Combining ${mergeState.items.length} files`);
+    const outDoc = await PDFDocument.create();
+    for (let i=0;i<mergeState.items.length;i++){
+      const item = mergeState.items[i];
+      const srcDoc = await PDFDocument.load(item.bytes.slice(0));
+      const pages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+      pages.forEach(p=>outDoc.addPage(p));
+      setOverlayProgress((i+1)/mergeState.items.length*70);
+    }
+
+    const addPageNumbers = $('#pageNumToggle').checked;
+    const addWatermark = $('#watermarkToggle').checked && $('#watermarkText').value.trim();
+    if (addPageNumbers || addWatermark){
+      const font = await outDoc.embedFont(StandardFonts.Helvetica);
+      const pages = outDoc.getPages();
+      pages.forEach((page, idx)=>{
+        const { width, height } = page.getSize();
+        if (addWatermark){
+          const text = $('#watermarkText').value.trim();
+          const size = 46;
+          const textWidth = font.widthOfTextAtSize(text, size);
+          page.drawText(text, {
+            x: width/2 - textWidth/2, y: height/2, size, font,
+            color: rgb(0.55,0.55,0.55), opacity: 0.28, rotate: degrees(45)
+          });
+        }
+        if (addPageNumbers){
+          const label = `${idx+1} / ${pages.length}`;
+          const size = 10;
+          const textWidth = font.widthOfTextAtSize(label, size);
+          const pos = positionFor($('#pageNumPosition').value, width, height, textWidth);
+          page.drawText(label, { x: pos.x, y: pos.y, size, font, color: rgb(0.35,0.35,0.35) });
+        }
+      });
+    }
+    setOverlayProgress(85);
+    let outBytes = await outDoc.save();
+    if ($('#mergeCompressToggle').checked){
+      showOverlay('Compressing…','Re-rendering pages');
+      outBytes = await rasterizeCompress(outBytes, parseFloat($('#compressQuality').value), p=>setOverlayProgress(85 + p*0.15));
+    }
+    setOverlayProgress(100);
+
+    const wrap = $('#mergeResult');
+    wrap.innerHTML = '';
+    $('#mergeResultWrap').style.display='block';
+    const totalPages = outDoc.getPageCount ? outDoc.getPageCount() : outDoc.getPages().length;
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `<div class="result-thumb"></div>
+      <div class="r-name">merged.pdf</div>
+      <div class="r-sub">${totalPages} pages · ${fmtBytes(outBytes.byteLength||outBytes.length)}</div>
+      <div class="result-actions">
+        <button class="ghost-btn" data-act="preview">Preview</button>
+        <button class="ghost-btn" data-act="download">Download</button>
+      </div>`;
+    wrap.appendChild(card);
+    const doc = await loadPdfjs(outBytes);
+    const canvas = await renderPageToCanvas(doc, 1, 200);
+    card.querySelector('.result-thumb').appendChild(canvas);
+    const blob = new Blob([outBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    card.querySelector('[data-act="download"]').addEventListener('click', ()=>{ const a=document.createElement('a'); a.href=url; a.download='merged.pdf'; a.click(); });
+    card.querySelector('[data-act="preview"]').addEventListener('click', ()=>window.open(url,'_blank'));
+
+    hideOverlay();
+    showToast('Merge complete — your document is ready.', 'success');
+  }catch(err){
+    hideOverlay(); console.error(err);
+    showToast('Something went wrong while merging these PDFs.', 'error');
+  }
+});
+
+/* ============================= INIT ============================= */
+initTheme();
+updateMergeSummary();
+</script>
+</body>
+</html>
