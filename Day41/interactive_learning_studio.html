@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regression &amp; Correlation Analysis · Interactive Learning Studio</title>
+<style>
+:root{
+  --ink-950:#0B1220;
+  --ink-900:#0F1826;
+  --ink-800:#141F30;
+  --ink-700:#1C2A40;
+  --ink-600:#2A3B56;
+  --ink-line:#2E4059;
+  --paper-50:#EDF1F5;
+  --paper-100:#E4EAF1;
+  --paper-200:#D6DEE9;
+  --paper-ink:#16202B;
+  --amber:#F2A93B;
+  --amber-dim:#B9812B;
+  --teal:#5EC8D8;
+  --teal-dim:#3E8E9C;
+  --rose:#E4636F;
+  --mint:#6FD69B;
+  --violet:#9C8CF5;
+  --font-display: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-body: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono","Cascadia Code","Consolas","Roboto Mono", monospace;
+  --radius: 14px;
+  --bg: var(--ink-950);
+  --surface: var(--ink-900);
+  --surface-2: var(--ink-800);
+  --surface-3: var(--ink-700);
+  --line: var(--ink-line);
+  --text: #E7ECF3;
+  --text-dim: #9BAAC2;
+  --text-faint: #64768F;
+  --accent: var(--amber);
+  --accent-2: var(--teal);
+}
+html[data-theme="light"]{
+  --bg: var(--paper-50);
+  --surface: #FFFFFF;
+  --surface-2: var(--paper-100);
+  --surface-3: var(--paper-200);
+  --line: #C7D2E0;
+  --text: var(--paper-ink);
+  --text-dim: #45566B;
+  --text-faint: #7488A0;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.6;
+  transition:background .3s ease,color .3s ease;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent);color:var(--ink-950);}
+a{color:var(--accent-2);}
+.mono{font-family:var(--font-mono);}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:700;
+}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:800;letter-spacing:-.01em;margin:0 0 .4em;}
+h1{font-size:2.6rem;letter-spacing:-.02em;}
+h2{font-size:1.85rem;}
+h3{font-size:1.3rem;}
+p{color:var(--text-dim);margin:0 0 1em;}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:1.5rem;
+}
+.btn{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:.92rem;
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  color:var(--text);
+  padding:.75rem 1.4rem;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .18s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--ink-950);}
+.btn-primary:hover{background:var(--amber-dim);border-color:var(--amber-dim);color:var(--ink-950);}
+.btn-ghost{background:transparent;}
+.pill{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  padding:.25rem .6rem;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-2);}
+@media print{
+  .no-print{display:none !important;}
+  body{background:#fff;color:#000;}
+}
+</style>
+</head>
+<body>
+<style id="layout-css">
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.8rem 1.5rem;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:.6rem;font-family:var(--font-display);font-weight:800;}
+.brand .mark{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--amber),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:800;color:var(--ink-950);font-size:.85rem;
+}
+.topbar-right{display:flex;align-items:center;gap:.6rem;}
+.icon-btn{
+  width:38px;height:38px;border-radius:9px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+}
+.icon-btn:hover{border-color:var(--accent);}
+.progress-track{
+  width:140px;height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden;
+}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));width:0%;transition:width .5s ease;}
+.shell{max-width:1180px;margin:0 auto;padding:0 1.5rem 6rem;}
+.hero{
+  display:grid;grid-template-columns:1.1fr .9fr;gap:2.5rem;
+  padding:3.5rem 0 2.5rem;align-items:center;
+  border-bottom:1px solid var(--line);
+}
+.hero h1{font-size:2.7rem;}
+.hero-badges{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.2rem 0 1.6rem;}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin-top:1.5rem;}
+.stat-box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;}
+.stat-box .num{font-family:var(--font-mono);font-size:1.5rem;font-weight:800;color:var(--accent);}
+.stat-box .lab{font-size:.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+.hero-visual{
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  padding:1.2rem;position:relative;overflow:hidden;
+}
+.reward-strip{
+  display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.6rem;
+}
+.reward-chip{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--surface);border:1px solid var(--line);border-radius:99px;
+  padding:.45rem .9rem .45rem .5rem;font-size:.82rem;color:var(--text-dim);
+}
+.reward-chip .dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.section-head{margin:3.2rem 0 1.6rem;}
+.section-head .eyebrow{margin-bottom:.4rem;display:block;}
+.nav-rail{
+  position:sticky;top:70px;
+  display:flex;gap:.5rem;overflow-x:auto;padding:.6rem 0 1.2rem;
+  border-bottom:1px solid var(--line);margin-bottom:1rem;background:var(--bg);z-index:30;
+}
+.nav-chip{
+  flex:0 0 auto;font-family:var(--font-mono);font-size:.78rem;padding:.5rem .9rem;
+  border-radius:99px;border:1px solid var(--line);color:var(--text-faint);cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;gap:.4rem;background:var(--surface);
+}
+.nav-chip.active{border-color:var(--accent);color:var(--accent);}
+.nav-chip.locked{opacity:.45;cursor:not-allowed;}
+.nav-chip .lock-ico{font-size:.7rem;}
+.module{display:none;}
+.module.active{display:block;animation:fadein .4s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.module-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;
+  padding-bottom:1.4rem;border-bottom:1px solid var(--line);margin-bottom:1.8rem;
+}
+.module-num{
+  font-family:var(--font-mono);font-size:.8rem;color:var(--accent);
+  border:1px solid var(--line);border-radius:99px;padding:.3rem .8rem;
+}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+.subsec{margin:2.2rem 0;}
+.subsec h3{display:flex;align-items:center;gap:.5rem;}
+.subsec h3::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent-2);display:inline-block;}
+.example-box{
+  background:var(--surface-2);border-left:3px solid var(--teal);border-radius:8px;
+  padding:1rem 1.2rem;margin:1rem 0;
+}
+.analogy-box{
+  background:var(--surface-2);border-left:3px solid var(--violet);border-radius:8px;
+  padding:1rem 1.2rem;margin:1rem 0;
+}
+.misconception-box{
+  background:var(--surface-2);border-left:3px solid var(--rose);border-radius:8px;
+  padding:1rem 1.2rem;margin:1rem 0;
+}
+.takeaway-box{
+  background:var(--surface-2);border-left:3px solid var(--mint);border-radius:8px;
+  padding:1rem 1.2rem;margin:1rem 0;
+}
+.box-label{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.4rem;display:block;}
+.comparison-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem;}
+.comparison-table th,.comparison-table td{
+  border:1px solid var(--line);padding:.65rem .8rem;text-align:left;
+}
+.comparison-table th{background:var(--surface-2);font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;color:var(--text-faint);}
+.diagram-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem;margin:1.2rem 0;}
+.diagram-cap{font-size:.8rem;color:var(--text-faint);text-align:center;margin-top:.5rem;font-family:var(--font-mono);}
+.exercise-box{
+  background:var(--surface);border:1px dashed var(--accent);border-radius:12px;padding:1.4rem;margin:1.4rem 0;
+}
+.exercise-box .box-label{color:var(--accent);}
+.formula{
+  font-family:var(--font-mono);background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:.9rem 1.1rem;margin:.8rem 0;font-size:1rem;overflow-x:auto;
+}
+.quiz-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.8rem;margin-top:2.5rem;}
+.quiz-progress{display:flex;gap:.35rem;margin-bottom:1.4rem;}
+.quiz-progress .seg{flex:1;height:6px;border-radius:99px;background:var(--surface-3);}
+.quiz-progress .seg.done{background:var(--mint);}
+.quiz-progress .seg.current{background:var(--accent);}
+.quiz-q{font-weight:700;font-size:1.08rem;margin-bottom:1rem;}
+.quiz-options{display:grid;gap:.65rem;}
+.quiz-opt{
+  text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+  padding:.85rem 1rem;cursor:pointer;font-family:var(--font-body);font-size:.95rem;color:var(--text);
+  display:flex;gap:.7rem;align-items:flex-start;
+}
+.quiz-opt:hover{border-color:var(--accent-2);}
+.quiz-opt .k{font-family:var(--font-mono);color:var(--text-faint);}
+.quiz-opt.correct{border-color:var(--mint);background:color-mix(in srgb, var(--mint) 14%, var(--surface-2));}
+.quiz-opt.wrong{border-color:var(--rose);background:color-mix(in srgb, var(--rose) 14%, var(--surface-2));}
+.quiz-opt.disabled{cursor:default;}
+.quiz-explain{
+  margin-top:1rem;padding:.9rem 1.1rem;border-radius:10px;background:var(--surface-2);
+  font-size:.9rem;color:var(--text-dim);border-left:3px solid var(--accent-2);display:none;
+}
+.quiz-explain.show{display:block;}
+.quiz-nav{display:flex;justify-content:flex-end;margin-top:1.3rem;}
+.quiz-summary{text-align:center;padding:1.5rem 0;}
+.score-ring{width:130px;height:130px;margin:0 auto 1rem;}
+.badge-earned{
+  display:inline-flex;align-items:center;gap:.5rem;background:var(--surface-2);
+  border:1px solid var(--accent);border-radius:99px;padding:.5rem 1.1rem;color:var(--accent);
+  font-family:var(--font-mono);font-size:.85rem;margin-top:.6rem;
+}
+.toast{
+  position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);
+  border-radius:12px;padding:1rem 1.3rem;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:200;
+  display:flex;align-items:center;gap:.7rem;transform:translateY(120%);transition:transform .35s ease;max-width:320px;
+}
+.toast.show{transform:translateY(0);}
+.footer-nav{display:flex;justify-content:space-between;margin-top:2.5rem;}
+.checklist{list-style:none;padding:0;margin:1rem 0;}
+.checklist li{display:flex;gap:.6rem;padding:.4rem 0;color:var(--text-dim);}
+.checklist li::before{content:"→";color:var(--accent);font-weight:700;}
+.tag-row{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0;}
+.tag{font-family:var(--font-mono);font-size:.78rem;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:.3rem .6rem;}
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-top:1.2rem;}
+.resource-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem;}
+.resource-card h4{margin-bottom:.6rem;color:var(--accent-2);font-size:1rem;}
+.resource-card ul{margin:0;padding-left:1.1rem;color:var(--text-dim);font-size:.9rem;}
+.resource-card li{margin-bottom:.5rem;}
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:1rem;}
+.cheat-item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem;}
+.cheat-item .name{font-weight:700;font-size:.9rem;margin-bottom:.4rem;}
+.challenge-panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.8rem;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:var(--surface-3);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--ink-950);}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--ink-950);}
+select,input[type=text],input[type=number]{
+  font-family:var(--font-body);background:var(--surface-2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:.55rem .7rem;font-size:.9rem;
+}
+.slider-row{display:flex;align-items:center;gap:1rem;margin:.9rem 0;}
+.slider-row label{flex:0 0 140px;font-size:.85rem;color:var(--text-dim);}
+.slider-val{font-family:var(--font-mono);color:var(--accent);min-width:52px;text-align:right;}
+.data-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.data-table th,.data-table td{border:1px solid var(--line);padding:.4rem .6rem;text-align:center;font-family:var(--font-mono);}
+.data-table th{background:var(--surface-2);}
+.completion-panel{
+  text-align:center;padding:3rem 1.5rem;background:var(--surface);border:1px solid var(--accent);border-radius:20px;margin-top:2.5rem;
+}
+.result-badge{font-size:3rem;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;}
+  .grid-2,.two-col{grid-template-columns:1fr;}
+  h1{font-size:2rem;}
+}
+</style>
+<div class="topbar no-print">
+  <div class="brand"><div class="mark">r</div> Interactive Learning Studio</div>
+  <div class="topbar-right">
+    <div class="pill" id="xpPill">⚡ 0 XP</div>
+    <div class="progress-track"><div class="progress-fill" id="topProgress"></div></div>
+    <button class="icon-btn" id="printBtn" title="Print / Save notes">🖨</button>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</div>
+
+<div class="shell">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Data Analysis &amp; Statistics · Single-Session Tutorial</span>
+      <h1>Regression &amp; Correlation Analysis</h1>
+      <p style="font-size:1.05rem;max-width:52ch;">Learn to measure how variables move together, fit a line through the noise, and know exactly when to trust — or distrust — the story your data is telling you.</p>
+
+      <div class="hero-badges">
+        <span class="pill">⏱ ~90 min</span>
+        <span class="pill">📈 4 modules</span>
+        <span class="pill">📝 16 quiz questions</span>
+        <span class="pill">🏁 1 final challenge</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num">r</div><div class="lab">Correlation strength</div></div>
+        <div class="stat-box"><div class="num">ŷ</div><div class="lab">Predicted value</div></div>
+        <div class="stat-box"><div class="num">R²</div><div class="lab">Variance explained</div></div>
+        <div class="stat-box"><div class="num">ε</div><div class="lab">Residual error</div></div>
+      </div>
+
+      <div class="reward-strip">
+        <div class="reward-chip"><span class="dot" style="background:var(--surface-3);">🥉</span>Module badges ×4</div>
+        <div class="reward-chip"><span class="dot" style="background:var(--surface-3);">🎯</span>XP per correct answer</div>
+        <div class="reward-chip"><span class="dot" style="background:var(--surface-3);">🏆</span>Data Whisperer certificate</div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <svg id="heroSvg" viewBox="0 0 420 320" style="width:100%;height:auto;display:block;">
+        <line x1="50" y1="270" x2="390" y2="270" stroke="var(--line)" stroke-width="1"/>
+        <line x1="50" y1="30" x2="50" y2="270" stroke="var(--line)" stroke-width="1"/>
+        <text x="215" y="305" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">Hours Studied</text>
+        <text x="18" y="150" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace" transform="rotate(-90 18 150)">Exam Score</text>
+        <line id="heroFitLine" x1="60" y1="250" x2="60" y2="250" stroke="var(--amber)" stroke-width="3" stroke-linecap="round"/>
+        <g id="heroPoints"></g>
+      </svg>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.6rem;">
+        <span class="diagram-cap" style="margin:0;">Live fit: study hours → exam score</span>
+        <span class="mono" id="heroR" style="color:var(--accent);font-weight:800;">r = 0.00</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-head" id="intro">
+    <span class="eyebrow">Before You Begin</span>
+    <h2>What you'll walk away with</h2>
+  </section>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🎯 Learning objectives</h3>
+      <ul class="checklist">
+        <li>Quantify how two variables move together with the correlation coefficient</li>
+        <li>Fit and interpret a simple linear regression line by hand and by logic</li>
+        <li>Read R², adjusted R², and residual plots like a practitioner, not a formula-plugger</li>
+        <li>Extend to multiple predictors and recognize when a model is lying to you</li>
+        <li>Spot Simpson's Paradox, outliers, and correlation-causation traps in real data</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🧭 Good to know before starting</h3>
+      <p><strong>Prerequisites:</strong> comfort with basic algebra (y = mx + b) and arithmetic averages. No calculus or coding required.</p>
+      <p><strong>Estimated time:</strong> 90 minutes across 4 modules + final challenge.</p>
+      <p><strong>Expected outcome:</strong> you'll be able to look at a scatter plot or a regression printout and correctly explain what it does — and doesn't — prove.</p>
+      <p><strong>Reward system:</strong> earn XP for every quiz answer, unlock a badge per completed module, and finish with a printable Data Whisperer certificate.</p>
+    </div>
+  </div>
+
+  <div class="nav-rail no-print" id="navRail"></div>
+  <!-- ===================== MODULE 1 ===================== -->
+  <section class="module active" id="mod-1" data-module="1">
+    <div class="module-head">
+      <div>
+        <span class="module-num">MODULE 1 · FOUNDATIONS</span>
+        <h2>Understanding Correlation</h2>
+        <p>Before we draw a single line through data, we need a way to measure whether two variables even have a relationship worth modeling.</p>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <h3>What correlation actually measures</h3>
+      <p>Correlation describes the <em>strength and direction</em> of a straight-line relationship between two numeric variables. When one variable rises, does the other tend to rise too (positive), fall (negative), or do the two have no consistent pattern at all (zero/near-zero)?</p>
+      <p>The standard tool for this is the <strong>Pearson correlation coefficient</strong>, written <span class="mono">r</span>. It always lands between -1 and +1:</p>
+      <div class="formula">r = Σ[(xᵢ − x̄)(yᵢ − ȳ)] / √[Σ(xᵢ − x̄)² · Σ(yᵢ − ȳ)²]</div>
+      <p>Don't worry about computing this by hand every time — what matters is reading the result. <span class="mono">r = 1</span> is a perfect uphill line, <span class="mono">r = -1</span> is a perfect downhill line, and <span class="mono">r = 0</span> means no linear pattern at all.</p>
+    </div>
+
+    <div class="analogy-box">
+      <span class="box-label" style="color:var(--violet);">Analogy</span>
+      Think of correlation like two dancers on a stage. When r is close to +1, they move in lockstep — one steps forward, the other steps forward too, every time. When r is close to -1, they're mirror partners — one steps forward exactly as the other steps back. When r is near 0, they're improvising independently: watching one dancer tells you nothing about what the other will do next.
+    </div>
+
+    <div class="subsec">
+      <h3>The four shapes of a scatter plot</h3>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 640 190" style="width:100%;height:auto;">
+          <!-- Strong positive -->
+          <g transform="translate(10,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="0" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="140" x2="130" y2="15" stroke="var(--amber)" stroke-width="2" stroke-dasharray="4 3"/>
+            <circle cx="15" cy="135" r="4" fill="var(--teal)"/><circle cx="35" cy="118" r="4" fill="var(--teal)"/><circle cx="55" cy="100" r="4" fill="var(--teal)"/><circle cx="70" cy="90" r="4" fill="var(--teal)"/><circle cx="90" cy="65" r="4" fill="var(--teal)"/><circle cx="110" cy="45" r="4" fill="var(--teal)"/><circle cx="125" cy="25" r="4" fill="var(--teal)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">strong positive (r≈0.9)</text>
+          </g>
+          <!-- Strong negative -->
+          <g transform="translate(175,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="0" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="20" x2="130" y2="140" stroke="var(--rose)" stroke-width="2" stroke-dasharray="4 3"/>
+            <circle cx="15" cy="25" r="4" fill="var(--teal)"/><circle cx="35" cy="45" r="4" fill="var(--teal)"/><circle cx="55" cy="65" r="4" fill="var(--teal)"/><circle cx="70" cy="80" r="4" fill="var(--teal)"/><circle cx="90" cy="100" r="4" fill="var(--teal)"/><circle cx="110" cy="120" r="4" fill="var(--teal)"/><circle cx="125" cy="135" r="4" fill="var(--teal)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">strong negative (r≈-0.9)</text>
+          </g>
+          <!-- Weak / none -->
+          <g transform="translate(340,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="0" x2="0" y2="150" stroke="var(--line)"/>
+            <circle cx="20" cy="60" r="4" fill="var(--teal)"/><circle cx="40" cy="120" r="4" fill="var(--teal)"/><circle cx="60" cy="30" r="4" fill="var(--teal)"/><circle cx="80" cy="100" r="4" fill="var(--teal)"/><circle cx="100" cy="50" r="4" fill="var(--teal)"/><circle cx="120" cy="90" r="4" fill="var(--teal)"/><circle cx="55" cy="140" r="4" fill="var(--teal)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">near zero (r≈0.05)</text>
+          </g>
+          <!-- Curved / non-linear -->
+          <g transform="translate(505,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="0" x2="0" y2="150" stroke="var(--line)"/>
+            <path d="M10,140 Q70,-10 130,140" fill="none" stroke="var(--mint)" stroke-width="2" stroke-dasharray="4 3"/>
+            <circle cx="15" cy="135" r="4" fill="var(--teal)"/><circle cx="35" cy="80" r="4" fill="var(--teal)"/><circle cx="55" cy="35" r="4" fill="var(--teal)"/><circle cx="70" cy="15" r="4" fill="var(--teal)"/><circle cx="90" cy="35" r="4" fill="var(--teal)"/><circle cx="110" cy="80" r="4" fill="var(--teal)"/><circle cx="125" cy="135" r="4" fill="var(--teal)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">curved (r≈0.0, not linear!)</text>
+          </g>
+        </svg>
+        <div class="diagram-cap">Same "zero correlation" reading can hide very different realities — always look at the scatter plot, not just the number.</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <span class="box-label" style="color:var(--teal);">Worked example</span>
+      Ice cream sales and drowning incidents both rise in summer. If you compute r for these two variables across the year, you'll likely get a strong positive value, around <span class="mono">r ≈ 0.7</span>. That doesn't mean ice cream causes drowning — both are driven by a third variable: hot weather, which pushes people toward both ice cream stands and swimming pools.
+    </div>
+
+    <div class="subsec">
+      <h3>Correlation vs. causation</h3>
+      <table class="comparison-table">
+        <tr><th>Correlation</th><th>Causation</th></tr>
+        <tr><td>Two variables move together in a measurable, consistent way</td><td>Changing one variable directly produces a change in the other</td></tr>
+        <tr><td>Can be checked with a single formula (r) on observational data</td><td>Usually requires controlled experiments or careful causal-inference design</td></tr>
+        <tr><td>Vulnerable to confounding variables (a hidden third cause)</td><td>Accounts for and rules out confounders by design</td></tr>
+        <tr><td>Symmetric: r(x,y) = r(y,x)</td><td>Directional: X causes Y is not the same claim as Y causes X</td></tr>
+      </table>
+    </div>
+
+    <div class="exercise-box">
+      <span class="box-label">Practical exercise</span>
+      <p style="margin-bottom:.4rem;">Click anywhere on the grid to drop data points. Watch the correlation coefficient update live as you build the cloud of points.</p>
+      <svg id="exSvg1" viewBox="0 0 500 260" style="width:100%;height:auto;background:var(--surface-2);border-radius:10px;cursor:crosshair;">
+        <line x1="40" y1="220" x2="470" y2="220" stroke="var(--line)"/>
+        <line x1="40" y1="20" x2="40" y2="220" stroke="var(--line)"/>
+        <g id="exPoints1"></g>
+      </svg>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.6rem;">
+        <button class="btn" id="exClear1">Clear points</button>
+        <span class="mono" id="exR1" style="font-size:1.1rem;color:var(--accent);">r = —</span>
+      </div>
+    </div>
+
+    <div class="misconception-box">
+      <span class="box-label" style="color:var(--rose);">Common misconceptions</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li><strong>"Correlation proves causation."</strong> It never does on its own — see the ice cream example above.</li>
+        <li><strong>"r = 0 means no relationship."</strong> It means no <em>linear</em> relationship. The curved example above has a strong pattern with r near zero.</li>
+        <li><strong>"A higher r is always better."</strong> Context matters — in social sciences r = 0.3 can be meaningful, while in physics r = 0.3 might signal a broken instrument.</li>
+      </ul>
+    </div>
+
+    <div class="takeaway-box">
+      <span class="box-label" style="color:var(--mint);">Key takeaways</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li>Correlation (r) measures the strength and direction of a <em>linear</em> relationship, ranging from -1 to +1.</li>
+        <li>Always eyeball the scatter plot — the number alone can hide curves, clusters, and outliers (Anscombe's Quartet is the classic proof of this, coming up in Module 4).</li>
+        <li>Correlation is a necessary but never sufficient condition for causation.</li>
+      </ul>
+    </div>
+
+    <div class="quiz-card" id="quiz-1">
+      <div class="eyebrow">Module 1 Quiz</div>
+      <div class="quiz-progress" id="qprog-1"></div>
+      <div id="qbody-1"></div>
+    </div>
+
+    <div class="footer-nav no-print">
+      <span></span>
+      <button class="btn btn-ghost" disabled>Complete the quiz to continue →</button>
+    </div>
+  </section>
+  <!-- ===================== MODULE 2 ===================== -->
+  <section class="module" id="mod-2" data-module="2">
+    <div class="module-head">
+      <div>
+        <span class="module-num">MODULE 2 · APPLICATION</span>
+        <h2>Simple Linear Regression</h2>
+        <p>Correlation tells you two variables move together. Regression goes further: it gives you an equation you can actually use to predict one from the other.</p>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <h3>Fitting a line through the noise</h3>
+      <p>A simple linear regression finds the straight line that best summarizes the relationship between a predictor <span class="mono">x</span> and an outcome <span class="mono">y</span>:</p>
+      <div class="formula">ŷ = b₀ + b₁x&nbsp;&nbsp;&nbsp;(intercept b₀, slope b₁, predicted value ŷ)</div>
+      <p><span class="mono">b₁</span> (the slope) tells you how much ŷ changes for every one-unit increase in x. <span class="mono">b₀</span> (the intercept) is the predicted value when x = 0. The line is chosen using the <strong>least squares method</strong>: out of every possible line, pick the one that minimizes the sum of squared vertical distances between the actual points and the line.</p>
+      <div class="formula">Minimize: Σ(yᵢ − ŷᵢ)² &nbsp;→&nbsp; this vertical gap is called a <strong>residual</strong></div>
+    </div>
+
+    <div class="analogy-box">
+      <span class="box-label" style="color:var(--violet);">Analogy</span>
+      Imagine a crowd of people walking roughly northeast across a field, each drifting a little off-course. The regression line is the single straight path a tour guide would draw to best represent where the group as a whole is heading — not matching anyone exactly, but minimizing how far off it is from everyone, with big deviations penalized more heavily than small ones (because we square the residuals).
+    </div>
+
+    <div class="subsec">
+      <h3>Seeing residuals</h3>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 460 220" style="width:100%;height:auto;">
+          <line x1="40" y1="190" x2="430" y2="190" stroke="var(--line)"/>
+          <line x1="40" y1="20" x2="40" y2="190" stroke="var(--line)"/>
+          <line x1="55" y1="170" x2="410" y2="45" stroke="var(--amber)" stroke-width="2.5"/>
+          <!-- points with residual lines -->
+          <g stroke="var(--rose)" stroke-width="1.5" stroke-dasharray="3 2">
+            <line x1="90" y1="150" x2="90" y2="156"/>
+            <line x1="150" y1="95" x2="150" y2="132"/>
+            <line x1="210" y1="118" x2="210" y2="107"/>
+            <line x1="270" y1="60" x2="270" y2="82"/>
+            <line x1="330" y1="75" x2="330" y2="58"/>
+            <line x1="380" y1="50" x2="380" y2="33"/>
+          </g>
+          <g fill="var(--teal)">
+            <circle cx="90" cy="156" r="4.5"/><circle cx="150" cy="132" r="4.5"/><circle cx="210" cy="107" r="4.5"/>
+            <circle cx="270" cy="82" r="4.5"/><circle cx="330" cy="58" r="4.5"/><circle cx="380" cy="33" r="4.5"/>
+          </g>
+          <text x="235" y="210" text-anchor="middle" fill="var(--text-faint)" font-size="11" font-family="monospace">x</text>
+          <text x="235" y="15" text-anchor="middle" fill="var(--text-dim)" font-size="11" font-family="monospace">dashed = residuals (actual − predicted)</text>
+        </svg>
+        <div class="diagram-cap">The regression line minimizes the sum of the squares of every dashed residual segment simultaneously.</div>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <h3>R²: how much variance does the line explain?</h3>
+      <div class="formula">R² = 1 − (Σ residual² / Σ total deviation from mean²)</div>
+      <p>R² ranges from 0 to 1 and tells you the proportion of variation in y that's explained by x. An R² of 0.81 means 81% of the spread in exam scores can be explained by hours studied — the remaining 19% comes from other factors (sleep, prior knowledge, luck) not in the model.</p>
+    </div>
+
+    <table class="comparison-table">
+      <tr><th>r (correlation)</th><th>R² (coefficient of determination)</th></tr>
+      <tr><td>Ranges from -1 to +1, keeps the direction sign</td><td>Ranges from 0 to 1, always positive</td></tr>
+      <tr><td>Measures strength of linear association</td><td>Measures proportion of variance explained by the model</td></tr>
+      <tr><td>Symmetric between x and y</td><td>Depends on which variable is being predicted</td></tr>
+      <tr><td>r = 0.9 → R² = 0.81</td><td>Simply r squared, in simple linear regression</td></tr>
+    </table>
+
+    <div class="exercise-box">
+      <span class="box-label">Practical exercise</span>
+      <p style="margin-bottom:.4rem;">Drag the sliders to change the slope and intercept of your own line. Try to minimize the "sum of squared residuals" readout below — that's exactly what least-squares regression automates for you.</p>
+      <svg id="exSvg2" viewBox="0 0 480 220" style="width:100%;height:auto;background:var(--surface-2);border-radius:10px;">
+        <line x1="40" y1="190" x2="460" y2="190" stroke="var(--line)"/>
+        <line x1="40" y1="20" x2="40" y2="190" stroke="var(--line)"/>
+        <g id="ex2ResidLines"></g>
+        <line id="ex2Line" x1="40" y1="180" x2="460" y2="60" stroke="var(--amber)" stroke-width="2.5"/>
+        <g id="ex2Points"></g>
+      </svg>
+      <div class="slider-row">
+        <label>Slope (b₁)</label><input type="range" id="ex2Slope" min="-30" max="30" value="8" step="0.5"><span class="slider-val" id="ex2SlopeVal">8.0</span>
+      </div>
+      <div class="slider-row">
+        <label>Intercept (b₀)</label><input type="range" id="ex2Intercept" min="0" max="180" value="90" step="1"><span class="slider-val" id="ex2InterceptVal">90</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="mono" id="ex2SSR" style="color:var(--accent);">Σresidual² = —</span>
+        <button class="btn btn-primary" id="ex2Best">Show best-fit line</button>
+      </div>
+    </div>
+
+    <div class="misconception-box">
+      <span class="box-label" style="color:var(--rose);">Common misconceptions</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li><strong>"I can extrapolate confidently far beyond my data."</strong> A line fit on 0–10 hours of study shouldn't be trusted to predict scores at 40 hours — the relationship may not stay linear.</li>
+        <li><strong>"Regression toward the mean is a modeling trick."</strong> It's a real statistical phenomenon: extreme observations tend to be followed by more average ones, purely from randomness, not causation.</li>
+        <li><strong>"A steep slope means a strong relationship."</strong> Slope depends on units; strength is better read from r or R², not the slope's steepness alone.</li>
+      </ul>
+    </div>
+
+    <div class="takeaway-box">
+      <span class="box-label" style="color:var(--mint);">Key takeaways</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li>Simple linear regression finds ŷ = b₀ + b₁x by minimizing the sum of squared residuals.</li>
+        <li>R² tells you the share of variance in y explained by x — not whether the model is "correct."</li>
+        <li>Never extrapolate confidently outside the range of your observed x values.</li>
+      </ul>
+    </div>
+
+    <div class="quiz-card" id="quiz-2">
+      <div class="eyebrow">Module 2 Quiz</div>
+      <div class="quiz-progress" id="qprog-2"></div>
+      <div id="qbody-2"></div>
+    </div>
+
+    <div class="footer-nav no-print">
+      <button class="btn" onclick="goToModule(1)">← Back to Module 1</button>
+      <button class="btn btn-ghost" disabled>Complete the quiz to continue →</button>
+    </div>
+  </section>
+  <!-- ===================== MODULE 3 ===================== -->
+  <section class="module" id="mod-3" data-module="3">
+    <div class="module-head">
+      <div>
+        <span class="module-num">MODULE 3 · APPLICATION</span>
+        <h2>Multiple Regression &amp; Model Evaluation</h2>
+        <p>Real outcomes rarely have just one cause. Now we add more predictors — and learn how to tell whether the model is actually trustworthy.</p>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <h3>Adding more predictors</h3>
+      <p>Multiple linear regression extends the same idea to several predictors at once:</p>
+      <div class="formula">ŷ = b₀ + b₁x₁ + b₂x₂ + b₃x₃ + ... + bₙxₙ</div>
+      <p>Each coefficient <span class="mono">bᵢ</span> now means "the expected change in y for a one-unit increase in xᵢ, holding all other predictors constant." That last clause matters enormously — it's what separates multiple regression from just running several simple regressions separately.</p>
+    </div>
+
+    <div class="analogy-box">
+      <span class="box-label" style="color:var(--violet);">Analogy</span>
+      Think of predicting how good a loaf of bread turns out. Flour amount, water ratio, yeast, kneading time, and oven temperature all influence the result simultaneously. Multiple regression is like a recipe that quantifies each ingredient's individual contribution to the final loaf — while holding the others fixed — rather than testing one ingredient at a time in isolation.
+    </div>
+
+    <div class="subsec">
+      <h3>Adjusted R²: penalizing complexity</h3>
+      <p>Plain R² can only go up (or stay flat) as you add more predictors — even useless, random ones. <strong>Adjusted R²</strong> corrects for this by penalizing the model for extra predictors that don't pull their weight:</p>
+      <div class="formula">Adjusted R² = 1 − [(1 − R²)(n − 1) / (n − k − 1)]&nbsp;&nbsp;(n = observations, k = predictors)</div>
+      <p>If adding a variable barely improves R² but adjusted R² actually drops, that variable is likely just noise.</p>
+    </div>
+
+    <div class="subsec">
+      <h3>The LINE assumptions</h3>
+      <table class="comparison-table">
+        <tr><th>Assumption</th><th>What it means</th></tr>
+        <tr><td><strong>L</strong>inearity</td><td>The true relationship between predictors and outcome is a straight line (or transformed to be one)</td></tr>
+        <tr><td><strong>I</strong>ndependence</td><td>Residuals aren't correlated with each other (no hidden time or grouping structure)</td></tr>
+        <tr><td><strong>N</strong>ormality</td><td>Residuals are roughly normally distributed around zero</td></tr>
+        <tr><td><strong>E</strong>qual variance</td><td>Residual spread stays constant across all predicted values (homoscedasticity)</td></tr>
+      </table>
+    </div>
+
+    <div class="subsec">
+      <h3>Reading a residual plot</h3>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 640 190" style="width:100%;height:auto;">
+          <g transform="translate(10,10)">
+            <line x1="0" y1="80" x2="180" y2="80" stroke="var(--line)"/>
+            <line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <circle cx="20" cy="70" r="3.5" fill="var(--mint)"/><circle cx="40" cy="88" r="3.5" fill="var(--mint)"/><circle cx="60" cy="75" r="3.5" fill="var(--mint)"/><circle cx="80" cy="90" r="3.5" fill="var(--mint)"/><circle cx="100" cy="72" r="3.5" fill="var(--mint)"/><circle cx="120" cy="85" r="3.5" fill="var(--mint)"/><circle cx="140" cy="78" r="3.5" fill="var(--mint)"/><circle cx="160" cy="82" r="3.5" fill="var(--mint)"/>
+            <text x="90" y="175" text-anchor="middle" fill="var(--mint)" font-size="11" font-family="monospace">healthy: random scatter</text>
+          </g>
+          <g transform="translate(230,10)">
+            <line x1="0" y1="80" x2="180" y2="80" stroke="var(--line)"/>
+            <line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <circle cx="20" cy="79" r="3.5" fill="var(--rose)"/><circle cx="40" cy="76" r="3.5" fill="var(--rose)"/><circle cx="60" cy="70" r="3.5" fill="var(--rose)"/><circle cx="80" cy="55" r="3.5" fill="var(--rose)"/><circle cx="100" cy="35" r="3.5" fill="var(--rose)"/><circle cx="120" cy="15" r="3.5" fill="var(--rose)"/><circle cx="140" cy="0" r="3.5" fill="var(--rose)"/><circle cx="160" cy="-15" r="3.5" fill="var(--rose)"/>
+            <text x="90" y="175" text-anchor="middle" fill="var(--rose)" font-size="11" font-family="monospace">bad: curved pattern (non-linear)</text>
+          </g>
+          <g transform="translate(450,10)">
+            <line x1="0" y1="80" x2="180" y2="80" stroke="var(--line)"/>
+            <line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <circle cx="15" cy="80" r="2.5" fill="var(--rose)"/><circle cx="30" cy="79" r="2.5" fill="var(--rose)"/><circle cx="50" cy="83" r="3" fill="var(--rose)"/><circle cx="70" cy="70" r="4" fill="var(--rose)"/><circle cx="95" cy="95" r="5" fill="var(--rose)"/><circle cx="120" cy="55" r="6" fill="var(--rose)"/><circle cx="150" cy="105" r="7" fill="var(--rose)"/><circle cx="165" cy="45" r="8" fill="var(--rose)"/>
+            <text x="90" y="175" text-anchor="middle" fill="var(--rose)" font-size="11" font-family="monospace">bad: funnel (heteroscedasticity)</text>
+          </g>
+        </svg>
+        <div class="diagram-cap">Plotting residuals against predicted values is the fastest way to check the LINE assumptions visually.</div>
+      </div>
+    </div>
+
+    <div class="exercise-box">
+      <span class="box-label">Practical exercise</span>
+      <p style="margin-bottom:.4rem;">Select a scenario and diagnose which assumption is being violated.</p>
+      <select id="ex3Select">
+        <option value="funnel">Residuals fan out wider as predicted values increase</option>
+        <option value="curve">Residuals form a clear U-shape across predicted values</option>
+        <option value="clock">Residuals for consecutive time periods are similar to their neighbors</option>
+        <option value="ok">Residuals scatter randomly with no pattern, centered on zero</option>
+      </select>
+      <div id="ex3Answer" class="quiz-explain show" style="margin-top:1rem;"></div>
+    </div>
+
+    <div class="misconception-box">
+      <span class="box-label" style="color:var(--rose);">Common misconceptions</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li><strong>"More predictors always make a model better."</strong> Extra variables can overfit — the model memorizes noise in your sample instead of learning the true pattern, so it performs worse on new data.</li>
+        <li><strong>"Two highly correlated predictors just add extra confidence."</strong> That's multicollinearity, and it actually makes individual coefficient estimates unstable and hard to interpret.</li>
+        <li><strong>"A high R² alone proves the model is valid."</strong> A model can have R² = 0.95 and still badly violate the LINE assumptions.</li>
+      </ul>
+    </div>
+
+    <div class="takeaway-box">
+      <span class="box-label" style="color:var(--mint);">Key takeaways</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li>Multiple regression coefficients are "holding everything else constant" effects, not standalone ones.</li>
+        <li>Adjusted R² penalizes useless predictors; plain R² never decreases when you add variables.</li>
+        <li>Always check LINE assumptions with residual plots before trusting a regression's conclusions.</li>
+      </ul>
+    </div>
+
+    <div class="quiz-card" id="quiz-3">
+      <div class="eyebrow">Module 3 Quiz</div>
+      <div class="quiz-progress" id="qprog-3"></div>
+      <div id="qbody-3"></div>
+    </div>
+
+    <div class="footer-nav no-print">
+      <button class="btn" onclick="goToModule(2)">← Back to Module 2</button>
+      <button class="btn btn-ghost" disabled>Complete the quiz to continue →</button>
+    </div>
+  </section>
+  <!-- ===================== MODULE 4 ===================== -->
+  <section class="module" id="mod-4" data-module="4">
+    <div class="module-head">
+      <div>
+        <span class="module-num">MODULE 4 · MASTERY</span>
+        <h2>Practical Application &amp; Mastery</h2>
+        <p>Here's where textbook regression meets messy real data: non-linear patterns, outliers, deceptive aggregates, and how experienced analysts protect themselves from being fooled.</p>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <h3>When the relationship isn't a straight line</h3>
+      <p>Not every real relationship is linear. Growth, decay, and saturation effects often follow curves. Two common fixes:</p>
+      <ul class="checklist">
+        <li><strong>Log transformation:</strong> compresses large values, useful for exponential-looking growth (income, population, pricing)</li>
+        <li><strong>Polynomial terms:</strong> adding x² lets the line bend, useful for U-shaped or peak-then-decline patterns</li>
+      </ul>
+    </div>
+
+    <div class="subsec">
+      <h3>Anscombe's Quartet: the same statistics, four different truths</h3>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 640 190" style="width:100%;height:auto;">
+          <g transform="translate(10,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="140" x2="130" y2="30" stroke="var(--amber)" stroke-width="1.5"/>
+            <circle cx="20" cy="120" r="3.5" fill="var(--teal)"/><circle cx="40" cy="110" r="3.5" fill="var(--teal)"/><circle cx="55" cy="90" r="3.5" fill="var(--teal)"/><circle cx="75" cy="80" r="3.5" fill="var(--teal)"/><circle cx="95" cy="60" r="3.5" fill="var(--teal)"/><circle cx="115" cy="45" r="3.5" fill="var(--teal)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="monospace">I: genuinely linear</text>
+          </g>
+          <g transform="translate(175,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="140" x2="130" y2="30" stroke="var(--amber)" stroke-width="1.5"/>
+            <path d="M15,140 Q70,10 125,120" fill="none" stroke="var(--rose)" stroke-width="2"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="monospace">II: curved, mis-fit as linear</text>
+          </g>
+          <g transform="translate(340,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="135" x2="130" y2="35" stroke="var(--amber)" stroke-width="1.5"/>
+            <circle cx="20" cy="130" r="3.5" fill="var(--teal)"/><circle cx="30" cy="120" r="3.5" fill="var(--teal)"/><circle cx="40" cy="112" r="3.5" fill="var(--teal)"/><circle cx="50" cy="104" r="3.5" fill="var(--teal)"/><circle cx="60" cy="96" r="3.5" fill="var(--teal)"/><circle cx="115" cy="40" r="5" fill="var(--rose)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="monospace">III: one outlier drives r</text>
+          </g>
+          <g transform="translate(505,10)">
+            <line x1="0" y1="150" x2="140" y2="150" stroke="var(--line)"/><line x1="0" y1="10" x2="0" y2="150" stroke="var(--line)"/>
+            <line x1="10" y1="140" x2="130" y2="40" stroke="var(--amber)" stroke-width="1.5"/>
+            <circle cx="45" cy="130" r="3.5" fill="var(--teal)"/><circle cx="45" cy="115" r="3.5" fill="var(--teal)"/><circle cx="45" cy="100" r="3.5" fill="var(--teal)"/><circle cx="45" cy="85" r="3.5" fill="var(--teal)"/><circle cx="45" cy="70" r="3.5" fill="var(--teal)"/><circle cx="120" cy="35" r="5" fill="var(--rose)"/>
+            <text x="70" y="175" text-anchor="middle" fill="var(--text-faint)" font-size="10" font-family="monospace">IV: one high-leverage point</text>
+          </g>
+        </svg>
+        <div class="diagram-cap">All four datasets share nearly identical r, R², slope, and intercept — yet tell completely different stories. Statistics summarize; they don't replace looking at the plot.</div>
+      </div>
+    </div>
+
+    <div class="analogy-box">
+      <span class="box-label" style="color:var(--violet);">Analogy</span>
+      A regression model is like a compass: extremely useful for finding direction, but only as trustworthy as the assumptions it was built on. Hand a compass to someone standing next to a large magnet (an outlier, a confounder, a broken assumption) and it will confidently point you the wrong way.
+    </div>
+
+    <div class="subsec">
+      <h3>Simpson's Paradox</h3>
+      <p>A trend that appears in several groups of data can reverse — or disappear — when those groups are combined. A treatment might look worse overall while actually performing better within every single patient subgroup, if the subgroups differ in size and severity. This is exactly why a correlation matrix on aggregated data can mislead without checking for hidden subgroups.</p>
+    </div>
+
+    <table class="comparison-table">
+      <tr><th>Predictive modeling</th><th>Causal inference</th></tr>
+      <tr><td>Goal: forecast y accurately from x</td><td>Goal: determine whether changing x changes y</td></tr>
+      <tr><td>Correlational data is often enough</td><td>Usually needs randomization or careful confound control</td></tr>
+      <tr><td>A confounder can still help predictions</td><td>A confounder invalidates the causal claim</td></tr>
+      <tr><td>Example: predicting exam scores from study hours</td><td>Example: proving that studying more <em>causes</em> higher scores</td></tr>
+    </table>
+
+    <div class="exercise-box">
+      <span class="box-label">Practical exercise · mini case study</span>
+      <p>A city-wide dataset shows a strong negative correlation (r = -0.6) between number of fire trucks sent to a fire and the amount of damage. Which conclusion is correct?</p>
+      <div class="quiz-options" id="ex4Options">
+        <button class="quiz-opt" data-correct="false"><span class="k">A</span> Sending fewer fire trucks reduces fire damage, so departments should send fewer trucks.</button>
+        <button class="quiz-opt" data-correct="true"><span class="k">B</span> Fire severity is a confounder: bigger fires get more trucks dispatched AND cause more damage, creating the correlation without that causal claim.</button>
+        <button class="quiz-opt" data-correct="false"><span class="k">C</span> The correlation coefficient must be miscalculated since the relationship makes no sense.</button>
+      </div>
+      <div id="ex4Explain" class="quiz-explain"></div>
+    </div>
+
+    <div class="misconception-box">
+      <span class="box-label" style="color:var(--rose);">Common misconceptions</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li><strong>"A high R² always means a good, deployable model."</strong> It can still be overfit, violate assumptions, or rely on a variable you won't have at prediction time.</li>
+        <li><strong>"Removing outliers is always the right move."</strong> Sometimes the outlier is the most important data point — investigate before deleting.</li>
+        <li><strong>"Aggregated trends always reflect subgroup trends."</strong> Simpson's Paradox proves this can flip entirely.</li>
+      </ul>
+    </div>
+
+    <div class="takeaway-box">
+      <span class="box-label" style="color:var(--mint);">Key takeaways</span>
+      <ul style="margin:0;padding-left:1.1rem;color:var(--text-dim);">
+        <li>Identical summary statistics (r, R², slope) can describe wildly different underlying data — always visualize.</li>
+        <li>Predictive power and causal validity are different goals that require different evidence.</li>
+        <li>Check for confounders and subgroup reversals (Simpson's Paradox) before trusting an aggregate trend.</li>
+      </ul>
+    </div>
+
+    <div class="quiz-card" id="quiz-4">
+      <div class="eyebrow">Module 4 Quiz</div>
+      <div class="quiz-progress" id="qprog-4"></div>
+      <div id="qbody-4"></div>
+    </div>
+
+    <div class="footer-nav no-print">
+      <button class="btn" onclick="goToModule(3)">← Back to Module 3</button>
+      <button class="btn btn-ghost" disabled>Complete the quiz to continue →</button>
+    </div>
+  </section>
+  <!-- ===================== FINAL CHALLENGE ===================== -->
+  <section class="module" id="mod-final" data-module="final">
+    <div class="section-head">
+      <span class="eyebrow">Final Practical Challenge</span>
+      <h2>The Study-Hours Dataset</h2>
+      <p>Ten students reported hours studied and their exam score. Work through the four tasks below using everything from Modules 1–4.</p>
+    </div>
+
+    <div class="challenge-panel">
+      <table class="data-table" style="margin-bottom:1.2rem;">
+        <tr><th>Hours studied (x)</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+        <tr><th>Exam score (y)</th><td>52</td><td>58</td><td>55</td><td>63</td><td>68</td><td>66</td><td>74</td><td>78</td><td>80</td><td>85</td></tr>
+      </table>
+
+      <div id="challengeSteps"></div>
+
+      <div class="quiz-nav">
+        <button class="btn btn-primary" id="challengeSubmit">Check my answers</button>
+      </div>
+      <div id="challengeResult"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CHEAT SHEET ===================== -->
+  <section class="section-head" id="cheatsheet-anchor">
+    <span class="eyebrow">Reference</span>
+    <h2>Cheat Sheet</h2>
+  </section>
+  <div class="cheat-grid">
+    <div class="cheat-item"><div class="name mono">Pearson r</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">r = Σ(x-x̄)(y-ȳ) / √[Σ(x-x̄)²Σ(y-ȳ)²]</div></div>
+    <div class="cheat-item"><div class="name mono">Regression line</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">ŷ = b₀ + b₁x</div></div>
+    <div class="cheat-item"><div class="name mono">Slope</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">b₁ = r · (sᵧ / sₓ)</div></div>
+    <div class="cheat-item"><div class="name mono">R²</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">R² = 1 − (SSresidual / SStotal)</div></div>
+    <div class="cheat-item"><div class="name mono">Adjusted R²</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">1 − [(1−R²)(n−1)/(n−k−1)]</div></div>
+    <div class="cheat-item"><div class="name mono">LINE assumptions</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">Linearity · Independence · Normality · Equal variance</div></div>
+    <div class="cheat-item"><div class="name mono">r → R²</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">R² = r² (simple regression only)</div></div>
+    <div class="cheat-item"><div class="name mono">Reading strength</div><div class="mono" style="font-size:.82rem;color:var(--text-dim);">|r| .7-1 strong · .3-.7 moderate · 0-.3 weak</div></div>
+  </div>
+
+  <!-- ===================== SUMMARY NOTES ===================== -->
+  <section class="section-head">
+    <span class="eyebrow">Printable</span>
+    <h2>Summary Notes</h2>
+  </section>
+  <div class="card">
+    <ol style="color:var(--text-dim);padding-left:1.2rem;">
+      <li style="margin-bottom:.6rem;"><strong>Correlation (r)</strong> quantifies the strength and direction of a linear relationship between two variables, from -1 to +1. It never proves causation on its own.</li>
+      <li style="margin-bottom:.6rem;"><strong>Simple linear regression</strong> fits ŷ = b₀ + b₁x by minimizing the sum of squared residuals — the least-squares method.</li>
+      <li style="margin-bottom:.6rem;"><strong>R²</strong> reports the proportion of variance in y explained by the model; in simple regression, R² = r².</li>
+      <li style="margin-bottom:.6rem;"><strong>Multiple regression</strong> extends this to several predictors, with each coefficient interpreted holding the others constant; use adjusted R² to penalize useless predictors.</li>
+      <li style="margin-bottom:.6rem;"><strong>The LINE assumptions</strong> (Linearity, Independence, Normality, Equal variance) should be checked with residual plots before trusting any regression output.</li>
+      <li style="margin-bottom:.6rem;"><strong>Anscombe's Quartet and Simpson's Paradox</strong> are permanent reminders that identical summary statistics can hide very different, even contradictory, underlying realities — always visualize your data.</li>
+    </ol>
+    <button class="btn no-print" id="printNotesBtn">🖨 Print these notes</button>
+  </div>
+
+  <!-- ===================== CONTINUE LEARNING ===================== -->
+  <section class="section-head">
+    <span class="eyebrow">Continue Learning</span>
+    <h2>Where to go from here</h2>
+  </section>
+  <div class="resource-grid">
+    <div class="resource-card">
+      <h4>📚 Books</h4>
+      <ul>
+        <li>"The Art of Statistics" — David Spiegelhalter</li>
+        <li>"An Introduction to Statistical Learning" — James, Witten, Hastie, Tibshirani</li>
+        <li>"Naked Statistics" — Charles Wheelan</li>
+      </ul>
+    </div>
+    <div class="resource-card">
+      <h4>📖 Documentation</h4>
+      <ul>
+        <li>scikit-learn: <span class="mono">sklearn.linear_model</span> user guide</li>
+        <li>statsmodels: Ordinary Least Squares (OLS) docs</li>
+        <li>NumPy: <span class="mono">polyfit</span> / <span class="mono">corrcoef</span> reference</li>
+      </ul>
+    </div>
+    <div class="resource-card">
+      <h4>🔬 Research papers</h4>
+      <ul>
+        <li>Anscombe, F.J. (1973) — "Graphs in Statistical Analysis"</li>
+        <li>Galton, F. (1886) — "Regression Towards Mediocrity in Hereditary Stature"</li>
+      </ul>
+    </div>
+    <div class="resource-card">
+      <h4>👥 Communities</h4>
+      <ul>
+        <li>Cross Validated (stats.stackexchange.com)</li>
+        <li>r/statistics</li>
+        <li>Kaggle discussion forums</li>
+      </ul>
+    </div>
+    <div class="resource-card">
+      <h4>🏋️ Practice platforms</h4>
+      <ul>
+        <li>Kaggle (datasets + notebooks)</li>
+        <li>DataCamp — Statistics track</li>
+        <li>Khan Academy — Statistics &amp; Probability</li>
+        <li>StatQuest with Josh Starmer (video walkthroughs)</li>
+      </ul>
+    </div>
+    <div class="resource-card">
+      <h4>🔎 Search keywords</h4>
+      <div class="tag-row">
+        <span class="tag">ordinary least squares</span>
+        <span class="tag">heteroscedasticity</span>
+        <span class="tag">multicollinearity VIF</span>
+        <span class="tag">Anscombe's quartet</span>
+        <span class="tag">Simpson's paradox</span>
+        <span class="tag">regularization ridge lasso</span>
+      </div>
+    </div>
+    <div class="resource-card" style="grid-column:1/-1;">
+      <h4>🤖 Additional AI prompts for further learning</h4>
+      <ul>
+        <li>"Walk me through calculating a Pearson correlation by hand using this 5-point dataset: [x,y pairs]."</li>
+        <li>"Explain multicollinearity using a real dataset with height and shoe size as predictors."</li>
+        <li>"Generate a synthetic dataset that produces Simpson's Paradox and explain why it reverses."</li>
+        <li>"Compare ridge and lasso regression to plain multiple regression for a dataset with 50 correlated predictors."</li>
+        <li>"Critique this regression output for LINE assumption violations: [paste summary/residual plot description]."</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="completion-panel no-print" id="completionPanel" style="display:none;">
+    <div class="result-badge">🏆</div>
+    <h2>Data Whisperer Certificate</h2>
+    <p>You've completed Regression &amp; Correlation Analysis — all 4 modules, every quiz, and the final challenge.</p>
+    <div class="mono" id="finalScoreLine" style="color:var(--accent);font-size:1.2rem;margin:1rem 0;"></div>
+    <button class="btn btn-primary" id="printCertBtn">🖨 Print certificate</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+"use strict";
+
+/* ---------- THEME ---------- */
+const root = document.documentElement;
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('ils_theme_regcorr', t);
+}
+applyTheme(localStorage.getItem('ils_theme_regcorr') || 'dark');
+document.getElementById('themeBtn').addEventListener('click', () => {
+  applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('printNotesBtn').addEventListener('click', () => window.print());
+
+/* ---------- PROGRESS STATE ---------- */
+const STORE_KEY = 'ils_regcorr_progress_v1';
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {unlocked:1, xp:0, quizDone:{1:false,2:false,3:false,4:false}, quizScore:{1:0,2:0,3:0,4:0}, challengeDone:false};
+}
+let state = loadState();
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+function addXP(n){
+  state.xp += n;
+  document.getElementById('xpPill').textContent = `⚡ ${state.xp} XP`;
+  saveState();
+}
+
+function updateTopProgress(){
+  const totalSteps = 5; // 4 modules + challenge
+  let done = 0;
+  for(let i=1;i<=4;i++) if(state.quizDone[i]) done++;
+  if(state.challengeDone) done++;
+  document.getElementById('topProgress').style.width = (done/totalSteps*100)+'%';
+}
+
+/* ---------- TOAST ---------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ---------- NAV RAIL / MODULE SWITCHING ---------- */
+const MODULE_TITLES = {1:'1 · Foundations',2:'2 · Simple Regression',3:'3 · Multiple Regression',4:'4 · Mastery',final:'🏁 Final Challenge'};
+const railOrder = [1,2,3,4,'final'];
+function buildRail(){
+  const rail = document.getElementById('navRail');
+  rail.innerHTML = '';
+  railOrder.forEach(id=>{
+    const locked = typeof id === 'number' ? id > state.unlocked : state.unlocked < 4 || !allQuizzesDone();
+    const chip = document.createElement('div');
+    chip.className = 'nav-chip' + (locked ? ' locked' : '');
+    chip.textContent = (locked ? '🔒 ' : '') + MODULE_TITLES[id];
+    chip.dataset.target = id;
+    if(!locked){
+      chip.addEventListener('click', ()=>goToModule(id));
+    }
+    rail.appendChild(chip);
+  });
+  markActiveChip(currentModule);
+}
+function allQuizzesDone(){
+  return state.quizDone[1] && state.quizDone[2] && state.quizDone[3] && state.quizDone[4];
+}
+function markActiveChip(id){
+  document.querySelectorAll('.nav-chip').forEach(c=>{
+    c.classList.toggle('active', String(c.dataset.target) === String(id));
+  });
+}
+
+let currentModule = 1;
+window.goToModule = function(id){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  const target = document.getElementById(id==='final' ? 'mod-final' : 'mod-'+id);
+  if(target){
+    target.classList.add('active');
+    currentModule = id;
+    markActiveChip(id);
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+};
+
+/* ---------- QUIZ ENGINE ---------- */
+const QUIZZES = {
+  1: [
+    {q:"What does a correlation coefficient of r = -0.85 indicate?", opts:[
+        "A weak negative relationship",
+        "A strong negative linear relationship",
+        "A strong positive relationship",
+        "No relationship at all"
+      ], correct:1, exp:"Values of |r| close to 1 signal a strong linear relationship; the negative sign means the variables move in opposite directions."},
+    {q:"The ice-cream-sales-vs-drownings example illustrates that:", opts:[
+        "Ice cream causes drowning",
+        "A confounding variable (hot weather) drives both, creating the correlation",
+        "The correlation coefficient was calculated incorrectly",
+        "Drowning causes ice cream sales"
+      ], correct:1, exp:"Hot weather increases both ice cream sales and swimming (and therefore drownings) — a classic confounder producing correlation without direct causation."},
+    {q:"A scatter plot shows a perfect U-shaped curve. What will r likely be close to?", opts:[
+        "1",
+        "-1",
+        "0, despite a strong non-linear pattern existing",
+        "Undefined — r can't be computed for curves"
+      ], correct:2, exp:"Pearson's r only detects linear patterns. A symmetric U-shape has no net linear trend, so r lands near zero even though a strong relationship exists."},
+    {q:"Which statement about correlation is TRUE?", opts:[
+        "r ranges from 0 to 100",
+        "r measures only linear relationships",
+        "r always implies causation",
+        "r cannot be negative"
+      ], correct:1, exp:"Pearson's r specifically captures the strength of a straight-line relationship — nothing about curved or categorical patterns, and nothing about causation."}
+  ],
+  2: [
+    {q:"In ŷ = b₀ + b₁x, what does b₁ represent?", opts:[
+        "The predicted value when x = 0",
+        "The change in ŷ for a one-unit increase in x",
+        "The correlation coefficient",
+        "The total variance explained by the model"
+      ], correct:1, exp:"b₁ is the slope — how much the predicted outcome shifts for each one-unit increase in the predictor."},
+    {q:"The least-squares method chooses the line that minimizes:", opts:[
+        "The sum of residuals",
+        "The sum of squared residuals",
+        "The correlation coefficient",
+        "The slope of the line"
+      ], correct:1, exp:"Squaring residuals before summing penalizes larger errors more and prevents positive and negative residuals from canceling out."},
+    {q:"If R² = 0.64 for a simple regression, what does that mean?", opts:[
+        "64% of the variance in y is explained by x",
+        "8% of the variance in y is explained by x",
+        "36% of the variance in y is explained by x",
+        "The model is 100% accurate"
+      ], correct:0, exp:"R² is read directly as the proportion of variance explained — 0.64 means 64%, leaving 36% explained by other factors or noise."},
+    {q:"Why is extrapolating far beyond your observed data risky?", opts:[
+        "The slope automatically flips sign outside the data range",
+        "The relationship may not remain linear outside the range you actually observed",
+        "R² always drops to exactly zero beyond the data",
+        "It isn't risky — linear equations are always exact"
+      ], correct:1, exp:"A line fit on a limited range only describes behavior within that range; the real relationship could curve, plateau, or reverse beyond it."}
+  ],
+  3: [
+    {q:"Why prefer adjusted R² over plain R² when comparing models with different numbers of predictors?", opts:[
+        "Adjusted R² is always higher than plain R²",
+        "It penalizes predictors that don't meaningfully improve the model's fit",
+        "It's simpler to calculate by hand",
+        "It ignores the sample size entirely"
+      ], correct:1, exp:"Plain R² can only rise (or stay flat) as predictors are added, even useless ones. Adjusted R² corrects for that inflation."},
+    {q:"In multiple regression, a single coefficient bᵢ represents the effect of xᵢ on y:", opts:[
+        "Completely ignoring all other predictors in the model",
+        "While holding all other predictors constant",
+        "As the model's overall R²",
+        "As the correlation between two predictors"
+      ], correct:1, exp:"That 'holding constant' clause is exactly what separates a multiple-regression coefficient from a simple correlation with y."},
+    {q:"A funnel-shaped pattern in a residual plot (spread widening as predicted values increase) violates:", opts:[
+        "Normality",
+        "Independence",
+        "Homoscedasticity (equal variance)",
+        "Linearity"
+      ], correct:2, exp:"A funnel shape is the textbook signature of heteroscedasticity — residual variance that changes across the range of predictions."},
+    {q:"Multicollinearity refers to:", opts:[
+        "High correlation between two or more predictor variables",
+        "A model that has too few predictors",
+        "Residuals that follow a normal distribution",
+        "A model with a perfect R² score"
+      ], correct:0, exp:"When predictors are highly correlated with each other, it becomes hard to isolate each one's individual effect, destabilizing coefficient estimates."}
+  ],
+  4: [
+    {q:"Anscombe's Quartet demonstrates that:", opts:[
+        "Any two datasets with equal r must be visually identical",
+        "Identical summary statistics (r, R², slope) can come from very different underlying data",
+        "R² is a meaningless statistic",
+        "Correlation always requires specialized software to compute"
+      ], correct:1, exp:"All four Anscombe datasets share nearly identical r and regression line, yet look completely different when plotted — a warning against trusting summary numbers alone."},
+    {q:"Simpson's Paradox occurs when:", opts:[
+        "A trend seen in aggregated data reverses or disappears when the data is split into subgroups",
+        "A regression line happens to have a negative slope",
+        "Two variables have exactly zero correlation",
+        "The sample size is too small to compute statistics"
+      ], correct:0, exp:"Simpson's Paradox is specifically about a trend flipping direction (or vanishing) once you account for a hidden grouping variable."},
+    {q:"A log transformation of a variable is most useful when:", opts:[
+        "The relationship between variables is already perfectly linear",
+        "The relationship looks exponential or the data is highly right-skewed",
+        "You want to permanently delete outliers",
+        "R² is already equal to 1.0"
+      ], correct:1, exp:"Logging compresses large values and can straighten out exponential-looking curves, making a linear model appropriate again."},
+    {q:"High-leverage outliers are dangerous in regression because they can:", opts:[
+        "Always lower the model's R² automatically",
+        "Single-handedly pull the slope and intercept of the fitted line toward themselves",
+        "Only ever be caused by data-entry errors",
+        "Have no real effect on the regression coefficients"
+      ], correct:1, exp:"A point far out on the x-axis (Anscombe IV style) has huge leverage — moving that single point can swing the whole fitted line."}
+  ]
+};
+
+function renderQuiz(modNum){
+  const questions = QUIZZES[modNum];
+  const body = document.getElementById('qbody-'+modNum);
+  const progWrap = document.getElementById('qprog-'+modNum);
+  progWrap.innerHTML = '';
+  for(let i=0;i<questions.length;i++){
+    const seg = document.createElement('div');
+    seg.className = 'seg' + (i===0 ? ' current' : '');
+    seg.id = 'seg-'+modNum+'-'+i;
+    progWrap.appendChild(seg);
+  }
+  let qi = 0, correctCount = 0, answered = false;
+
+  function renderQuestion(){
+    answered = false;
+    const q = questions[qi];
+    body.innerHTML = `
+      <div class="quiz-q">Q${qi+1}. ${q.q}</div>
+      <div class="quiz-options" id="opts-${modNum}"></div>
+      <div class="quiz-explain" id="explain-${modNum}"></div>
+      <div class="quiz-nav"><button class="btn btn-primary" id="qnext-${modNum}" style="display:none;">Next question →</button></div>
+    `;
+    const optsWrap = document.getElementById('opts-'+modNum);
+    const letters = ['A','B','C','D'];
+    q.opts.forEach((optText, idx)=>{
+      const b = document.createElement('button');
+      b.className = 'quiz-opt';
+      b.innerHTML = `<span class="k">${letters[idx]}</span><span>${optText}</span>`;
+      b.addEventListener('click', ()=>{
+        if(answered) return;
+        answered = true;
+        const isCorrect = idx === q.correct;
+        if(isCorrect){ correctCount++; addXP(10); showToast('✅ Correct! +10 XP'); }
+        else { showToast('❌ Not quite — check the explanation'); }
+        [...optsWrap.children].forEach((el,i2)=>{
+          el.classList.add('disabled');
+          if(i2 === q.correct) el.classList.add('correct');
+          else if(i2 === idx) el.classList.add('wrong');
+        });
+        const ex = document.getElementById('explain-'+modNum);
+        ex.textContent = (isCorrect ? '✓ Correct. ' : '✗ ') + q.exp;
+        ex.classList.add('show');
+        document.getElementById('seg-'+modNum+'-'+qi).classList.add('done');
+        document.getElementById('seg-'+modNum+'-'+qi).classList.remove('current');
+        const nextBtn = document.getElementById('qnext-'+modNum);
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.textContent = (qi === questions.length-1) ? 'See results →' : 'Next question →';
+        nextBtn.onclick = ()=>{
+          qi++;
+          if(qi < questions.length){
+            const nseg = document.getElementById('seg-'+modNum+'-'+qi);
+            if(nseg) nseg.classList.add('current');
+            renderQuestion();
+          } else {
+            renderSummary();
+          }
+        };
+      });
+      optsWrap.appendChild(b);
+    });
+  }
+
+  function renderSummary(){
+    const pct = Math.round(correctCount/questions.length*100);
+    state.quizDone[modNum] = true;
+    state.quizScore[modNum] = pct;
+    if(modNum < 4) state.unlocked = Math.max(state.unlocked, modNum+1);
+    saveState();
+    body.innerHTML = `
+      <div class="quiz-summary">
+        <div style="font-size:2.6rem;">${pct >= 75 ? '🎉' : pct >= 50 ? '👍' : '📘'}</div>
+        <h3>You scored ${correctCount}/${questions.length} (${pct}%)</h3>
+        <p>${pct >= 75 ? "Excellent grasp of this module's core ideas." : pct >= 50 ? "Solid effort — consider re-reading the misconception callouts above." : "Worth another pass through this module before continuing."}</p>
+        <div class="badge-earned">🥉 Module ${modNum} badge earned</div>
+      </div>
+    `;
+    updateTopProgress();
+    buildRail();
+    const footer = document.querySelector('#mod-'+modNum+' .footer-nav button:last-child');
+    if(footer){
+      footer.disabled = false;
+      footer.textContent = modNum < 4 ? 'Continue to Module '+(modNum+1)+' →' : 'Continue to Final Challenge →';
+      footer.onclick = ()=> goToModule(modNum < 4 ? modNum+1 : 'final');
+    }
+    showToast('Module '+modNum+' complete! Badge unlocked 🥉');
+  }
+
+  renderQuestion();
+}
+for(let m=1;m<=4;m++) renderQuiz(m);
+
+buildRail();
+updateTopProgress();
+document.getElementById('xpPill').textContent = `⚡ ${state.xp} XP`;
+
+/* ---------- HERO SVG ANIMATION ---------- */
+(function(){
+  const heroPointsG = document.getElementById('heroPoints');
+  const heroLine = document.getElementById('heroFitLine');
+  const heroR = document.getElementById('heroR');
+  const pts = [[70,235],[100,215],[125,195],[150,180],[175,160],[200,140],[230,125],[260,105],[290,90],[320,70],[350,55]];
+  let i = 0;
+  function meanArr(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+  function corr(pairs){
+    const xs = pairs.map(p=>p[0]), ys = pairs.map(p=>p[1]);
+    const mx = meanArr(xs), my = meanArr(ys);
+    let num=0, dx=0, dy=0;
+    for(let k=0;k<pairs.length;k++){ num += (xs[k]-mx)*(ys[k]-my); dx += (xs[k]-mx)**2; dy += (ys[k]-my)**2; }
+    return dx && dy ? num/Math.sqrt(dx*dy) : 0;
+  }
+  function step(){
+    if(i >= pts.length){
+      heroLine.setAttribute('x1',60); heroLine.setAttribute('y1',250);
+      heroLine.setAttribute('x2',370); heroLine.setAttribute('y2',50);
+      return;
+    }
+    const [x,y] = pts[i];
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',5);
+    c.setAttribute('fill','var(--teal)'); c.setAttribute('opacity','0');
+    heroPointsG.appendChild(c);
+    requestAnimationFrame(()=>{ c.style.transition='opacity .4s ease'; c.setAttribute('opacity','1'); });
+    const partial = pts.slice(0,i+1).map(p=>[p[0], 320-p[1]]); // invert y for "up is high score" feel
+    const rVal = -corr(pts.slice(0,i+1)); // downward pixel-y as x grows looks positive on screen
+    heroR.textContent = 'r = ' + (isNaN(rVal)?0:rVal).toFixed(2);
+    i++;
+    setTimeout(step, 220);
+  }
+  setTimeout(step, 500);
+})();
+
+/* ---------- MODULE 1 EXERCISE: click scatter ---------- */
+(function(){
+  const svg = document.getElementById('exSvg1');
+  const g = document.getElementById('exPoints1');
+  const rOut = document.getElementById('exR1');
+  let points = [];
+  function computeR(){
+    if(points.length < 2){ rOut.textContent = 'r = —'; return; }
+    const xs = points.map(p=>p.x), ys = points.map(p=>220-p.y);
+    const mx = xs.reduce((a,b)=>a+b,0)/xs.length, my = ys.reduce((a,b)=>a+b,0)/ys.length;
+    let num=0,dx=0,dy=0;
+    for(let i=0;i<xs.length;i++){ num += (xs[i]-mx)*(ys[i]-my); dx += (xs[i]-mx)**2; dy += (ys[i]-my)**2; }
+    const r = (dx&&dy) ? num/Math.sqrt(dx*dy) : 0;
+    rOut.textContent = 'r = ' + r.toFixed(2);
+  }
+  svg.addEventListener('click', (e)=>{
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const x = (e.clientX-rect.left)/rect.width*vb.width;
+    const y = (e.clientY-rect.top)/rect.height*vb.height;
+    if(x < 40 || x > 470 || y < 20 || y > 220) return;
+    points.push({x,y});
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',5);
+    c.setAttribute('fill','var(--teal)');
+    g.appendChild(c);
+    computeR();
+  });
+  document.getElementById('exClear1').addEventListener('click', ()=>{
+    points = []; g.innerHTML=''; rOut.textContent='r = —';
+  });
+})();
+
+/* ---------- MODULE 2 EXERCISE: slope/intercept sliders ---------- */
+(function(){
+  const slopeIn = document.getElementById('ex2Slope');
+  const interceptIn = document.getElementById('ex2Intercept');
+  const slopeVal = document.getElementById('ex2SlopeVal');
+  const interceptVal = document.getElementById('ex2InterceptVal');
+  const line = document.getElementById('ex2Line');
+  const ptsG = document.getElementById('ex2Points');
+  const residG = document.getElementById('ex2ResidLines');
+  const ssrOut = document.getElementById('ex2SSR');
+  const dataPts = [[70,150],[130,120],[190,140],[250,90],[310,100],[370,60],[420,40]];
+  dataPts.forEach(([x,y])=>{
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',5); c.setAttribute('fill','var(--teal)');
+    ptsG.appendChild(c);
+  });
+  function xToPlot(x){ return 40 + (x-40)/(460-40)*(460-40); }
+  function redraw(){
+    const slope = parseFloat(slopeIn.value);
+    const intercept = parseFloat(interceptIn.value);
+    slopeVal.textContent = slope.toFixed(1);
+    interceptVal.textContent = intercept.toFixed(0);
+    // line: y = intercept - slope*(x-40)/40 style scaling for visual clarity (screen y grows downward)
+    const y1 = 190 - (intercept - slope*0);
+    const y2 = 190 - (intercept - slope*10);
+    const clampedY1 = Math.max(20, Math.min(190, y1));
+    const clampedY2 = Math.max(20, Math.min(190, y2));
+    line.setAttribute('x1',40); line.setAttribute('y1',clampedY1);
+    line.setAttribute('x2',460); line.setAttribute('y2',clampedY2);
+
+    residG.innerHTML='';
+    let ssr = 0;
+    dataPts.forEach(([x,y])=>{
+      const t = (x-40)/(460-40)*10;
+      const predY = 190 - (intercept - slope*t);
+      const clampedPred = Math.max(20, Math.min(190, predY));
+      ssr += (y-clampedPred)**2;
+      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1',x); l.setAttribute('y1',y); l.setAttribute('x2',x); l.setAttribute('y2',clampedPred);
+      l.setAttribute('stroke','var(--rose)'); l.setAttribute('stroke-width','1.5'); l.setAttribute('stroke-dasharray','3 2');
+      residG.appendChild(l);
+    });
+    ssrOut.textContent = 'Σresidual² = ' + Math.round(ssr).toLocaleString();
+  }
+  slopeIn.addEventListener('input', redraw);
+  interceptIn.addEventListener('input', redraw);
+  document.getElementById('ex2Best').addEventListener('click', ()=>{
+    slopeIn.value = -19; interceptIn.value = 148;
+    redraw();
+    showToast('That\'s close to the true least-squares fit!');
+  });
+  redraw();
+})();
+
+/* ---------- MODULE 3 EXERCISE: diagnosis select ---------- */
+(function(){
+  const sel = document.getElementById('ex3Select');
+  const out = document.getElementById('ex3Answer');
+  const answers = {
+    funnel: "This violates <strong>homoscedasticity (equal variance)</strong> — a classic funnel shape. Consider a log transformation of the outcome or weighted least squares.",
+    curve: "This violates <strong>linearity</strong> — the model is missing a curved (e.g. polynomial or log) term.",
+    clock: "This violates <strong>independence</strong> — residuals correlated with time suggest autocorrelation, common in time-series data.",
+    ok: "No violation here — random, zero-centered scatter is exactly what a well-specified model's residuals should look like."
+  };
+  function update(){ out.innerHTML = answers[sel.value]; }
+  sel.addEventListener('change', update);
+  update();
+})();
+
+/* ---------- MODULE 4 EXERCISE: case study options ---------- */
+(function(){
+  const wrap = document.getElementById('ex4Options');
+  const explainBox = document.getElementById('ex4Explain');
+  let answered = false;
+  [...wrap.children].forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const correct = btn.dataset.correct === 'true';
+      [...wrap.children].forEach(b=>{
+        b.classList.add('disabled');
+        if(b.dataset.correct === 'true') b.classList.add('correct');
+        else if(b === btn) b.classList.add('wrong');
+      });
+      explainBox.classList.add('show');
+      explainBox.textContent = correct
+        ? '✓ Correct — fire severity confounds the relationship between trucks dispatched and damage.'
+        : '✗ Not quite — the real driver is fire severity, which increases both truck dispatches and damage independently.';
+      if(correct){ addXP(5); showToast('✅ +5 XP'); }
+    });
+  });
+})();
+
+/* ---------- FINAL CHALLENGE ---------- */
+(function(){
+  const stepsWrap = document.getElementById('challengeSteps');
+  stepsWrap.innerHTML = `
+    <div class="subsec">
+      <p><strong>Task 1.</strong> Looking at the table, is the correlation between hours studied and exam score most likely:</p>
+      <select id="c1"><option value="">Choose...</option><option value="a">Strong positive</option><option value="b">Strong negative</option><option value="c">Near zero</option></select>
+    </div>
+    <div class="subsec">
+      <p><strong>Task 2.</strong> As hours studied increases by 1, the exam score increases by roughly 3.5-4 points. This number (b₁) is called the:</p>
+      <select id="c2"><option value="">Choose...</option><option value="a">Intercept</option><option value="b">Slope</option><option value="c">Residual</option></select>
+    </div>
+    <div class="subsec">
+      <p><strong>Task 3.</strong> If this model has R² = 0.97, what's the most defensible conclusion?</p>
+      <select id="c3"><option value="">Choose...</option><option value="a">Studying causes higher scores, proven definitively</option><option value="b">97% of the variance in scores is explained by study hours in this sample</option><option value="c">The model has no error at all</option></select>
+    </div>
+    <div class="subsec">
+      <p><strong>Task 4.</strong> Would you trust this model's prediction for 40 hours studied in a week?</p>
+      <select id="c4"><option value="">Choose...</option><option value="a">Yes, lines are always accurate everywhere</option><option value="b">No — that's far outside the observed 1-10 hour range (extrapolation risk)</option><option value="c">Yes, because R² is high</option></select>
+    </div>
+  `;
+  const correctAnswers = {c1:'a', c2:'b', c3:'b', c4:'b'};
+  document.getElementById('challengeSubmit').addEventListener('click', ()=>{
+    let score = 0;
+    Object.keys(correctAnswers).forEach(id=>{
+      const val = document.getElementById(id).value;
+      if(val === correctAnswers[id]) score++;
+    });
+    const resultBox = document.getElementById('challengeResult');
+    const pct = Math.round(score/4*100);
+    const challengeMsg = pct===100 ? 'Flawless. You are ready to apply regression thinking to real datasets.' : 'Review the explanations in Modules 1-4 for any you missed, then revisit this challenge anytime.';
+    resultBox.innerHTML = '<div class="quiz-explain show" style="margin-top:1.2rem;">You got ' + score + '/4 correct (' + pct + '%). ' + challengeMsg + '</div>';
+    if(score >= 3){
+      state.challengeDone = true;
+      saveState();
+      updateTopProgress();
+      addXP(20);
+      document.getElementById('completionPanel').style.display = 'block';
+      document.getElementById('finalScoreLine').textContent =
+        `Total XP: ${state.xp} · Quiz scores: M1 ${state.quizScore[1]}% · M2 ${state.quizScore[2]}% · M3 ${state.quizScore[3]}% · M4 ${state.quizScore[4]}% · Challenge ${pct}%`;
+      document.getElementById('completionPanel').scrollIntoView({behavior:'smooth'});
+      showToast('🏆 Certificate unlocked!');
+    }
+  });
+  document.getElementById('printCertBtn')?.addEventListener('click', ()=>window.print());
+})();
+
+/* restore module view on load based on progress */
+goToModule(currentModule);
+
+})();
+</script>
+</body>
+</html>
