@@ -41,4 +41,4 @@ _Add screenshots here after completing all four modules, every quiz, and the fin
 ## Files in this folder
 - `interactive-learning-studio-regression-correlation.html` — the complete interactive course
 - `day41.md` — this write-up
-- `screenshots/` — completion screenshots (add before committing)
+- `screenshots/` — completion screenshots 
