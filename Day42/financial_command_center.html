@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ledger Room — Financial Command Center</title>
+<style>
+  :root{
+    --ink:#0B1220;
+    --surface:#101B2E;
+    --surface-2:#16233A;
+    --surface-3:#1C2C46;
+    --line: rgba(232,236,241,0.08);
+    --line-strong: rgba(232,236,241,0.16);
+    --text:#E8ECF1;
+    --muted:#8492A6;
+    --muted-2:#5E6C81;
+    --gold:#D4A24E;
+    --gold-soft: rgba(212,162,78,0.14);
+    --teal:#2DD4A7;
+    --teal-soft: rgba(45,212,167,0.14);
+    --coral:#FF6B5E;
+    --coral-soft: rgba(255,107,94,0.14);
+    --blue:#5B8DEF;
+    --blue-soft: rgba(91,141,239,0.14);
+    --radius:14px;
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'Space Grotesk', 'Segoe UI', sans-serif;
+    --sans: 'Inter', 'Segoe UI', sans-serif;
+    --shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+  [data-theme="light"]{
+    --ink:#F3F1EA;
+    --surface:#FFFFFF;
+    --surface-2:#FAF9F5;
+    --surface-3:#F1EFE7;
+    --line: rgba(20,20,20,0.08);
+    --line-strong: rgba(20,20,20,0.16);
+    --text:#181611;
+    --muted:#5E5A50;
+    --muted-2:#8A8676;
+    --shadow: 0 20px 50px -20px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  @font-face{
+    font-family:'Fraunces'; src:local('Georgia'); font-weight: 400 900;
+  }
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    transition:background .3s ease, color .3s ease;
+    min-height:100vh;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--gold); color:#111;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--surface-3); border-radius:10px;}
+
+  /* ===== Layout ===== */
+  .app{display:grid; grid-template-columns:248px 1fr; min-height:100vh;}
+  @media (max-width: 900px){ .app{grid-template-columns:1fr;} .sidebar{position:fixed; z-index:50; height:100vh; transform:translateX(-100%); transition:transform .25s ease;} .sidebar.open{transform:translateX(0);} .menu-toggle{display:flex !important;} }
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    background:var(--surface);
+    border-right:1px solid var(--line);
+    padding:28px 18px;
+    display:flex; flex-direction:column; gap:26px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding:0 6px;}
+  .brand-mark{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(155deg, var(--gold), #9c6f22);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-weight:800; color:#141010; font-size:17px;
+    flex-shrink:0;
+  }
+  .brand-text{font-family:var(--serif); font-weight:700; font-size:16.5px; letter-spacing:.2px; line-height:1.15;}
+  .brand-text span{display:block; font-family:var(--sans); font-weight:500; font-size:10.5px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; margin-top:2px;}
+
+  nav.navlist{display:flex; flex-direction:column; gap:2px;}
+  .nav-eyebrow{font-size:10.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--muted-2); margin:14px 10px 6px; font-weight:600;}
+  .navlist button{
+    all:unset; cursor:pointer; display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:9px; font-size:13.5px; color:var(--muted);
+    font-weight:500; transition:.15s ease;
+  }
+  .navlist button:hover{background:var(--surface-2); color:var(--text);}
+  .navlist button.active{background:var(--gold-soft); color:var(--gold); font-weight:600;}
+  .navlist button .dot{width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.7; flex-shrink:0;}
+
+  .sidebar-foot{margin-top:auto; display:flex; flex-direction:column; gap:10px;}
+  .theme-toggle{
+    all:unset; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    padding:9px 12px; border-radius:9px; background:var(--surface-2); border:1px solid var(--line);
+    font-size:12.5px; color:var(--muted); font-weight:500;
+  }
+  .print-btn{
+    all:unset; cursor:pointer; text-align:center; padding:10px 12px; border-radius:9px;
+    background:transparent; border:1px solid var(--line-strong); font-size:12.5px; color:var(--text); font-weight:600;
+  }
+  .print-btn:hover{border-color:var(--gold); color:var(--gold);}
+
+  .menu-toggle{
+    display:none; position:fixed; top:16px; left:16px; z-index:60;
+    width:38px; height:38px; border-radius:9px; background:var(--surface); border:1px solid var(--line-strong);
+    align-items:center; justify-content:center; cursor:pointer;
+  }
+  .menu-toggle span, .menu-toggle::before, .menu-toggle::after{content:''; display:block; width:16px; height:1.5px; background:var(--text); position:relative;}
+
+  /* ===== Main ===== */
+  main{padding:30px 34px 80px; max-width:1180px; width:100%;}
+  @media (max-width:900px){ main{padding:70px 18px 60px;} }
+
+  /* Ticker */
+  .ticker-wrap{
+    overflow:hidden; border:1px solid var(--line); border-radius:999px; background:var(--surface);
+    margin-bottom:24px; position:relative;
+  }
+  .ticker-wrap::before, .ticker-wrap::after{
+    content:''; position:absolute; top:0; bottom:0; width:40px; z-index:2; pointer-events:none;
+  }
+  .ticker-wrap::before{left:0; background:linear-gradient(90deg, var(--surface), transparent);}
+  .ticker-wrap::after{right:0; background:linear-gradient(270deg, var(--surface), transparent);}
+  .ticker{display:flex; gap:34px; white-space:nowrap; padding:11px 0; animation:scroll 32s linear infinite;}
+  .ticker:hover{animation-play-state:paused;}
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .tick-item{display:flex; align-items:baseline; gap:7px; font-family:var(--mono); font-size:12.5px; padding:0 4px;}
+  .tick-item .name{color:var(--muted); font-weight:500;}
+  .tick-item .val{font-weight:700;}
+  .tick-item .up{color:var(--teal);}
+  .tick-item .down{color:var(--coral);}
+
+  .view{display:none; animation:fadeIn .35s ease;}
+  .view.active{display:block;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .view-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:22px; flex-wrap:wrap; gap:12px;}
+  .view-eyebrow{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px;}
+  .view-title{font-family:var(--serif); font-size:30px; font-weight:700; letter-spacing:-.3px;}
+  .view-sub{color:var(--muted); font-size:13.5px; margin-top:5px; max-width:520px;}
+
+  /* Cards / grid */
+  .grid{display:grid; gap:16px;}
+  .g-4{grid-template-columns:repeat(4,1fr);}
+  .g-3{grid-template-columns:repeat(3,1fr);}
+  .g-2{grid-template-columns:repeat(2,1fr);}
+  .g-3-2{grid-template-columns:2fr 1fr;}
+  @media (max-width:1050px){ .g-4{grid-template-columns:repeat(2,1fr);} .g-3{grid-template-columns:repeat(2,1fr);} .g-3-2{grid-template-columns:1fr;} }
+  @media (max-width:560px){ .g-4,.g-3,.g-2{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; box-shadow:var(--shadow);
+  }
+  .card h3{font-family:var(--serif); font-size:15.5px; font-weight:600; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;}
+  .card h3 small{font-family:var(--sans); font-size:11px; color:var(--muted); font-weight:500;}
+
+  .stat-card{padding:18px 20px;}
+  .stat-label{font-size:11.5px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px;}
+  .stat-value{font-family:var(--mono); font-size:28px; font-weight:700; margin-top:10px; letter-spacing:-.5px;}
+  .stat-delta{font-size:12px; margin-top:8px; font-weight:600; display:flex; align-items:center; gap:5px;}
+  .stat-delta.pos{color:var(--teal);}
+  .stat-delta.neg{color:var(--coral);}
+
+  /* Health score gauge */
+  .score-wrap{display:flex; align-items:center; gap:22px;}
+  .score-ring{position:relative; width:132px; height:132px; flex-shrink:0;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .score-num{font-family:var(--mono); font-size:32px; font-weight:800;}
+  .score-label{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:1px;}
+  .score-verdict{font-family:var(--serif); font-size:18px; font-weight:700; margin-bottom:6px;}
+  .score-desc{font-size:13px; color:var(--muted); line-height:1.55;}
+
+  /* Bars */
+  .bar-row{display:flex; align-items:center; gap:12px; margin-bottom:13px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-label{width:120px; font-size:12.5px; color:var(--muted); flex-shrink:0;}
+  .bar-track{flex:1; height:9px; background:var(--surface-3); border-radius:999px; overflow:hidden; position:relative;}
+  .bar-fill{height:100%; border-radius:999px; transition:width .6s ease;}
+  .bar-val{width:64px; text-align:right; font-family:var(--mono); font-size:12px; font-weight:600; flex-shrink:0;}
+
+  /* Table */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--muted-2); font-weight:600; padding:0 10px 10px; border-bottom:1px solid var(--line);}
+  td{padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  td.num{font-family:var(--mono); text-align:right;}
+  .tag{display:inline-block; padding:3px 9px; border-radius:999px; font-size:10.5px; font-weight:600;}
+  .tag.biz{background:var(--blue-soft); color:var(--blue);}
+  .tag.personal{background:var(--gold-soft); color:var(--gold);}
+  .row-input{width:100%; background:transparent; border:none; color:var(--text); font-family:inherit; font-size:13px; outline:none;}
+  .row-input:focus{color:var(--gold);}
+
+  .icon-btn{all:unset; cursor:pointer; color:var(--muted-2); font-size:14px; padding:4px 7px; border-radius:6px;}
+  .icon-btn:hover{color:var(--coral); background:var(--coral-soft);}
+  .add-row-btn{
+    all:unset; cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+    font-size:12.5px; font-weight:600; color:var(--gold); padding:7px 12px; border:1px dashed var(--line-strong); border-radius:8px;
+  }
+  .add-row-btn:hover{border-color:var(--gold); background:var(--gold-soft);}
+
+  input[type=text], input[type=number], select{
+    background:var(--surface-2); border:1px solid var(--line-strong); border-radius:8px;
+    padding:9px 11px; color:var(--text); font-family:inherit; font-size:13px; outline:none; width:100%;
+  }
+  input:focus, select:focus{border-color:var(--gold);}
+  label{font-size:11.5px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; display:block;}
+  .field{margin-bottom:14px;}
+  .btn{
+    all:unset; cursor:pointer; padding:11px 20px; border-radius:9px; font-weight:700; font-size:13px;
+    background:var(--gold); color:#161208; display:inline-flex; align-items:center; gap:7px; transition:.15s;
+  }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px -8px var(--gold);}
+  .btn.ghost{background:transparent; border:1px solid var(--line-strong); color:var(--text);}
+  .btn.ghost:hover{border-color:var(--gold); color:var(--gold); box-shadow:none;}
+
+  /* Insight / recommendation cards */
+  .insight{
+    display:flex; gap:13px; padding:15px 16px; border-radius:11px; background:var(--surface-2);
+    border-left:3px solid var(--gold); margin-bottom:10px;
+  }
+  .insight:last-child{margin-bottom:0;}
+  .insight.warn{border-color:var(--coral);}
+  .insight.good{border-color:var(--teal);}
+  .insight-icon{font-size:17px; flex-shrink:0;}
+  .insight-body b{display:block; font-size:13.5px; margin-bottom:3px;}
+  .insight-body span{font-size:12.5px; color:var(--muted); line-height:1.5;}
+
+  /* progress goals */
+  .goal-card{padding:18px;}
+  .goal-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;}
+  .goal-top b{font-size:14px;}
+  .goal-top span{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .goal-track{height:10px; background:var(--surface-3); border-radius:999px; overflow:hidden; margin:10px 0 8px;}
+  .goal-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--teal)); border-radius:999px; transition:width .6s ease;}
+  .goal-meta{font-size:11.5px; color:var(--muted-2); display:flex; justify-content:space-between;}
+
+  /* Checklist */
+  .checklist label{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--text); text-transform:none; letter-spacing:0; font-weight:500; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .checklist label:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{width:16px; height:16px; accent-color:var(--gold); flex-shrink:0;}
+  .checklist input:checked ~ span{text-decoration:line-through; color:var(--muted-2);}
+
+  .tip-card{padding:16px; font-size:13px; line-height:1.6; color:var(--muted);}
+  .tip-card b{color:var(--text); display:block; margin-bottom:6px; font-family:var(--serif); font-size:14.5px;}
+
+  .simbox{display:flex; flex-direction:column; gap:16px;}
+  .slider-row label{display:flex; justify-content:space-between; text-transform:none; letter-spacing:0; font-size:13px; color:var(--text); font-weight:600;}
+  .slider-row label b{color:var(--gold); font-family:var(--mono);}
+  input[type=range]{-webkit-appearance:none; width:100%; height:5px; border-radius:999px; background:var(--surface-3); margin-top:8px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:17px; height:17px; border-radius:50%; background:var(--gold); cursor:pointer; border:3px solid var(--ink);}
+
+  .divider{height:1px; background:var(--line); margin:26px 0;}
+  .muted{color:var(--muted);}
+  .small{font-size:12px;}
+  .flex{display:flex; align-items:center;}
+  .between{justify-content:space-between;}
+  .gap8{gap:8px;} .gap12{gap:12px;}
+  .mt8{margin-top:8px;} .mt16{margin-top:16px;} .mt24{margin-top:24px;}
+
+  footer.print-only{display:none;}
+  @media print{
+    .sidebar, .menu-toggle, .ticker-wrap, .btn, .add-row-btn, .icon-btn, .theme-toggle, .print-btn{display:none !important;}
+    .app{display:block;}
+    main{padding:0; max-width:100%;}
+    .view{display:block !important;}
+    body{background:#fff; color:#111;}
+    .card{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="menu-toggle" id="menuToggle"><span></span></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div class="brand-text">The Ledger Room<span>Command Center</span></div>
+    </div>
+
+    <nav class="navlist" id="navlist">
+      <div class="nav-eyebrow">Overview</div>
+      <button data-view="overview" class="active"><span class="dot"></span>Dashboard</button>
+
+      <div class="nav-eyebrow">Money In</div>
+      <button data-view="revenue"><span class="dot"></span>Revenue Streams</button>
+      <button data-view="personal-income"><span class="dot"></span>Personal Income</button>
+
+      <div class="nav-eyebrow">Money Out</div>
+      <button data-view="expenses"><span class="dot"></span>Expenses</button>
+      <button data-view="budgets"><span class="dot"></span>Budgets</button>
+
+      <div class="nav-eyebrow">Position</div>
+      <button data-view="cashflow"><span class="dot"></span>Cash Flow</button>
+      <button data-view="savings"><span class="dot"></span>Savings &amp; Reserve</button>
+      <button data-view="investing"><span class="dot"></span>Investing Starter</button>
+      <button data-view="goals"><span class="dot"></span>Goals</button>
+
+      <div class="nav-eyebrow">Intelligence</div>
+      <button data-view="insights"><span class="dot"></span>AI Insights</button>
+      <button data-view="simulator"><span class="dot"></span>What-If Simulator</button>
+      <button data-view="reports"><span class="dot"></span>Reports</button>
+      <button data-view="learn"><span class="dot"></span>Tips &amp; Resources</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="theme-toggle" id="themeToggle"><span>Dark mode</span><span id="themeIcon">●</span></button>
+      <button class="print-btn" onclick="window.print()">Print / Export Report</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="ticker-wrap">
+      <div class="ticker" id="tickerEl"></div>
+    </div>
+
+    <!-- ============ OVERVIEW ============ -->
+    <section class="view active" id="view-overview">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Command Center</div>
+          <div class="view-title">Good to see you back</div>
+          <div class="view-sub">Your business and personal finances, reconciled into a single view.</div>
+        </div>
+      </div>
+
+      <div class="grid g-4" id="overviewStats"></div>
+
+      <div class="grid g-3-2 mt16">
+        <div class="card">
+          <h3>Combined Cash Flow <small>Last 6 months</small></h3>
+          <canvas id="cashflowChart" height="150"></canvas>
+        </div>
+        <div class="card">
+          <h3>Financial Health Score</h3>
+          <div class="score-wrap">
+            <div class="score-ring">
+              <svg width="132" height="132" viewBox="0 0 132 132">
+                <circle cx="66" cy="66" r="56" stroke="var(--surface-3)" stroke-width="12" fill="none"/>
+                <circle id="scoreArc" cx="66" cy="66" r="56" stroke="var(--gold)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="352"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-num" id="scoreNum">--</div>
+                <div class="score-label">out of 100</div>
+              </div>
+            </div>
+            <div>
+              <div class="score-verdict" id="scoreVerdict">Calculating…</div>
+              <div class="score-desc" id="scoreDesc">Your score blends revenue diversity, expense discipline, savings rate, and reserve coverage.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g-2 mt16">
+        <div class="card">
+          <h3>Revenue Mix <small>By stream</small></h3>
+          <canvas id="revenuePie" height="180"></canvas>
+        </div>
+        <div class="card">
+          <h3>Business vs Personal Spend</h3>
+          <canvas id="bizPersonalBar" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="card mt16">
+        <h3>Top AI Recommendations <small>Auto-generated from your data</small></h3>
+        <div id="overviewInsights"></div>
+      </div>
+    </section>
+
+    <!-- ============ REVENUE STREAMS ============ -->
+    <section class="view" id="view-revenue">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Money In</div>
+          <div class="view-title">Revenue Streams</div>
+          <div class="view-sub">Every line the business earns from, tracked monthly.</div>
+        </div>
+        <button class="btn" onclick="addRevenue()">+ Add stream</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Stream</th><th>Type</th><th style="text-align:right">Monthly Amount (₹)</th><th style="text-align:right">Share</th><th></th></tr></thead>
+          <tbody id="revenueTable"></tbody>
+        </table>
+      </div>
+      <div class="card mt16">
+        <h3>Revenue Trend <small>6-month view</small></h3>
+        <canvas id="revenueTrendChart" height="120"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ PERSONAL INCOME ============ -->
+    <section class="view" id="view-personal-income">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Money In</div>
+          <div class="view-title">Personal Income</div>
+          <div class="view-sub">Draws, salary from your own company, and other personal earnings.</div>
+        </div>
+        <button class="btn" onclick="addPersonalIncome()">+ Add source</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Source</th><th style="text-align:right">Monthly Amount (₹)</th><th></th></tr></thead>
+          <tbody id="personalIncomeTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ EXPENSES ============ -->
+    <section class="view" id="view-expenses">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Money Out</div>
+          <div class="view-title">Expenses</div>
+          <div class="view-sub">Business and personal spending, kept separate but visible together.</div>
+        </div>
+        <button class="btn" onclick="addExpense()">+ Add expense</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Expense</th><th>Category</th><th>Type</th><th style="text-align:right">Monthly (₹)</th><th></th></tr></thead>
+          <tbody id="expenseTable"></tbody>
+        </table>
+      </div>
+      <div class="grid g-2 mt16">
+        <div class="card"><h3>Business Expense Breakdown</h3><canvas id="bizExpChart" height="180"></canvas></div>
+        <div class="card"><h3>Personal Expense Breakdown</h3><canvas id="personalExpChart" height="180"></canvas></div>
+      </div>
+    </section>
+
+    <!-- ============ BUDGETS ============ -->
+    <section class="view" id="view-budgets">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Money Out</div>
+          <div class="view-title">Budgets</div>
+          <div class="view-sub">Category ceilings versus what's actually going out.</div>
+        </div>
+      </div>
+      <div class="card" id="budgetCard"></div>
+    </section>
+
+    <!-- ============ CASH FLOW ============ -->
+    <section class="view" id="view-cashflow">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Position</div>
+          <div class="view-title">Cash Flow</div>
+          <div class="view-sub">What's actually left after business and personal accounts settle.</div>
+        </div>
+      </div>
+      <div class="grid g-3" id="cashflowStats"></div>
+      <div class="card mt16">
+        <h3>Monthly Net Position <small>Projected 6 months</small></h3>
+        <canvas id="cashflowProjection" height="140"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ SAVINGS ============ -->
+    <section class="view" id="view-savings">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Position</div>
+          <div class="view-title">Savings &amp; Reserve</div>
+          <div class="view-sub">Your buffer against a slow revenue month.</div>
+        </div>
+      </div>
+      <div class="grid g-3">
+        <div class="card stat-card">
+          <div class="stat-label">Business Emergency Fund</div>
+          <div class="stat-value" id="bizReserveVal">₹0</div>
+          <div class="small muted mt8" id="bizReserveMonths">-- months of expenses covered</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Personal Emergency Fund</div>
+          <div class="stat-value" id="personalReserveVal">₹0</div>
+          <div class="small muted mt8" id="personalReserveMonths">-- months of expenses covered</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Combined Savings Rate</div>
+          <div class="stat-value" id="savingsRateVal">0%</div>
+          <div class="small muted mt8">of total income saved monthly</div>
+        </div>
+      </div>
+      <div class="card mt16">
+        <h3>Adjust Your Reserves</h3>
+        <div class="grid g-2">
+          <div class="field"><label>Business reserve balance (₹)</label><input type="number" id="bizReserveInput"></div>
+          <div class="field"><label>Personal reserve balance (₹)</label><input type="number" id="personalReserveInput"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INVESTING STARTER ============ -->
+    <section class="view" id="view-investing">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Position</div>
+          <div class="view-title">Investing Starter</div>
+          <div class="view-sub">You're just getting going — this module keeps it simple: how much, how often, and what it could grow into.</div>
+        </div>
+      </div>
+      <div class="grid g-3-2">
+        <div class="card">
+          <h3>Beginner Portfolio Planner</h3>
+          <div class="grid g-2">
+            <div class="field"><label>Monthly contribution (₹)</label><input type="number" id="investMonthly" value="10000"></div>
+            <div class="field"><label>Expected annual return (%)</label><input type="number" id="investReturn" value="10"></div>
+            <div class="field"><label>Time horizon (years)</label><input type="number" id="investYears" value="10"></div>
+            <div class="field"><label>Starting lump sum (₹)</label><input type="number" id="investLump" value="0"></div>
+          </div>
+          <canvas id="investChart" height="150"></canvas>
+        </div>
+        <div class="card">
+          <h3>Suggested Starter Mix</h3>
+          <div id="investMixList"></div>
+          <p class="small muted mt16">A simple, diversified starting point often used by first-time investors. Not personalized financial advice — consider speaking with a licensed advisor before investing.</p>
+        </div>
+      </div>
+      <div class="card mt16">
+        <h3>Why Start Small &amp; Early</h3>
+        <div class="grid g-3" id="investEduCards"></div>
+      </div>
+    </section>
+
+    <!-- ============ GOALS ============ -->
+    <section class="view" id="view-goals">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Position</div>
+          <div class="view-title">Goals</div>
+          <div class="view-sub">Business and personal milestones, tracked side by side.</div>
+        </div>
+        <button class="btn" onclick="addGoal()">+ Add goal</button>
+      </div>
+      <div class="grid g-2" id="goalsGrid"></div>
+    </section>
+
+    <!-- ============ AI INSIGHTS ============ -->
+    <section class="view" id="view-insights">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Intelligence</div>
+          <div class="view-title">AI Insights</div>
+          <div class="view-sub">Pattern-based recommendations generated from your live numbers.</div>
+        </div>
+      </div>
+      <div class="card" id="fullInsights"></div>
+    </section>
+
+    <!-- ============ SIMULATOR ============ -->
+    <section class="view" id="view-simulator">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Intelligence</div>
+          <div class="view-title">What-If Simulator</div>
+          <div class="view-sub">Drag the levers. Watch your health score and cash position react instantly.</div>
+        </div>
+      </div>
+      <div class="grid g-3-2">
+        <div class="card">
+          <h3>Scenario Levers</h3>
+          <div class="simbox">
+            <div class="slider-row"><label>Revenue growth <b id="simRevLbl">0%</b></label><input type="range" id="simRev" min="-30" max="60" value="0"></div>
+            <div class="slider-row"><label>Expense change <b id="simExpLbl">0%</b></label><input type="range" id="simExp" min="-30" max="60" value="0"></div>
+            <div class="slider-row"><label>New monthly investment <b id="simInvLbl">₹0</b></label><input type="range" id="simInv" min="0" max="50000" step="1000" value="0"></div>
+            <div class="slider-row"><label>New team hire cost/mo <b id="simHireLbl">₹0</b></label><input type="range" id="simHire" min="0" max="100000" step="5000" value="0"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Projected Outcome</h3>
+          <div class="stat-label mt8">New Monthly Net</div>
+          <div class="stat-value" id="simNet">₹0</div>
+          <div class="stat-label mt16">New Health Score</div>
+          <div class="stat-value" id="simScore">--</div>
+          <div class="small mt16" id="simVerdict"></div>
+        </div>
+      </div>
+      <div class="card mt16">
+        <h3>Scenario vs Current</h3>
+        <canvas id="simChart" height="140"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ REPORTS ============ -->
+    <section class="view" id="view-reports">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Intelligence</div>
+          <div class="view-title">Reports</div>
+          <div class="view-sub">A printable snapshot of where things stand today.</div>
+        </div>
+        <button class="btn ghost" onclick="window.print()">Print this report</button>
+      </div>
+      <div class="card" id="reportSummary"></div>
+    </section>
+
+    <!-- ============ TIPS / RESOURCES ============ -->
+    <section class="view" id="view-learn">
+      <div class="view-head">
+        <div>
+          <div class="view-eyebrow">Intelligence</div>
+          <div class="view-title">Tips &amp; Resources</div>
+          <div class="view-sub">Short, practical reading for owners balancing two ledgers at once.</div>
+        </div>
+      </div>
+
+      <div class="grid g-3" id="tipsGrid"></div>
+
+      <div class="card mt16">
+        <h3>Monthly Financial Checklist</h3>
+        <div class="checklist" id="checklist"></div>
+      </div>
+
+      <div class="card mt16">
+        <h3>Prompts to Keep Learning With Claude</h3>
+        <div id="promptsList"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const LS_KEY = 'ledgerRoomState_v1';
+
+const defaultState = {
+  revenue: [
+    {name:'Retainer clients', type:'Recurring', amount:180000},
+    {name:'Product sales', type:'One-off', amount:95000},
+    {name:'Consulting projects', type:'Project', amount:120000},
+    {name:'Affiliate / licensing', type:'Passive', amount:22000},
+  ],
+  personalIncome: [
+    {name:'Owner draw', amount:60000},
+    {name:'Rental income', amount:15000},
+  ],
+  expenses: [
+    {name:'Team salaries', category:'Payroll', type:'business', amount:140000},
+    {name:'Software & tools', category:'Operations', type:'business', amount:18000},
+    {name:'Marketing', category:'Growth', type:'business', amount:35000},
+    {name:'Office / coworking', category:'Operations', type:'business', amount:20000},
+    {name:'Rent', category:'Housing', type:'personal', amount:32000},
+    {name:'Groceries & household', category:'Living', type:'personal', amount:18000},
+    {name:'Insurance & health', category:'Living', type:'personal', amount:9000},
+    {name:'Dining & lifestyle', category:'Discretionary', type:'personal', amount:12000},
+  ],
+  budgets: [
+    {category:'Payroll', limit:150000},
+    {category:'Growth', limit:40000},
+    {category:'Operations', limit:45000},
+    {category:'Living', limit:35000},
+    {category:'Discretionary', limit:15000},
+  ],
+  goals: [
+    {name:'Business: 6-month runway', target:900000, current:410000, type:'business'},
+    {name:'Personal: Home down payment', target:2500000, current:620000, type:'personal'},
+    {name:'Business: New hire fund', target:300000, current:110000, type:'business'},
+    {name:'Personal: Vacation fund', target:150000, current:65000, type:'personal'},
+  ],
+  bizReserve: 260000,
+  personalReserve: 140000,
+  checklist: [
+    {label:'Reconcile business and personal accounts', done:true},
+    {label:'Review revenue stream performance', done:true},
+    {label:'Check budget vs actuals by category', done:false},
+    {label:'Top up emergency reserve', done:false},
+    {label:'Review outstanding invoices', done:false},
+    {label:"Log this month's investment contribution", done:false},
+  ]
+};
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(defaultState));
+}
+function saveState(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const fmtSigned = n => (n>=0?'+':'') + fmt(n);
+
+/* ================= NAVIGATION ================= */
+document.getElementById('navlist').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-view]');
+  if(!btn) return;
+  document.querySelectorAll('.navlist button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+});
+document.getElementById('menuToggle').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ================= THEME ================= */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.getElementById('themeIcon').textContent = t==='dark' ? '●' : '○';
+  themeToggle.querySelector('span').textContent = t==='dark' ? 'Dark mode' : 'Light mode';
+  localStorage.setItem('ledgerTheme', t);
+}
+themeToggle.addEventListener('click', ()=>{
+  const cur = document.body.getAttribute('data-theme');
+  applyTheme(cur==='dark' ? 'light' : 'dark');
+  renderAll();
+});
+applyTheme(localStorage.getItem('ledgerTheme') || 'dark');
+
+/* ================= DERIVED HELPERS ================= */
+function totalRevenue(){ return state.revenue.reduce((s,r)=>s+Number(r.amount),0); }
+function totalPersonalIncome(){ return state.personalIncome.reduce((s,r)=>s+Number(r.amount),0); }
+function totalIncome(){ return totalRevenue() + totalPersonalIncome(); }
+function bizExpenses(){ return state.expenses.filter(e=>e.type==='business').reduce((s,e)=>s+Number(e.amount),0); }
+function personalExpenses(){ return state.expenses.filter(e=>e.type==='personal').reduce((s,e)=>s+Number(e.amount),0); }
+function totalExpenses(){ return bizExpenses()+personalExpenses(); }
+function netCashflow(){ return totalIncome() - totalExpenses(); }
+function bizNet(){ return totalRevenue() - bizExpenses(); }
+function personalNet(){ return totalPersonalIncome() - personalExpenses(); }
+function savingsRate(){ const inc = totalIncome(); return inc>0 ? Math.max(0,netCashflow())/inc*100 : 0; }
+function expByCategory(type){
+  const map={};
+  state.expenses.filter(e=>e.type===type).forEach(e=>{ map[e.category]=(map[e.category]||0)+Number(e.amount); });
+  return map;
+}
+
+function healthScore(){
+  let score = 0;
+  // 1. Revenue diversity (0-25): more streams, more evenly spread = better
+  const revs = state.revenue.map(r=>Number(r.amount));
+  const revTotal = revs.reduce((a,b)=>a+b,0) || 1;
+  const shares = revs.map(r=>r/revTotal);
+  const hhi = shares.reduce((s,x)=>s+x*x,0); // Herfindahl index, lower = more diverse
+  const diversityScore = Math.max(0, 25 * (1 - hhi)) ;
+  score += Math.min(25, diversityScore + (revs.length>=3?4:0));
+
+  // 2. Savings rate (0-25)
+  const sr = savingsRate();
+  score += Math.min(25, sr/30*25);
+
+  // 3. Reserve coverage (0-25): months of combined expenses covered
+  const monthlyExp = totalExpenses() || 1;
+  const reserveMonths = (state.bizReserve + state.personalReserve) / monthlyExp;
+  score += Math.min(25, reserveMonths/6*25);
+
+  // 4. Cash flow positivity (0-25)
+  const net = netCashflow();
+  const ratio = totalIncome()>0 ? net/totalIncome() : -1;
+  score += Math.max(0, Math.min(25, (ratio+0.1)/0.4*25));
+
+  return Math.round(Math.max(0, Math.min(100, score)));
+}
+
+function scoreVerdict(s){
+  if(s>=80) return ['Excellent footing','Your business and personal finances are both diversified and well-reserved.'];
+  if(s>=60) return ['Solid, with room to grow','Cash flow is healthy — building reserves or diversifying revenue further would help.'];
+  if(s>=40) return ['Stable but exposed','You are getting by, but a slow month could strain things. Focus on reserves.'];
+  return ['Needs attention','Expenses are close to or exceeding income. Prioritize the recommendations below.'];
+}
+
+/* ================= CHARTS (lightweight canvas, no libs) ================= */
+function drawLineChart(canvas, series, opts={}){
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.clientWidth, h = canvas.clientHeight || canvas.height;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:44,r:14,t:14,b:26};
+  const allVals = series.flatMap(s=>s.data);
+  const max = Math.max(...allVals,1)*1.15;
+  const min = Math.min(0,Math.min(...allVals));
+  const n = series[0].data.length;
+  const xw = (w-pad.l-pad.r)/(n-1);
+  const yScale = v => h-pad.b - ( (v-min)/(max-min) )*(h-pad.t-pad.b);
+  const styles = getComputedStyle(document.body);
+  const muted = styles.getPropertyValue('--muted').trim();
+  const line = styles.getPropertyValue('--line').trim();
+  // grid
+  ctx.strokeStyle = line; ctx.lineWidth=1; ctx.font='10px Inter, sans-serif'; ctx.fillStyle=muted;
+  for(let i=0;i<=4;i++){
+    const y = pad.t + (h-pad.t-pad.b)*i/4;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    const val = max - (max-min)*i/4;
+    ctx.fillText(Math.round(val/1000)+'k', 4, y+3);
+  }
+  series.forEach(s=>{
+    ctx.beginPath();
+    s.data.forEach((v,i)=>{ const x=pad.l+xw*i, y=yScale(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.strokeStyle = s.color; ctx.lineWidth=2.4; ctx.lineJoin='round'; ctx.stroke();
+    if(s.fill){
+      ctx.lineTo(pad.l+xw*(n-1), yScale(min)); ctx.lineTo(pad.l, yScale(min)); ctx.closePath();
+      ctx.fillStyle = s.color+'22'; ctx.fill();
+    }
+    s.data.forEach((v,i)=>{
+      const x=pad.l+xw*i, y=yScale(v);
+      ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fillStyle=s.color; ctx.fill();
+    });
+  });
+  // x labels
+  if(opts.labels){
+    ctx.fillStyle = muted; ctx.font='10px Inter, sans-serif'; ctx.textAlign='center';
+    opts.labels.forEach((lab,i)=>{ ctx.fillText(lab, pad.l+xw*i, h-8); });
+    ctx.textAlign='left';
+  }
+}
+
+function drawBarChart(canvas, labels, datasets, opts={}){
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.clientWidth, h = canvas.clientHeight||canvas.height;
+  canvas.width=w*dpr; canvas.height=h*dpr; ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const pad={l:44,r:14,t:14,b:26};
+  const allVals = datasets.flatMap(d=>d.data);
+  const max = Math.max(...allVals,1)*1.2;
+  const styles=getComputedStyle(document.body);
+  const muted = styles.getPropertyValue('--muted').trim();
+  const line = styles.getPropertyValue('--line').trim();
+  ctx.strokeStyle=line; ctx.font='10px Inter, sans-serif'; ctx.fillStyle=muted;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+(h-pad.t-pad.b)*i/4;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(Math.round((max-max*i/4)/1000)+'k', 4, y+3);
+  }
+  const groupW = (w-pad.l-pad.r)/labels.length;
+  const barW = Math.min(26, groupW/(datasets.length+1.5));
+  labels.forEach((lab,i)=>{
+    const gx = pad.l + groupW*i + groupW/2 - (barW*datasets.length)/2;
+    datasets.forEach((d,j)=>{
+      const val = d.data[i];
+      const bh = (val/max)*(h-pad.t-pad.b);
+      const x = gx + j*barW;
+      const y = h-pad.b-bh;
+      ctx.fillStyle = d.color;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x,y,barW-4,bh,3) : ctx.rect(x,y,barW-4,bh);
+      ctx.fill();
+    });
+    ctx.fillStyle=muted; ctx.font='10px Inter, sans-serif'; ctx.textAlign='center';
+    ctx.fillText(lab, pad.l+groupW*i+groupW/2, h-8);
+    ctx.textAlign='left';
+  });
+}
+
+function drawPieChart(canvas, data){
+  const ctx = canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const w=canvas.clientWidth, h=canvas.clientHeight||canvas.height;
+  canvas.width=w*dpr; canvas.height=h*dpr; ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const cx=w*0.32, cy=h/2, r=Math.min(cx,cy)-10;
+  const total = data.reduce((s,d)=>s+d.value,0)||1;
+  let start=-Math.PI/2;
+  data.forEach(d=>{
+    const angle = (d.value/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.closePath(); ctx.fillStyle=d.color; ctx.fill();
+    start+=angle;
+  });
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,7); ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+  // legend
+  const styles=getComputedStyle(document.body);
+  const text = styles.getPropertyValue('--text').trim();
+  const muted = styles.getPropertyValue('--muted').trim();
+  let ly = cy - (data.length*20)/2 + 6;
+  data.forEach(d=>{
+    ctx.fillStyle=d.color; ctx.fillRect(w*0.62, ly-8, 10,10);
+    ctx.fillStyle=text; ctx.font='11px Inter, sans-serif';
+    ctx.fillText(d.label, w*0.62+16, ly+1);
+    ctx.fillStyle=muted; ctx.font='10px Inter, sans-serif';
+    ctx.fillText(Math.round(d.value/total*100)+'%', w*0.62+16, ly+13);
+    ly+=34;
+  });
+}
+
+/* ================= RENDER: TICKER ================= */
+function renderTicker(){
+  const el = document.getElementById('tickerEl');
+  const items = [
+    ...state.revenue.map(r=>({name:r.name, val:fmt(r.amount)+'/mo', up:true})),
+    {name:'Net Cash Flow', val: fmtSigned(netCashflow())+'/mo', up: netCashflow()>=0},
+    {name:'Health Score', val: healthScore()+'/100', up: healthScore()>=60},
+  ];
+  const html = items.map(it=>`<div class="tick-item"><span class="name">${it.name}</span><span class="val ${it.up?'up':'down'}">${it.up?'▲':'▼'} ${it.val}</span></div>`).join('');
+  el.innerHTML = html+html; // duplicate for seamless loop
+}
+
+/* ================= RENDER: OVERVIEW ================= */
+function renderOverview(){
+  const stats = [
+    {label:'Total Monthly Income', value: fmt(totalIncome()), delta: 'Business '+fmt(totalRevenue())+' · Personal '+fmt(totalPersonalIncome()), pos:true},
+    {label:'Total Monthly Expenses', value: fmt(totalExpenses()), delta: 'Business '+fmt(bizExpenses())+' · Personal '+fmt(personalExpenses()), pos:false},
+    {label:'Net Cash Flow', value: fmtSigned(netCashflow()), delta: (netCashflow()>=0?'Positive':'Negative')+' this month', pos: netCashflow()>=0},
+    {label:'Combined Reserve', value: fmt(state.bizReserve+state.personalReserve), delta: ((state.bizReserve+state.personalReserve)/(totalExpenses()||1)).toFixed(1)+' months covered', pos:true},
+  ];
+  document.getElementById('overviewStats').innerHTML = stats.map(s=>`
+    <div class="card stat-card">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-delta ${s.pos?'pos':'neg'}">${s.delta}</div>
+    </div>`).join('');
+
+  // health score ring
+  const s = healthScore();
+  const circumference = 2*Math.PI*56;
+  document.getElementById('scoreArc').setAttribute('stroke-dasharray', circumference);
+  document.getElementById('scoreArc').setAttribute('stroke-dashoffset', circumference - (s/100)*circumference);
+  document.getElementById('scoreArc').setAttribute('stroke', s>=60?'#2DD4A7':(s>=40?'#D4A24E':'#FF6B5E'));
+  document.getElementById('scoreNum').textContent = s;
+  const [verdict,desc] = scoreVerdict(s);
+  document.getElementById('scoreVerdict').textContent = verdict;
+  document.getElementById('scoreDesc').textContent = desc;
+
+  // cashflow trend chart (simulate 6mo trailing from current with slight variance)
+  const months = ['Feb','Mar','Apr','May','Jun','Jul'];
+  const base = netCashflow();
+  const incomeSeries = months.map((_,i)=> totalIncome()*(0.88+0.03*i));
+  const expenseSeries = months.map((_,i)=> totalExpenses()*(0.92+0.015*i));
+  drawLineChart(document.getElementById('cashflowChart'), [
+    {data:incomeSeries, color:'#2DD4A7', fill:true},
+    {data:expenseSeries, color:'#FF6B5E', fill:false},
+  ], {labels:months});
+
+  drawPieChart(document.getElementById('revenuePie'), state.revenue.map((r,i)=>({
+    label:r.name, value:Number(r.amount), color:['#D4A24E','#2DD4A7','#5B8DEF','#FF6B5E','#B58AF0','#4CC9E0'][i%6]
+  })));
+
+  drawBarChart(document.getElementById('bizPersonalBar'), ['Income','Expenses','Net'],
+    [
+      {data:[totalRevenue(), bizExpenses(), bizNet()], color:'#5B8DEF'},
+      {data:[totalPersonalIncome(), personalExpenses(), personalNet()], color:'#D4A24E'},
+    ]);
+
+  document.getElementById('overviewInsights').innerHTML = generateInsights().slice(0,3).map(insightHTML).join('');
+}
+
+/* ================= RENDER: REVENUE ================= */
+function renderRevenueTable(){
+  const total = totalRevenue()||1;
+  document.getElementById('revenueTable').innerHTML = state.revenue.map((r,i)=>`
+    <tr>
+      <td><input class="row-input" value="${r.name}" onchange="state.revenue[${i}].name=this.value; persist()"></td>
+      <td><select class="row-input" onchange="state.revenue[${i}].type=this.value; persist()">
+        ${['Recurring','Project','One-off','Passive'].map(t=>`<option ${t===r.type?'selected':''}>${t}</option>`).join('')}
+      </select></td>
+      <td class="num"><input class="row-input" style="text-align:right" type="number" value="${r.amount}" onchange="state.revenue[${i}].amount=Number(this.value); persist()"></td>
+      <td class="num">${Math.round(r.amount/total*100)}%</td>
+      <td><button class="icon-btn" onclick="state.revenue.splice(${i},1); persist()">✕</button></td>
+    </tr>`).join('');
+  const months = ['Feb','Mar','Apr','May','Jun','Jul'];
+  drawLineChart(document.getElementById('revenueTrendChart'),
+    state.revenue.map((r,i)=>({data: months.map((_,mi)=> r.amount*(0.85+0.03*mi)), color:['#D4A24E','#2DD4A7','#5B8DEF','#FF6B5E','#B58AF0'][i%5], fill:false})),
+    {labels:months});
+}
+function addRevenue(){ state.revenue.push({name:'New stream', type:'Recurring', amount:10000}); persist(); }
+
+/* ================= RENDER: PERSONAL INCOME ================= */
+function renderPersonalIncome(){
+  document.getElementById('personalIncomeTable').innerHTML = state.personalIncome.map((r,i)=>`
+    <tr>
+      <td><input class="row-input" value="${r.name}" onchange="state.personalIncome[${i}].name=this.value; persist()"></td>
+      <td class="num"><input class="row-input" style="text-align:right" type="number" value="${r.amount}" onchange="state.personalIncome[${i}].amount=Number(this.value); persist()"></td>
+      <td><button class="icon-btn" onclick="state.personalIncome.splice(${i},1); persist()">✕</button></td>
+    </tr>`).join('');
+}
+function addPersonalIncome(){ state.personalIncome.push({name:'New source', amount:5000}); persist(); }
+
+/* ================= RENDER: EXPENSES ================= */
+function renderExpenses(){
+  document.getElementById('expenseTable').innerHTML = state.expenses.map((e,i)=>`
+    <tr>
+      <td><input class="row-input" value="${e.name}" onchange="state.expenses[${i}].name=this.value; persist()"></td>
+      <td><input class="row-input" value="${e.category}" onchange="state.expenses[${i}].category=this.value; persist()"></td>
+      <td><span class="tag ${e.type==='business'?'biz':'personal'}" style="cursor:pointer" onclick="state.expenses[${i}].type = state.expenses[${i}].type==='business'?'personal':'business'; persist()">${e.type}</span></td>
+      <td class="num"><input class="row-input" style="text-align:right" type="number" value="${e.amount}" onchange="state.expenses[${i}].amount=Number(this.value); persist()"></td>
+      <td><button class="icon-btn" onclick="state.expenses.splice(${i},1); persist()">✕</button></td>
+    </tr>`).join('');
+
+  const bizCats = expByCategory('business');
+  const persCats = expByCategory('personal');
+  drawPieChart(document.getElementById('bizExpChart'), Object.entries(bizCats).map(([k,v],i)=>({label:k,value:v,color:['#5B8DEF','#4CC9E0','#B58AF0','#D4A24E'][i%4]})));
+  drawPieChart(document.getElementById('personalExpChart'), Object.entries(persCats).map(([k,v],i)=>({label:k,value:v,color:['#D4A24E','#FF6B5E','#2DD4A7','#B58AF0'][i%4]})));
+}
+function addExpense(){ state.expenses.push({name:'New expense', category:'Other', type:'personal', amount:1000}); persist(); }
+
+/* ================= RENDER: BUDGETS ================= */
+function renderBudgets(){
+  const actuals = {};
+  state.expenses.forEach(e=>{ actuals[e.category]=(actuals[e.category]||0)+Number(e.amount); });
+  document.getElementById('budgetCard').innerHTML = `<h3>Category Budgets vs Actual</h3>` + state.budgets.map(b=>{
+    const actual = actuals[b.category]||0;
+    const pct = Math.min(140, Math.round(actual/b.limit*100));
+    const over = actual>b.limit;
+    return `<div class="bar-row">
+      <div class="bar-label">${b.category}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct)}%; background:${over?'var(--coral)':'var(--teal)'}"></div></div>
+      <div class="bar-val" style="color:${over?'var(--coral)':'var(--text)'}">${fmt(actual)} / ${fmt(b.limit)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ================= RENDER: CASH FLOW ================= */
+function renderCashflow(){
+  document.getElementById('cashflowStats').innerHTML = `
+    <div class="card stat-card"><div class="stat-label">Business Net</div><div class="stat-value">${fmtSigned(bizNet())}</div></div>
+    <div class="card stat-card"><div class="stat-label">Personal Net</div><div class="stat-value">${fmtSigned(personalNet())}</div></div>
+    <div class="card stat-card"><div class="stat-label">Combined Net</div><div class="stat-value">${fmtSigned(netCashflow())}</div></div>
+  `;
+  const months = ['Aug','Sep','Oct','Nov','Dec','Jan'];
+  let running = state.bizReserve+state.personalReserve;
+  const proj = months.map(()=>{ running += netCashflow(); return running; });
+  drawLineChart(document.getElementById('cashflowProjection'), [{data:proj, color:'#D4A24E', fill:true}], {labels:months});
+}
+
+/* ================= RENDER: SAVINGS ================= */
+function renderSavings(){
+  document.getElementById('bizReserveVal').textContent = fmt(state.bizReserve);
+  document.getElementById('personalReserveVal').textContent = fmt(state.personalReserve);
+  document.getElementById('bizReserveMonths').textContent = (state.bizReserve/(bizExpenses()||1)).toFixed(1)+' months of business expenses covered';
+  document.getElementById('personalReserveMonths').textContent = (state.personalReserve/(personalExpenses()||1)).toFixed(1)+' months of personal expenses covered';
+  document.getElementById('savingsRateVal').textContent = Math.round(savingsRate())+'%';
+  document.getElementById('bizReserveInput').value = state.bizReserve;
+  document.getElementById('personalReserveInput').value = state.personalReserve;
+}
+document.getElementById('bizReserveInput').addEventListener('change', e=>{ state.bizReserve=Number(e.target.value); persist(); });
+document.getElementById('personalReserveInput').addEventListener('change', e=>{ state.personalReserve=Number(e.target.value); persist(); });
+
+/* ================= RENDER: INVESTING ================= */
+function computeInvestProjection(){
+  const monthly = Number(document.getElementById('investMonthly').value)||0;
+  const rate = Number(document.getElementById('investReturn').value)||0;
+  const years = Number(document.getElementById('investYears').value)||0;
+  const lump = Number(document.getElementById('investLump').value)||0;
+  const monthlyRate = rate/100/12;
+  let balance = lump;
+  const points = [];
+  for(let m=0;m<=years*12;m++){
+    if(m>0){ balance = balance*(1+monthlyRate) + monthly; }
+    if(m%12===0) points.push(Math.round(balance));
+  }
+  return points;
+}
+function renderInvesting(){
+  const points = computeInvestProjection();
+  const years = Number(document.getElementById('investYears').value)||0;
+  const labels = points.map((_,i)=> 'Y'+i);
+  drawLineChart(document.getElementById('investChart'), [{data:points, color:'#2DD4A7', fill:true}], {labels});
+
+  document.getElementById('investMixList').innerHTML = [
+    {label:'Broad market index fund', pct:50, color:'#5B8DEF'},
+    {label:'Debt / bond fund (stability)', pct:25, color:'#D4A24E'},
+    {label:'Emergency-linked liquid fund', pct:15, color:'#2DD4A7'},
+    {label:'High-growth / small-cap (higher risk)', pct:10, color:'#FF6B5E'},
+  ].map(m=>`
+    <div class="bar-row">
+      <div class="bar-label">${m.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${m.pct}%; background:${m.color}"></div></div>
+      <div class="bar-val">${m.pct}%</div>
+    </div>`).join('');
+
+  document.getElementById('investEduCards').innerHTML = [
+    {t:'Compounding needs time', d:'Starting even a modest monthly amount now typically outperforms larger amounts started years later.'},
+    {t:'Diversify before you optimize', d:'A simple, spread-out starter mix reduces single-stream risk while you learn the ropes.'},
+    {t:'Reserve first, invest second', d:'Keep 3–6 months of expenses liquid before committing more to long-term investments.'},
+  ].map(c=>`<div class="card"><h3 style="margin-bottom:8px">${c.t}</h3><p class="small muted">${c.d}</p></div>`).join('');
+}
+['investMonthly','investReturn','investYears','investLump'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderInvesting);
+});
+
+/* ================= RENDER: GOALS ================= */
+function renderGoals(){
+  document.getElementById('goalsGrid').innerHTML = state.goals.map((g,i)=>{
+    const pct = Math.min(100, Math.round(g.current/g.target*100));
+    return `<div class="card goal-card">
+      <div class="goal-top"><b>${g.name}</b><span class="tag ${g.type==='business'?'biz':'personal'}">${g.type}</span></div>
+      <div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div>
+      <div class="goal-meta"><span>${fmt(g.current)} saved</span><span>${pct}% of ${fmt(g.target)}</span></div>
+    </div>`;
+  }).join('');
+}
+function addGoal(){ state.goals.push({name:'New goal', target:100000, current:0, type:'personal'}); persist(); }
+
+/* ================= AI INSIGHTS ENGINE ================= */
+function generateInsights(){
+  const insights = [];
+  const revs = state.revenue.map(r=>Number(r.amount));
+  const revTotal = revs.reduce((a,b)=>a+b,0)||1;
+  const topShare = Math.max(...revs)/revTotal;
+  if(topShare > 0.5){
+    const top = state.revenue.find(r=>r.amount===Math.max(...revs));
+    insights.push({type:'warn', icon:'⚠️', title:'Revenue concentration risk', body:`"${top.name}" makes up ${Math.round(topShare*100)}% of business income. Consider growing a second stream so a slow month in one area doesn't sink the business.`});
+  } else {
+    insights.push({type:'good', icon:'✅', title:'Healthy revenue diversity', body:'No single stream dominates your income — that spread is protecting you from concentration risk.'});
+  }
+
+  const bizMonths = state.bizReserve/(bizExpenses()||1);
+  if(bizMonths < 3){
+    insights.push({type:'warn', icon:'🏦', title:'Business reserve below target', body:`Your business reserve covers ${bizMonths.toFixed(1)} months of expenses. Most advisors suggest 3–6 months for a growing company with multiple revenue lines.`});
+  } else {
+    insights.push({type:'good', icon:'🏦', title:'Business reserve on track', body:`${bizMonths.toFixed(1)} months of business expenses covered — a solid cushion for slow periods.`});
+  }
+
+  const personalMonths = state.personalReserve/(personalExpenses()||1);
+  if(personalMonths < 3){
+    insights.push({type:'warn', icon:'🧾', title:'Personal reserve below target', body:`Personal savings cover ${personalMonths.toFixed(1)} months of living costs. Building this toward 3–6 months reduces pressure to draw extra from the business during a rough patch.`});
+  }
+
+  if(netCashflow() < 0){
+    insights.push({type:'warn', icon:'📉', title:'Spending exceeds income', body:'Combined expenses are currently higher than combined income. Review the Budgets tab to spot the categories running hottest.'});
+  } else if(savingsRate() < 15){
+    insights.push({type:'warn', icon:'💡', title:'Savings rate has room to grow', body:`You're saving ${Math.round(savingsRate())}% of income. Nudging toward 20% would meaningfully speed up your goals.`});
+  } else {
+    insights.push({type:'good', icon:'💰', title:'Strong savings rate', body:`At ${Math.round(savingsRate())}%, you're saving well above the typical benchmark — keep it up.`});
+  }
+
+  const overBudget = state.budgets.filter(b=>{
+    const actual = state.expenses.filter(e=>e.category===b.category).reduce((s,e)=>s+Number(e.amount),0);
+    return actual > b.limit;
+  });
+  if(overBudget.length){
+    insights.push({type:'warn', icon:'📊', title:'Categories running over budget', body:`${overBudget.map(b=>b.category).join(', ')} exceeded their monthly ceiling. Worth a closer look before it compounds.`});
+  }
+
+  if(state.goals.some(g=> g.current/g.target < 0.2)){
+    insights.push({type:'good', icon:'🎯', title:'Early-stage goals need consistency', body:'A few goals are still under 20% funded — small, automatic monthly transfers tend to close this gap fastest.'});
+  }
+
+  return insights;
+}
+function insightHTML(i){
+  return `<div class="insight ${i.type}"><div class="insight-icon">${i.icon}</div><div class="insight-body"><b>${i.title}</b><span>${i.body}</span></div></div>`;
+}
+function renderInsights(){
+  document.getElementById('fullInsights').innerHTML = generateInsights().map(insightHTML).join('');
+}
+
+/* ================= SIMULATOR ================= */
+function renderSimulator(){
+  const revEl=document.getElementById('simRev'), expEl=document.getElementById('simExp'), invEl=document.getElementById('simInv'), hireEl=document.getElementById('simHire');
+  function update(){
+    document.getElementById('simRevLbl').textContent = revEl.value+'%';
+    document.getElementById('simExpLbl').textContent = expEl.value+'%';
+    document.getElementById('simInvLbl').textContent = fmt(invEl.value);
+    document.getElementById('simHireLbl').textContent = fmt(hireEl.value);
+
+    const newRevenue = totalRevenue()*(1+revEl.value/100);
+    const newExpenses = totalExpenses()*(1+expEl.value/100) + Number(hireEl.value);
+    const newIncome = newRevenue + totalPersonalIncome();
+    const newNet = newIncome - newExpenses - Number(invEl.value);
+
+    document.getElementById('simNet').textContent = fmtSigned(newNet);
+    document.getElementById('simNet').style.color = newNet>=0 ? 'var(--teal)':'var(--coral)';
+
+    // approximate new score
+    const revs = state.revenue.map(r=>Number(r.amount)*(1+revEl.value/100));
+    const revTotal = revs.reduce((a,b)=>a+b,0)||1;
+    const shares = revs.map(r=>r/revTotal);
+    const hhi = shares.reduce((s,x)=>s+x*x,0);
+    const diversityScore = Math.min(25, Math.max(0,25*(1-hhi))+(revs.length>=3?4:0));
+    const sr = newIncome>0 ? Math.max(0,newNet)/newIncome*100 : 0;
+    const savingsScore = Math.min(25, sr/30*25);
+    const reserveMonths = (state.bizReserve+state.personalReserve)/(newExpenses||1);
+    const reserveScore = Math.min(25, reserveMonths/6*25);
+    const ratio = newIncome>0 ? newNet/newIncome : -1;
+    const cfScore = Math.max(0, Math.min(25, (ratio+0.1)/0.4*25));
+    const newScore = Math.round(Math.max(0,Math.min(100, diversityScore+savingsScore+reserveScore+cfScore)));
+
+    document.getElementById('simScore').textContent = newScore;
+    const curScore = healthScore();
+    const diff = newScore-curScore;
+    document.getElementById('simVerdict').innerHTML = diff===0 ? '<span class="muted">No meaningful change from current score.</span>' :
+      (diff>0 ? `<span style="color:var(--teal)">▲ ${diff} points better than today's score of ${curScore}.</span>` : `<span style="color:var(--coral)">▼ ${Math.abs(diff)} points worse than today's score of ${curScore}.</span>`);
+
+    drawBarChart(document.getElementById('simChart'), ['Income','Expenses','Net'], [
+      {data:[totalIncome(), totalExpenses(), netCashflow()], color:'#5B8DEF'},
+      {data:[newIncome, newExpenses+Number(invEl.value), newNet], color:'#D4A24E'},
+    ]);
+  }
+  [revEl,expEl,invEl,hireEl].forEach(el=> el.oninput = update);
+  update();
+}
+
+/* ================= REPORTS ================= */
+function renderReports(){
+  const s = healthScore();
+  const [verdict] = scoreVerdict(s);
+  document.getElementById('reportSummary').innerHTML = `
+    <h3>Snapshot — ${new Date().toLocaleDateString('en-IN',{month:'long', year:'numeric', day:'numeric'})}</h3>
+    <div class="grid g-3 mt16">
+      <div><div class="stat-label">Health Score</div><div class="stat-value">${s}/100 — ${verdict}</div></div>
+      <div><div class="stat-label">Total Monthly Income</div><div class="stat-value">${fmt(totalIncome())}</div></div>
+      <div><div class="stat-label">Total Monthly Expenses</div><div class="stat-value">${fmt(totalExpenses())}</div></div>
+    </div>
+    <div class="divider"></div>
+    <h3>Revenue Streams</h3>
+    <table><thead><tr><th>Stream</th><th>Type</th><th style="text-align:right">Monthly</th></tr></thead>
+    <tbody>${state.revenue.map(r=>`<tr><td>${r.name}</td><td>${r.type}</td><td class="num">${fmt(r.amount)}</td></tr>`).join('')}</tbody></table>
+    <div class="divider"></div>
+    <h3>Expenses by Type</h3>
+    <table><thead><tr><th>Expense</th><th>Category</th><th>Type</th><th style="text-align:right">Monthly</th></tr></thead>
+    <tbody>${state.expenses.map(e=>`<tr><td>${e.name}</td><td>${e.category}</td><td>${e.type}</td><td class="num">${fmt(e.amount)}</td></tr>`).join('')}</tbody></table>
+    <div class="divider"></div>
+    <h3>Goals Progress</h3>
+    <table><thead><tr><th>Goal</th><th>Type</th><th style="text-align:right">Progress</th></tr></thead>
+    <tbody>${state.goals.map(g=>`<tr><td>${g.name}</td><td>${g.type}</td><td class="num">${Math.round(g.current/g.target*100)}%</td></tr>`).join('')}</tbody></table>
+    <div class="divider"></div>
+    <h3>Recommendations</h3>
+    ${generateInsights().map(i=>`<p class="small muted mt8">• ${i.title}: ${i.body}</p>`).join('')}
+  `;
+}
+
+/* ================= TIPS / CHECKLIST / PROMPTS ================= */
+function renderTips(){
+  const tips = [
+    {t:'Separate the ledgers, share the dashboard', d:'Keep business and personal accounts legally distinct, but review them together weekly — blind spots hide in the gap between them.'},
+    {t:'Pay yourself a consistent draw', d:'An irregular owner draw makes personal budgeting nearly impossible. Set a fixed monthly amount and adjust quarterly, not weekly.'},
+    {t:'Watch revenue concentration', d:'If one client or channel is more than half your income, treat diversifying as an active project, not a someday goal.'},
+    {t:'Reserves before reinvestment', d:'It is tempting to plow every spare rupee back into growth. Fund 3–6 months of reserves first — it buys you the ability to make calm decisions.'},
+    {t:'Automate the boring stuff', d:'Standing transfers to savings and investment accounts remove the willpower requirement entirely.'},
+    {t:'Review budgets monthly, not annually', d:'Categories drift fast in a growing business. A 15-minute monthly check catches problems while they are still small.'},
+  ];
+  document.getElementById('tipsGrid').innerHTML = tips.map(t=>`<div class="card tip-card"><b>${t.t}</b>${t.d}</div>`).join('');
+
+  document.getElementById('checklist').innerHTML = state.checklist.map((c,i)=>`
+    <label><input type="checkbox" ${c.done?'checked':''} onchange="state.checklist[${i}].done=this.checked; persist()"><span>${c.label}</span></label>
+  `).join('');
+
+  const prompts = [
+    'Review my revenue streams and tell me which one I should try to grow first, and why.',
+    'Given my current savings rate, how long would it take to fully fund my emergency reserve?',
+    'Explain the difference between a business emergency fund and a personal one, and how much I should keep in each.',
+    'What questions should I ask a financial advisor before I start investing more seriously?',
+    'Help me draft a simple monthly review process to check business and personal finances together.',
+  ];
+  document.getElementById('promptsList').innerHTML = prompts.map(p=>`<div class="insight"><div class="insight-icon">💬</div><div class="insight-body"><span>${p}</span></div></div>`).join('');
+}
+
+/* ================= PERSIST + RENDER ALL ================= */
+function persist(){ saveState(); renderAll(); }
+function renderAll(){
+  renderTicker();
+  renderOverview();
+  renderRevenueTable();
+  renderPersonalIncome();
+  renderExpenses();
+  renderBudgets();
+  renderCashflow();
+  renderSavings();
+  renderInvesting();
+  renderGoals();
+  renderInsights();
+  renderSimulator();
+  renderReports();
+  renderTips();
+}
+renderAll();
+window.addEventListener('resize', ()=>{ clearTimeout(window._rt); window._rt=setTimeout(renderAll, 150); });
+</script>
+</body>
+</html>
