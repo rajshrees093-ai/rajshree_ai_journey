@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Profile Desk — LinkedIn Optimizer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#EFEDE6;
+    --paper-line: rgba(27,42,74,0.07);
+    --card:#FBFAF6;
+    --ink:#1B2A4A;
+    --ink-soft:#4A5673;
+    --red:#B4243C;
+    --red-soft:#F4DADD;
+    --green:#2F6F4F;
+    --green-soft:#DCEBE1;
+    --gold:#B8862B;
+    --gold-soft:#F3E6C8;
+    --rule: rgba(27,42,74,0.16);
+    --shadow: 0 1px 0 rgba(27,42,74,0.06), 0 8px 24px rgba(27,42,74,0.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(var(--paper-line) 0 1px, transparent 1px 34px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    padding: 0 0 80px 0;
+  }
+
+  .masthead{
+    max-width:920px;
+    margin:0 auto;
+    padding:48px 24px 20px;
+    border-bottom:3px solid var(--ink);
+  }
+  .masthead .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--red);
+    display:flex;
+    justify-content:space-between;
+  }
+  .masthead h1{
+    font-family:'Lora', serif;
+    font-weight:700;
+    font-size:clamp(32px,5vw,52px);
+    margin:8px 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .masthead p.sub{
+    font-family:'Lora', serif;
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:16px;
+    margin:0 0 14px;
+  }
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  /* ---- Cards / sections ---- */
+  .sheet{
+    background:var(--card);
+    border:1px solid var(--rule);
+    box-shadow:var(--shadow);
+    border-radius:2px;
+    padding:36px;
+    margin-top:28px;
+    position:relative;
+  }
+  .sheet::before{
+    content:attr(data-tag);
+    position:absolute;
+    top:-13px; left:28px;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:4px 10px;
+  }
+  .sheet h2{
+    font-family:'Lora',serif;
+    font-size:26px;
+    margin:6px 0 4px;
+  }
+  .sheet .desc{color:var(--ink-soft); font-size:14.5px; margin-bottom:22px;}
+
+  /* ---- Form elements ---- */
+  .field{margin-bottom:22px;}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .field .hint{font-size:12.5px; color:var(--ink-soft); margin-top:6px; font-style:italic;}
+  input[type=text], textarea, select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+    border:1.5px solid var(--rule);
+    border-radius:2px;
+    padding:12px 14px;
+    resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{
+    outline:2px solid var(--ink);
+    outline-offset:1px;
+    border-color:var(--ink);
+  }
+  textarea{min-height:90px;}
+
+  .path-toggle{display:flex; gap:12px; margin-bottom:28px; flex-wrap:wrap;}
+  .path-btn{
+    flex:1; min-width:220px;
+    border:1.5px solid var(--rule);
+    background:#fff;
+    padding:16px;
+    text-align:left;
+    cursor:pointer;
+    border-radius:2px;
+    font-family:'Inter',sans-serif;
+  }
+  .path-btn strong{display:block; font-family:'Lora',serif; font-size:17px; margin-bottom:4px;}
+  .path-btn span{font-size:13px; color:var(--ink-soft);}
+  .path-btn.active{border-color:var(--ink); background:var(--card); box-shadow: inset 0 0 0 1px var(--ink);}
+  .path-btn:focus-visible{outline:2px solid var(--red); outline-offset:2px;}
+
+  .step{display:none;}
+  .step.active{display:block;}
+  .step-progress{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+    letter-spacing:.05em;
+  }
+
+  .btn-row{display:flex; justify-content:space-between; margin-top:26px; gap:10px;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    padding:12px 22px;
+    border-radius:2px;
+    border:1.5px solid var(--ink);
+    cursor:pointer;
+    background:var(--ink);
+    color:var(--paper);
+    transition:transform .08s ease;
+  }
+  button:hover{transform:translateY(-1px);}
+  button:focus-visible{outline:2px solid var(--red); outline-offset:2px;}
+  button.ghost{background:transparent; color:var(--ink);}
+  button.small{padding:8px 14px; font-size:13px;}
+  button:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+
+  /* ---- Report card table ---- */
+  .grade-row{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    align-items:center;
+    padding:16px 0;
+    border-top:1px solid var(--rule);
+    gap:14px;
+  }
+  .grade-row:first-of-type{border-top:none;}
+  .grade-row .name{font-family:'Lora',serif; font-size:17px;}
+  .grade-row .reaction{font-size:13.5px; color:var(--ink-soft); margin-top:3px;}
+  .score-badge{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:20px;
+    min-width:62px;
+    text-align:center;
+    padding:6px 4px;
+    border-radius:2px;
+    border:1.5px solid;
+  }
+  .score-badge.bad{color:var(--red); border-color:var(--red); background:var(--red-soft);}
+  .score-badge.mid{color:var(--gold); border-color:var(--gold); background:var(--gold-soft);}
+  .score-badge.good{color:var(--green); border-color:var(--green); background:var(--green-soft);}
+
+  .overall-score{
+    display:flex; align-items:baseline; gap:14px;
+    margin-top:18px; padding-top:18px; border-top:2px solid var(--ink);
+  }
+  .overall-score .big{font-family:'Lora',serif; font-weight:700; font-size:44px;}
+  .overall-score .label{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+
+  .breakdown{margin-top:10px; padding-left:0; list-style:none;}
+  .breakdown li{margin-bottom:10px; font-size:14px; padding-left:22px; position:relative;}
+  .breakdown li .tag{position:absolute; left:0;}
+  .breakdown li b{font-weight:600;}
+  .quote{
+    font-style:italic; color:var(--red); background:var(--red-soft);
+    padding:1px 6px; border-radius:2px; word-break:break-word;
+  }
+
+  details.section-detail{border-top:1px solid var(--rule); padding:14px 0;}
+  details.section-detail summary{cursor:pointer; font-family:'Lora',serif; font-size:16.5px; list-style:none;}
+  details.section-detail summary::-webkit-details-marker{display:none;}
+  details.section-detail summary::before{content:"▸ "; color:var(--red);}
+  details.section-detail[open] summary::before{content:"▾ "; color:var(--red);}
+
+  /* ---- Rebuild ---- */
+  .option-card{
+    border:1.5px solid var(--rule); border-radius:2px; padding:16px 18px; margin-bottom:14px; background:#fff;
+  }
+  .option-card .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--green); margin-bottom:6px; display:block;
+  }
+  .option-card .text{font-family:'Lora',serif; font-size:17px;}
+  .option-card .why{font-size:13px; color:var(--ink-soft); margin-top:8px;}
+
+  .before-after{
+    border:1.5px solid var(--rule); border-radius:2px; padding:14px 16px; margin-bottom:12px; background:#fff;
+  }
+  .before-after .row{padding:6px 0; font-size:14.5px;}
+  .before-after .row .lbl{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--ink-soft); margin-right:8px;}
+  .before-after .before{color:var(--red);}
+  .before-after .after{color:var(--green); font-weight:500;}
+
+  .kw-pill{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:12px;
+    background:var(--gold-soft); color:#7a5a12; border:1px solid var(--gold); padding:3px 9px; border-radius:12px; margin:3px 4px 0 0;
+  }
+
+  .skill-cols{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media(max-width:640px){.skill-cols{grid-template-columns:1fr;}}
+  .skill-cols h4{font-family:'Lora',serif; font-size:15px; margin:0 0 8px;}
+  .skill-cols ol, .skill-cols ul{margin:0; padding-left:20px; font-size:14px;}
+  .skill-cols li{margin-bottom:5px;}
+
+  /* ---- Scorecard table ---- */
+  table.scorecard{width:100%; border-collapse:collapse; margin-top:8px;}
+  table.scorecard th, table.scorecard td{
+    text-align:left; padding:10px 8px; border-bottom:1px solid var(--rule); font-size:14px;
+  }
+  table.scorecard th{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:.05em;
+  }
+  table.scorecard .delta{color:var(--green); font-weight:600;}
+  table.scorecard tr.total td{font-weight:700; border-top:2px solid var(--ink); border-bottom:none; padding-top:14px;}
+
+  /* ---- 7 day plan ---- */
+  .day-card{border:1.5px solid var(--rule); border-radius:2px; margin-bottom:14px; background:#fff;}
+  .day-head{
+    display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;
+  }
+  .day-head .d{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--red);}
+  .day-head h3{font-family:'Lora',serif; font-size:17px; margin:2px 0 0;}
+  .day-body{padding:0 18px 18px; display:none; font-size:14px;}
+  .day-card.open .day-body{display:block;}
+  .day-card.open .day-head{border-bottom:1px solid var(--rule);}
+  .checklist label{display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; cursor:pointer;}
+  .checklist input{margin-top:3px;}
+  .draft-box{
+    background:var(--paper); border:1px dashed var(--rule); padding:14px; margin-top:10px; font-family:'Lora',serif; font-size:14.5px; white-space:pre-wrap; border-radius:2px;
+  }
+  .char-count{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-top:6px;}
+
+  /* ---- Summary card ---- */
+  .summary-card{
+    background:var(--ink); color:var(--paper);
+    border-radius:4px; padding:32px; position:relative; overflow:hidden;
+  }
+  .summary-card::after{
+    content:"IN"; position:absolute; right:-14px; bottom:-30px; font-family:'Lora',serif; font-weight:700; font-size:160px; color:rgba(255,255,255,0.04);
+  }
+  .summary-card h3{font-family:'Lora',serif; font-size:22px; margin:0 0 16px;}
+  .summary-scores{display:flex; gap:24px; margin-bottom:18px;}
+  .summary-scores div{font-family:'IBM Plex Mono',monospace;}
+  .summary-scores .n{font-size:34px; font-weight:600; display:block;}
+  .summary-scores .n.after{color:#8FD6A8;}
+  .summary-scores .n.before{color:#F3A0AD;}
+  .summary-card ol{padding-left:20px; font-size:14.5px;}
+  .summary-card .highlight{
+    margin-top:14px; padding:12px 14px; background:rgba(255,255,255,0.08); border-left:3px solid var(--gold); font-size:14px;
+  }
+
+  .toolbar{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+
+  footer{max-width:920px; margin:40px auto 0; padding:0 24px; color:var(--ink-soft); font-size:12.5px; text-align:center;}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="eyebrow"><span>The Profile Desk</span><span id="dateLine"></span></div>
+  <h1>LinkedIn Optimizer</h1>
+  <p class="sub">Roasted, rebuilt, and put to work — one profile at a time.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- STEP 0: PATH CHOICE -->
+  <div class="sheet" data-tag="Start Here" id="pathSheet">
+    <h2>First, where are you starting from?</h2>
+    <p class="desc">This decides which five questions we ask you.</p>
+    <div class="path-toggle">
+      <button type="button" class="path-btn active" id="pathHasBtn" onclick="choosePath('has')">
+        <strong>I already have a LinkedIn</strong>
+        <span>We'll roast it, then rebuild it section by section.</span>
+      </button>
+      <button type="button" class="path-btn" id="pathNoneBtn" onclick="choosePath('none')">
+        <strong>I don't have one yet</strong>
+        <span>We'll build your profile from scratch with you.</span>
+      </button>
+    </div>
+    <button type="button" onclick="goToForm()">Start the interview →</button>
+  </div>
+
+  <!-- STEP FORM: HAS PROFILE -->
+  <div class="sheet" data-tag="Interview" id="formHasSheet" style="display:none;">
+    <h2>Tell us about your current profile</h2>
+    <p class="desc">Paste it exactly as it appears — don't clean it up first. We need to see the real thing.</p>
+
+    <div class="step active" data-step="1">
+      <div class="step-progress">QUESTION 1 OF 5</div>
+      <div class="field">
+        <label for="h_headline">Current headline</label>
+        <input type="text" id="h_headline" placeholder="e.g. Marketing Coordinator at Acme Co.">
+      </div>
+      <div class="btn-row"><span></span><button type="button" onclick="nextStep('has',1)">Next →</button></div>
+    </div>
+
+    <div class="step" data-step="2">
+      <div class="step-progress">QUESTION 2 OF 5</div>
+      <div class="field">
+        <label for="h_about">About section (paste the full text)</label>
+        <textarea id="h_about" placeholder="Paste your full About section here..."></textarea>
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('has',2)">← Back</button><button type="button" onclick="nextStep('has',2)">Next →</button></div>
+    </div>
+
+    <div class="step" data-step="3">
+      <div class="step-progress">QUESTION 3 OF 5</div>
+      <div class="field">
+        <label for="h_title">Most recent job title & company</label>
+        <input type="text" id="h_title" placeholder="e.g. Marketing Coordinator, Acme Co.">
+      </div>
+      <div class="field">
+        <label for="h_bullets">Bullets from that role (one per line)</label>
+        <textarea id="h_bullets" placeholder="Responsible for managing social media accounts&#10;Helped organize company events"></textarea>
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('has',3)">← Back</button><button type="button" onclick="nextStep('has',3)">Next →</button></div>
+    </div>
+
+    <div class="step" data-step="4">
+      <div class="step-progress">QUESTION 4 OF 5</div>
+      <div class="field">
+        <label for="h_skills">Top skills (5–10, comma separated)</label>
+        <input type="text" id="h_skills" placeholder="e.g. Content Strategy, SEO, Adobe Photoshop, Microsoft Office, Team Player">
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('has',4)">← Back</button><button type="button" onclick="nextStep('has',4)">Next →</button></div>
+    </div>
+
+    <div class="step" data-step="5">
+      <div class="step-progress">QUESTION 5 OF 5</div>
+      <div class="field">
+        <label for="h_goal">Target goal</label>
+        <select id="h_goal">
+          <option value="job">Land a job</option>
+          <option value="clients">Attract clients</option>
+          <option value="thought">Build thought leadership</option>
+          <option value="network">Grow my network</option>
+        </select>
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('has',5)">← Back</button><button type="button" onclick="generateReport('has')">Roast &amp; rebuild my profile →</button></div>
+    </div>
+  </div>
+
+  <!-- STEP FORM: NO PROFILE -->
+  <div class="sheet" data-tag="Interview" id="formNoneSheet" style="display:none;">
+    <h2>Let's build your profile from zero</h2>
+    <p class="desc">No profile yet is not a disadvantage — a blank slate is easier to build right than a bad one is to fix.</p>
+
+    <div class="step active" data-step="1">
+      <div class="step-progress">QUESTION 1 OF 5</div>
+      <div class="field">
+        <label for="n_name">Name and current role or student status</label>
+        <input type="text" id="n_name" placeholder="e.g. Priya Sharma, final-year CS student">
+      </div>
+      <div class="btn-row"><span></span><button type="button" onclick="nextStep('none',1)">Next →</button></div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="step-progress">QUESTION 2 OF 5</div>
+      <div class="field">
+        <label for="n_skills">Top 3 skills</label>
+        <input type="text" id="n_skills" placeholder="e.g. Python, Data Analysis, Public Speaking">
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('none',2)">← Back</button><button type="button" onclick="nextStep('none',2)">Next →</button></div>
+    </div>
+    <div class="step" data-step="3">
+      <div class="step-progress">QUESTION 3 OF 5</div>
+      <div class="field">
+        <label for="n_wins">1–2 achievements or projects you're proud of</label>
+        <textarea id="n_wins" placeholder="e.g. Built a chatbot that reduced support tickets by 20% during my internship"></textarea>
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('none',3)">← Back</button><button type="button" onclick="nextStep('none',3)">Next →</button></div>
+    </div>
+    <div class="step" data-step="4">
+      <div class="step-progress">QUESTION 4 OF 5</div>
+      <div class="field">
+        <label for="n_audience">Who do you want to attract?</label>
+        <select id="n_audience">
+          <option value="recruiters">Recruiters</option>
+          <option value="clients">Clients</option>
+          <option value="collaborators">Collaborators</option>
+        </select>
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('none',4)">← Back</button><button type="button" onclick="nextStep('none',4)">Next →</button></div>
+    </div>
+    <div class="step" data-step="5">
+      <div class="step-progress">QUESTION 5 OF 5</div>
+      <div class="field">
+        <label for="n_diff">One sentence: what makes you different?</label>
+        <input type="text" id="n_diff" placeholder="e.g. I pair a design eye with an engineer's habit of shipping fast">
+      </div>
+      <div class="btn-row"><button type="button" class="ghost" onclick="prevStep('none',5)">← Back</button><button type="button" onclick="generateReport('none')">Build my profile →</button></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" style="display:none;"></div>
+
+</div>
+
+<footer>Built for Day 44 — AI Career Tools · Scoring is a rules-based simulation for this exercise, not a live model call. No data leaves your browser.</footer>
+
+<script>
+document.getElementById('dateLine').textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+let currentPath = 'has';
+function choosePath(p){
+  currentPath = p;
+  document.getElementById('pathHasBtn').classList.toggle('active', p==='has');
+  document.getElementById('pathNoneBtn').classList.toggle('active', p==='none');
+}
+function goToForm(){
+  document.getElementById('pathSheet').style.display='none';
+  document.getElementById('formHasSheet').style.display = currentPath==='has' ? 'block':'none';
+  document.getElementById('formNoneSheet').style.display = currentPath==='none' ? 'block':'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function nextStep(prefix, n){
+  const sheet = document.getElementById(prefix==='has' ? 'formHasSheet' : 'formNoneSheet');
+  sheet.querySelector('.step[data-step="'+n+'"]').classList.remove('active');
+  sheet.querySelector('.step[data-step="'+(n+1)+'"]').classList.add('active');
+}
+function prevStep(prefix, n){
+  const sheet = document.getElementById(prefix==='has' ? 'formHasSheet' : 'formNoneSheet');
+  sheet.querySelector('.step[data-step="'+n+'"]').classList.remove('active');
+  sheet.querySelector('.step[data-step="'+(n-1)+'"]').classList.add('active');
+}
+
+/* ---------------- Scoring engine (heuristic, rules-based) ---------------- */
+
+const GENERIC_PHRASES = ['passionate about','hard working','hardworking','team player','results-driven','results driven',
+  'dynamic professional','seeking opportunities','open to work','detail-oriented','detail oriented','go-getter',
+  'think outside the box','self-starter','motivated individual','responsible for','duties included','hard-working'];
+
+const GENERIC_SKILLS = ['microsoft office','ms office','team player','communication','hard work','teamwork','fast learner',
+  'time management','punctuality','leadership skills'];
+
+const ACTION_VERBS = ['led','built','launched','grew','drove','managed','designed','created','delivered','increased',
+  'reduced','saved','negotiated','automated','scaled','shipped','won','generated','improved','cut','streamlined'];
+
+function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+function containsAny(text, list){
+  const t = (text||'').toLowerCase();
+  return list.filter(p => t.includes(p));
+}
+function bandClass(score){ return score>=7.5?'good': score>=5?'mid':'bad'; }
+function reactionForBand(score, goodMsg, midMsg, badMsg){ return score>=7.5?goodMsg: score>=5?midMsg:badMsg; }
+
+function scoreHeadline(text){
+  if(!text || !text.trim()) return {score:0, generic:[], reaction:"There's no headline at all — LinkedIn defaults to your last job title, and that's all a recruiter sees in search results."};
+  let score = 4.5;
+  const generic = containsAny(text, GENERIC_PHRASES);
+  if(generic.length) score -= 2;
+  if(/\|/.test(text) || /•/.test(text) || /-/.test(text)) score += 1;
+  if(/\d/.test(text)) score += 1.5;
+  if(text.trim().split(/\s+/).length <= 4) score -= 1.5;
+  if(text.length > 15 && text.length < 100 && !generic.length) score += 1;
+  score = clamp(Math.round(score*10)/10, 0, 10);
+  const reaction = reactionForBand(score,
+    "Reads like someone who knows exactly what they offer — worth a click.",
+    "Tells me your job title, not why I should care. I'll keep scrolling.",
+    "Generic enough that I'd forget it before finishing the sentence.");
+  return {score, generic, reaction};
+}
+
+function scoreAboutHook(text){
+  if(!text || !text.trim()) return {score:0, reaction:"No About section — the single biggest missed opportunity on the whole profile."};
+  const firstTwoLines = text.split(/\n/).slice(0,2).join(' ').trim() || text.slice(0,160);
+  let score = 4;
+  const genericOpeners = [/^i am an?\b/i, /^i'm an?\b/i, /^experienced\b/i, /^results-driven\b/i, /^dedicated\b/i, /^dynamic\b/i];
+  if(genericOpeners.some(r=>r.test(firstTwoLines.trim()))) score -= 2;
+  if(/\?/.test(firstTwoLines)) score += 1.5;
+  if(firstTwoLines.length > 220) score -= 1;
+  if(firstTwoLines.length < 40) score -= 1;
+  if(/\d/.test(firstTwoLines)) score += 1;
+  score = clamp(Math.round(score*10)/10, 0, 10);
+  return {score, hookText:firstTwoLines, reaction: reactionForBand(score,
+    "Hooks me before the 'see more' fold — I click through.",
+    "Fine, but forgettable. I'll click 'see more' only if I have nothing else to look at.",
+    "This is exactly the line that makes me tap away without reading further.")};
+}
+
+function scoreAboutFull(text){
+  if(!text || !text.trim()) return {score:0, reaction:"Blank. This section carries more search weight and storytelling power than any other — leaving it empty is a silent rejection."};
+  let score = 4;
+  const words = text.trim().split(/\s+/).length;
+  if(words < 40) score -= 1.5;
+  if(words >= 80 && words <= 250) score += 1.5;
+  if(words > 350) score -= 1;
+  const numCount = (text.match(/\d+/g)||[]).length;
+  score += clamp(numCount * 0.4, 0, 2);
+  const generic = containsAny(text, GENERIC_PHRASES);
+  if(generic.length) score -= generic.length * 0.7;
+  const hasCTA = /(message me|reach out|let's connect|dm me|feel free to|contact me|link in|check out my|visit my)/i.test(text);
+  if(hasCTA) score += 1; else score -= 0.5;
+  score = clamp(Math.round(score*10)/10, 0, 10);
+  return {score, words, numCount, generic, hasCTA, reaction: reactionForBand(score,
+    "Reads like a person with a track record, not a job description.",
+    "I get what you do, but not what makes you worth remembering.",
+    "This reads like it was written for an HR form, not for a human scrolling LinkedIn.")};
+}
+
+function scoreExperience(title, bulletsRaw){
+  const bullets = (bulletsRaw||'').split('\n').map(b=>b.trim()).filter(Boolean);
+  if(!title && bullets.length===0) return {score:0, bullets:[], reaction:"No experience entry provided — recruiters can't evaluate what they can't see."};
+  let score = 4.5;
+  let weakCount = 0, verbCount = 0, numberCount = 0;
+  bullets.forEach(b=>{
+    const low = b.toLowerCase();
+    if(/^responsible for|^duties (included|include)|^helped|^worked on|^assisted/.test(low)) weakCount++;
+    if(ACTION_VERBS.some(v=>low.startsWith(v))) verbCount++;
+    if(/\d/.test(b)) numberCount++;
+  });
+  if(bullets.length){
+    score += clamp((verbCount/bullets.length)*3, 0, 3);
+    score += clamp((numberCount/bullets.length)*2.5, 0, 2.5);
+    score -= clamp((weakCount/bullets.length)*3, 0, 3);
+  } else {
+    score -= 2;
+  }
+  score = clamp(Math.round(score*10)/10, 0, 10);
+  return {score, bullets, weakCount, verbCount, numberCount, reaction: reactionForBand(score,
+    "Reads like impact. I can picture what you'd do in the next role.",
+    "Reads like a task list. I still don't know if you were good at the job.",
+    "This is a job description copy-paste, not a case for hiring you.")};
+}
+
+function scoreSkills(skillsRaw){
+  const skills = (skillsRaw||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if(!skills.length) return {score:0, skills:[], generic:[], reaction:"No skills listed — you're invisible in recruiter keyword search."};
+  let score = 5;
+  const generic = skills.filter(s=>GENERIC_SKILLS.includes(s.toLowerCase()));
+  score -= generic.length * 0.8;
+  if(skills.length >= 5 && skills.length <= 10) score += 2;
+  if(skills.length < 3) score -= 1.5;
+  score = clamp(Math.round(score*10)/10, 0, 10);
+  return {score, skills, generic, reaction: reactionForBand(score,
+    "Specific, searchable, relevant — you show up for the right roles.",
+    "Mixed bag — some searchable skills buried next to filler.",
+    "Mostly soft-skill filler that every other profile also lists. Doesn't help you get found.")};
+}
+
+function overallScore(scores){
+  // weighted: headline 15, hook 20, about 20, experience 25, skills 20
+  const weighted = scores.headline*1.5 + scores.hook*2 + scores.about*2 + scores.experience*2.5 + scores.skills*2;
+  return Math.round(weighted); // out of 100
+}
+
+/* ---------------- Rebuild generators ---------------- */
+
+function titleCase(s){ return (s||'').replace(/\w\S*/g, t=> t.charAt(0).toUpperCase()+t.slice(1).toLowerCase()); }
+
+function goalLabel(g){
+  return {job:'landing your next role', clients:'winning new clients', thought:'building thought leadership', network:'growing a relevant network',
+          recruiters:'catching recruiters\' attention', collaborators:'attracting the right collaborators'}[g] || 'your goal';
+}
+
+function buildHeadlines(role, skillsArr, goal, diff){
+  const primarySkill = skillsArr[0] || 'my craft';
+  const secondarySkill = skillsArr[1] || skillsArr[0] || 'results';
+  const roleClean = role || 'Professional';
+  const proof = diff ? diff.replace(/^i\s+/i,'').trim() : 'a track record of getting things done';
+  return [
+    { tag:'Keyword-optimized · for search visibility',
+      text: `${roleClean} | ${titleCase(primarySkill)} & ${titleCase(secondarySkill)} | Helping teams ${goal==='clients'?'grow with':'ship with'} ${titleCase(primarySkill)}`,
+      why: 'Front-loads the exact words recruiters type into LinkedIn search. Use this if your goal is showing up in searches for specific roles or skills.' },
+    { tag:'Value-proposition · for client attraction',
+      text: `I help ${goal==='clients' ? 'businesses' : 'teams'} ${primarySkill ? 'grow through '+titleCase(primarySkill) : 'get results'} — without the guesswork`,
+      why: 'Leads with the outcome you create for someone else, not your job title. Use this if strangers need to understand your value in one glance.' },
+    { tag:'Authority · for thought leadership',
+      text: `${titleCase(primarySkill)} specialist · ${proof} · Writing about ${titleCase(secondarySkill)}`,
+      why: 'Signals expertise and gives people a reason to follow your posts, not just your profile. Use this if you want to be known for a point of view.' }
+  ];
+}
+
+function buildAbout(name, role, skillsArr, achievements, goal, diff, audience){
+  const primarySkill = skillsArr[0] || 'this field';
+  const who = audience ? audience : (goal==='clients' ? 'businesses' : goal==='thought' ? 'my industry' : 'teams');
+  const hook = diff ? `${diff.trim()}.` : `Most people in ${titleCase(primarySkill)} do the expected. I don't.`;
+  const story = `I work in ${titleCase(primarySkill)}${skillsArr[1] ? ' and '+titleCase(skillsArr[1]) : ''}, focused on ${goalLabel(goal)}. ${achievements ? achievements.trim() : 'I care more about outcomes than busywork, and it shows in how I approach every project.'}`;
+  const proofLine = achievements ? `Recent proof: ${achievements.trim()}` : `I'm currently building the kind of track record that speaks for itself — ask me about my latest project.`;
+  const cta = goal==='clients' ? "If that sounds like what your business needs, message me — I reply personally."
+            : goal==='job' ? "Open to conversations about roles where this kind of thinking is valued. Message me."
+            : goal==='thought' ? "I post about this every week — follow along or drop a comment with your take."
+            : "Always glad to connect with people doing interesting work in this space — send a note when you connect.";
+  const keywords = Array.from(new Set(skillsArr.filter(Boolean))).slice(0,8);
+  return {hook, story, proofLine, cta, keywords};
+}
+
+function bulletRewrite(bullet, skillsArr){
+  const low = bullet.toLowerCase();
+  let verb = ACTION_VERBS.find(v=>low.includes(v));
+  if(!verb) verb = 'Drove';
+  let core = bullet.replace(/^responsible for\s*/i,'').replace(/^duties (included|include)\s*/i,'')
+    .replace(/^helped\s*/i,'').replace(/^worked on\s*/i,'').replace(/^assisted (with|in)?\s*/i,'').trim();
+  if(core.length) core = core.charAt(0).toLowerCase()+core.slice(1);
+  const hasNumber = /\d/.test(bullet);
+  const metric = hasNumber ? '' : ' — [add a number here: %, $, time saved, or scale]';
+  const verbCap = verb.charAt(0).toUpperCase()+verb.slice(1);
+  return `${verbCap} ${core || 'this initiative from start to finish'}${metric}`;
+}
+
+/* ---------------- Main render ---------------- */
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+
+function generateReport(pathKey){
+  let data = {};
+  if(pathKey==='has'){
+    data = {
+      headline: document.getElementById('h_headline').value.trim(),
+      about: document.getElementById('h_about').value.trim(),
+      expTitle: document.getElementById('h_title').value.trim(),
+      expBullets: document.getElementById('h_bullets').value.trim(),
+      skills: document.getElementById('h_skills').value.trim(),
+      goal: document.getElementById('h_goal').value
+    };
+  } else {
+    // map "no profile" answers onto the same shape so the same engine can run
+    const name = document.getElementById('n_name').value.trim();
+    const skills3 = document.getElementById('n_skills').value.trim();
+    const wins = document.getElementById('n_wins').value.trim();
+    const audience = document.getElementById('n_audience').value;
+    const diff = document.getElementById('n_diff').value.trim();
+    data = {
+      headline: '', about: '', expTitle: name, expBullets: wins,
+      skills: skills3, goal: audience==='recruiters'?'job':audience==='clients'?'clients':'network',
+      isNew:true, name, audience, diff
+    };
+  }
+
+  const skillsArr = data.skills.split(',').map(s=>s.trim()).filter(Boolean);
+
+  const sH = scoreHeadline(data.headline);
+  const sHook = scoreAboutHook(data.about);
+  const sAbout = scoreAboutFull(data.about);
+  const sExp = scoreExperience(data.expTitle, data.expBullets);
+  const sSkills = scoreSkills(data.skills);
+  const before100 = overallScore({headline:sH.score, hook:sHook.score, about:sAbout.score, experience:sExp.score, skills:sSkills.score});
+
+  const headlineOpts = buildHeadlines(data.expTitle, skillsArr, data.goal, data.diff||'');
+  const aboutRebuild = buildAbout(data.name||'', data.expTitle, skillsArr, data.expBullets && data.isNew ? data.expBullets : (data.expBullets? '': ''), data.goal, data.diff||'', data.audience||'');
+  // For "has profile" path, use their real bullets as achievements text source for About proof line
+  const achievementsForAbout = data.isNew ? data.expBullets : (sExp.bullets[0] || '');
+  const aboutRebuild2 = buildAbout(data.name||'', data.expTitle, skillsArr, achievementsForAbout, data.goal, data.diff||'', data.audience||'');
+
+  const bulletPairs = (sExp.bullets.length? sExp.bullets : (data.expBullets? data.expBullets.split('\n').filter(Boolean):[])).map(b=>({before:b, after:bulletRewrite(b, skillsArr)}));
+
+  const skillsToAdd = suggestSkillsToAdd(data.goal, skillsArr);
+  const skillsToRemove = sSkills.generic;
+  const skillsToPin = skillsArr.slice(0,3).length ? skillsArr.slice(0,3) : skillsToAdd.slice(0,3);
+
+  // "After" scores: heuristic uplift, capped at 9.3-9.8 realistic ceiling
+  const after = {
+    headline: clamp(Math.max(sH.score,7.8)+0.6,0,9.6),
+    hook: clamp(Math.max(sHook.score,7.6)+0.8,0,9.5),
+    about: clamp(Math.max(sAbout.score,7.6)+0.9,0,9.6),
+    experience: clamp(Math.max(sExp.score,7.6)+0.9,0,9.6),
+    skills: clamp(Math.max(sSkills.score,7.8)+0.6,0,9.5)
+  };
+  const after100 = overallScore(after);
+
+  const topMistakes = buildTopMistakes(sH, sHook, sAbout, sExp, sSkills);
+  const biggestLever = biggestLeverText(sH, sHook, sAbout, sExp, sSkills);
+
+  renderResults({
+    data, skillsArr, sH, sHook, sAbout, sExp, sSkills, before100,
+    headlineOpts, aboutRebuild: aboutRebuild2, bulletPairs,
+    skillsToAdd, skillsToRemove, skillsToPin,
+    after, after100, topMistakes, biggestLever
+  });
+
+  document.getElementById('pathSheet').style.display='none';
+  document.getElementById('formHasSheet').style.display='none';
+  document.getElementById('formNoneSheet').style.display='none';
+  document.getElementById('results').style.display='block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function suggestSkillsToAdd(goal, existing){
+  const existingLow = existing.map(s=>s.toLowerCase());
+  const pools = {
+    job: ['Stakeholder Management','Data-Driven Decision Making','Cross-Functional Collaboration','Project Management','Process Improvement','Client Presentations','Budget Management','Team Leadership','Strategic Planning','Vendor Negotiation'],
+    clients: ['Client Retention','Consultative Selling','Proposal Writing','Account Growth','Relationship Management','Contract Negotiation','ROI Analysis','Needs Assessment','Upselling Strategy','Client Onboarding'],
+    thought: ['Public Speaking','Content Strategy','Industry Analysis','Personal Branding','Newsletter Writing','Panel Moderation','Trend Forecasting','Community Building','Thought Leadership','Editorial Strategy'],
+    network: ['Relationship Building','Community Engagement','Event Networking','Cross-Industry Collaboration','Mentorship','Partnership Development','Referral Generation','Professional Networking','Introductions & Warm Intros','Alumni Engagement']
+  };
+  const pool = pools[goal] || pools.job;
+  return pool.filter(s=>!existingLow.includes(s.toLowerCase())).slice(0,10);
+}
+
+function buildTopMistakes(sH,sHook,sAbout,sExp,sSkills){
+  const items = [
+    {score:sH.score, text:'Headline reads like a job title, not a value proposition'},
+    {score:sHook.score, text:'About section opens with a generic line that gets skipped before "see more"'},
+    {score:sAbout.score, text:'About section lists duties instead of proof — no numbers, no story'},
+    {score:sExp.score, text:'Experience bullets copy the job description instead of showing impact'},
+    {score:sSkills.score, text:'Skills list is diluted with generic filler that doesn\'t help you get found'}
+  ];
+  return items.sort((a,b)=>a.score-b.score).slice(0,3).map(i=>i.text);
+}
+function biggestLeverText(sH,sHook,sAbout,sExp,sSkills){
+  const items = [
+    {score:sHook.score, text:'Rewriting the first two lines of your About section — that\'s the only real estate that matters before someone decides to keep reading.'},
+    {score:sExp.score, text:'Turning your experience bullets from tasks into quantified wins — that\'s what separates "did the job" from "was great at the job."'},
+    {score:sH.score, text:'Fixing the headline — it\'s the single most-seen line on your entire profile, shown in every search result, comment, and connection request.'},
+    {score:sAbout.score, text:'Adding real proof and a clear CTA to your About section — right now it explains what you do but gives no reason to act.'},
+    {score:sSkills.score, text:'Cleaning up your skills list so you show up in the searches recruiters actually run.'}
+  ];
+  items.sort((a,b)=>a.score-b.score);
+  return items[0].text;
+}
+
+/* ---------------- Rendering ---------------- */
+
+function gradeRow(name, score, reaction){
+  return `<div class="grade-row">
+    <div><div class="name">${name}</div><div class="reaction">${reaction}</div></div>
+    <div class="score-badge ${bandClass(score)}">${score}/10</div>
+  </div>`;
+}
+
+function esc(s){ return (s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function renderResults(ctx){
+  const {data, sH, sHook, sAbout, sExp, sSkills, before100, headlineOpts, aboutRebuild, bulletPairs,
+    skillsToAdd, skillsToRemove, skillsToPin, after, after100, topMistakes, biggestLever} = ctx;
+
+  let html = '';
+
+  // PART 1 — REPORT CARD
+  html += `<div class="sheet" data-tag="Part 1 · The Roast">
+    <h2>Profile Report Card — Before</h2>
+    <p class="desc">What a recruiter actually thinks in the first three seconds. No fluff.</p>
+    ${gradeRow('Headline', sH.score, sH.reaction)}
+    ${gradeRow('About — first 2 lines (the hook)', sHook.score, sHook.reaction)}
+    ${gradeRow('About — full section', sAbout.score, sAbout.reaction)}
+    ${gradeRow('Experience', sExp.score, sExp.reaction)}
+    ${gradeRow('Skills & keywords', sSkills.score, sSkills.reaction)}
+    <div class="overall-score">
+      <div class="big">${before100}<span style="font-size:20px;color:var(--ink-soft);">/100</span></div>
+      <div class="label">Overall profile strength</div>
+    </div>
+
+    <details class="section-detail" open>
+      <summary>Headline — the specifics</summary>
+      ${sectionDetail(data.headline, sH)}
+    </details>
+    <details class="section-detail">
+      <summary>About (hook) — the specifics</summary>
+      ${sectionDetail(sHook.hookText || data.about, sHook, true)}
+    </details>
+    <details class="section-detail">
+      <summary>About (full) — the specifics</summary>
+      ${aboutFullDetail(sAbout)}
+    </details>
+    <details class="section-detail">
+      <summary>Experience — the specifics</summary>
+      ${expDetail(sExp)}
+    </details>
+    <details class="section-detail">
+      <summary>Skills & keywords — the specifics</summary>
+      ${skillsDetail(sSkills)}
+    </details>
+  </div>`;
+
+  // PART 2 — REBUILD
+  html += `<div class="sheet" data-tag="Part 2 · The Rebuild">
+    <h2>Rewrites, with the strategy behind each one</h2>
+
+    <h3 style="font-family:'Lora',serif;">Headline — 3 options</h3>
+    ${headlineOpts.map(o=>`<div class="option-card">
+        <span class="tag">${o.tag}</span>
+        <div class="text">${esc(o.text)}</div>
+        <div class="why">Why: ${o.why}</div>
+      </div>`).join('')}
+
+    <h3 style="font-family:'Lora',serif; margin-top:26px;">About section — full rewrite</h3>
+    <div class="option-card">
+      <span class="tag">Line 1–2 · The Hook</span>
+      <div class="text">${esc(aboutRebuild.hook)}</div>
+      <div class="why">This is everything shown before "see more." It has to earn the click on its own.</div>
+    </div>
+    <div class="option-card">
+      <span class="tag">Line 3–5 · The Story</span>
+      <div class="text">${esc(aboutRebuild.story)}</div>
+      <div class="why">Human language, not corporate speak — says who you help and why it matters.</div>
+    </div>
+    <div class="option-card">
+      <span class="tag">Line 6–8 · The Proof</span>
+      <div class="text">${esc(aboutRebuild.proofLine)}</div>
+      <div class="why">Specifics beat adjectives. Replace any bracketed placeholder with a real number before you publish.</div>
+    </div>
+    <div class="option-card">
+      <span class="tag">Last line · The CTA</span>
+      <div class="text">${esc(aboutRebuild.cta)}</div>
+      <div class="why">Tells the reader exactly what to do next — profiles without a CTA get views, not conversations.</div>
+    </div>
+    <div style="margin-top:10px;">
+      <span class="tag" style="color:var(--ink-soft);">Keywords embedded for search</span><br>
+      ${aboutRebuild.keywords.length ? aboutRebuild.keywords.map(k=>`<span class="kw-pill">${esc(k)}</span>`).join('') : '<span class="hint">Add 3–5 skill keywords once you finalize your skills list.</span>'}
+    </div>
+
+    <h3 style="font-family:'Lora',serif; margin-top:26px;">Experience — top entry, bullet by bullet</h3>
+    ${bulletPairs.length ? bulletPairs.map(p=>`<div class="before-after">
+        <div class="row"><span class="lbl">Before</span><span class="before">${esc(p.before)}</span></div>
+        <div class="row"><span class="lbl">After</span><span class="after">${esc(p.after)}</span></div>
+      </div>`).join('') : `<p class="hint">No bullets were provided — add 3–5 bullets from your most recent role and this section will rewrite them with strong verbs and quantified impact.</p>`}
+
+    <h3 style="font-family:'Lora',serif; margin-top:26px;">Skills recommendations</h3>
+    <div class="skill-cols">
+      <div>
+        <h4>Add (priority order)</h4>
+        <ol>${skillsToAdd.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+      </div>
+      <div>
+        <h4>Remove — dilutes your profile</h4>
+        ${skillsToRemove.length ? `<ul>${skillsToRemove.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>` : `<p class="hint">Nothing egregious found — good.</p>`}
+        <h4 style="margin-top:16px;">Pin to the top 3</h4>
+        <ul>${skillsToPin.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+      </div>
+    </div>
+  </div>`;
+
+  // PART 3 — SCORECARD
+  html += `<div class="sheet" data-tag="Part 3 · Scorecard">
+    <h2>Before vs After</h2>
+    <table class="scorecard">
+      <tr><th>Section</th><th>Before</th><th>After</th><th>Change</th></tr>
+      ${scoreRow('Headline', sH.score, after.headline)}
+      ${scoreRow('About (hook)', sHook.score, after.hook)}
+      ${scoreRow('About (full)', sAbout.score, after.about)}
+      ${scoreRow('Experience', sExp.score, after.experience)}
+      ${scoreRow('Skills / keywords', sSkills.score, after.skills)}
+      <tr class="total"><td>Overall</td><td>${before100}/100</td><td>${after100}/100</td><td class="delta">+${after100-before100}</td></tr>
+    </table>
+  </div>`;
+
+  // PART 4 — 7 DAY PLAN
+  html += render7DayPlan(ctx);
+
+  // PART 5 — SUMMARY CARD
+  html += `<div class="sheet" data-tag="Part 5 · Shareable Summary">
+    <h2>What I learned today</h2>
+    <p class="desc">Ready to screenshot and post.</p>
+    <div class="summary-card" id="summaryCard">
+      <h3>I let AI roast my LinkedIn profile today. Here's what changed:</h3>
+      <div class="summary-scores">
+        <div><span class="n before">${before100}</span>Before /100</div>
+        <div><span class="n after">${after100}</span>After /100</div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#c9cfe0; margin-bottom:8px;">Top 3 mistakes I was making</div>
+      <ol>${topMistakes.map(m=>`<li>${esc(m)}</li>`).join('')}</ol>
+      <div class="highlight"><b>The #1 thing that made the biggest difference:</b><br>${esc(biggestLever)}</div>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="small" onclick="copySummary()">Copy summary text</button>
+      <button type="button" class="small ghost" onclick="window.print()">Print / save as PDF</button>
+      <button type="button" class="small ghost" onclick="restart()">Start over</button>
+    </div>
+  </div>`;
+
+  document.getElementById('results').innerHTML = html;
+  wireDayCards();
+}
+
+function scoreRow(name, before, after){
+  const b = Math.round(before*10)/10, a = Math.round(after*10)/10;
+  return `<tr><td>${name}</td><td>${b}/10</td><td>${a}/10</td><td class="delta">+${Math.round((a-b)*10)/10}</td></tr>`;
+}
+
+function sectionDetail(text, s, isHook){
+  const q = text ? `<span class="quote">"${esc(text.slice(0,140))}${text.length>140?'…':''}"</span>` : '<span class="quote">(nothing provided)</span>';
+  return `<ul class="breakdown">
+    <li><span class="tag">❌</span> <b>The problem:</b> ${q} ${s.generic && s.generic.length ? `— leans on generic phrasing recruiters skim past ("${esc(s.generic[0])}").` : (isHook && text && text.length<40 ? 'too thin to earn the click.' : '')}</li>
+    <li><span class="tag">🧠</span> <b>Why it hurts:</b> Recruiters and clients pattern-match instantly — vague or generic openers signal "this is one of hundreds," not "read further."</li>
+    <li><span class="tag">🔍</span> <b>The invisible cost:</b> You never find out how many people scrolled past before you'd even had a chance to make your case.</li>
+  </ul>`;
+}
+function aboutFullDetail(sAbout){
+  return `<ul class="breakdown">
+    <li><span class="tag">❌</span> <b>The problem:</b> ${sAbout.words? `${sAbout.words} words, ${sAbout.numCount||0} numbers mentioned` : 'section is empty'}${sAbout.generic && sAbout.generic.length ? `, includes filler like "${esc(sAbout.generic[0])}"` : ''}.</li>
+    <li><span class="tag">🧠</span> <b>Why it hurts:</b> ${sAbout.hasCTA ? 'You have a call to action — good — but' : 'There\'s no call to action, so'} readers finish the section with no clear next step, which kills conversion even when the writing is decent.</li>
+    <li><span class="tag">🔍</span> <b>The invisible cost:</b> LinkedIn's search algorithm weighs this section heavily for keyword matching — thin or generic text means you rank lower for the searches that matter to you.</li>
+  </ul>`;
+}
+function expDetail(sExp){
+  return `<ul class="breakdown">
+    <li><span class="tag">❌</span> <b>The problem:</b> ${sExp.bullets.length} bullet(s) provided, ${sExp.weakCount||0} start with weak phrasing like "responsible for," only ${sExp.numberCount||0} include a number.</li>
+    <li><span class="tag">🧠</span> <b>Why it hurts:</b> "Responsible for" describes a duty, not a result — hiring managers can't tell if you were good at the job, only that you were present for it.</li>
+    <li><span class="tag">🔍</span> <b>The invisible cost:</b> Unquantified bullets get skimmed and forgotten within seconds; quantified ones get remembered and referenced in interviews.</li>
+  </ul>`;
+}
+function skillsDetail(sSkills){
+  return `<ul class="breakdown">
+    <li><span class="tag">❌</span> <b>The problem:</b> ${sSkills.skills.length} skill(s) listed${sSkills.generic.length ? `, ${sSkills.generic.length} of them generic filler (e.g. "${esc(sSkills.generic[0])}")` : ''}.</li>
+    <li><span class="tag">🧠</span> <b>Why it hurts:</b> Generic skills are listed by almost every profile in your field, so they add search competition without adding search advantage.</li>
+    <li><span class="tag">🔍</span> <b>The invisible cost:</b> Recruiter searches are keyword-driven — every generic skill taking a slot is a specific, high-intent keyword you're not ranking for.</li>
+  </ul>`;
+}
+
+function render7DayPlan(ctx){
+  const {data, skillsArr, headlineOpts} = ctx;
+  const primarySkill = skillsArr[0] ? titleCase(skillsArr[0]) : 'my field';
+  const goalWord = goalLabel(data.goal);
+
+  const post1 = `I just rebuilt my LinkedIn profile — and realized how much of it was written for no one in particular.\n\nThe old headline just listed my job title. The About section listed duties. Zero numbers, zero point of view.\n\nWhat actually changed:\n→ Headline now says who I help, not just what I'm called\n→ About section leads with proof, not adjectives\n→ Experience bullets show results, not task lists\n\nStill early days, but the profile finally sounds like someone worth talking to. If you've put off doing this — it's worth the hour.`;
+
+  const post2 = `Unpopular opinion: most LinkedIn profiles are written for the person writing them, not the person reading them.\n\nI spent years treating mine like a resume PDF — a list of duties nobody asked to read.\n\nWhat changed my mind: every recruiter and client only spends 3 seconds deciding whether to keep reading. If those 3 seconds don't answer "why should I care," the rest of the profile doesn't matter.\n\nRewrite your first two lines before anything else. That's the whole game.`;
+
+  const connectionMsg = `Hi [Name] — really enjoyed your recent post on ${primarySkill}. I'm working in a similar space and would love to stay connected.`;
+
+  const days = [
+    {title:'Publish your rebuilt profile', body:`
+      <div class="checklist">
+        <label><input type="checkbox"> Update headline (pick from the 3 options above)</label>
+        <label><input type="checkbox"> Replace About section with the rebuild</label>
+        <label><input type="checkbox"> Rewrite top experience bullets</label>
+        <label><input type="checkbox"> Update skills list — add priority skills, remove generic ones, pin top 3</label>
+        <label><input type="checkbox"> Add a profile photo and banner if missing</label>
+      </div>`},
+    {title:'Publish Post #1 — "I just rebuilt my LinkedIn"', body:`
+      <div class="draft-box">${esc(post1)}</div>
+      <div class="char-count">${post1.length} / 1300 characters</div>`},
+    {title:'Send 10 strategic connection requests', body:`
+      <p>Target: people one step ahead of you in ${esc(primarySkill)}, plus anyone actively hiring or buying in your space — this is what moves you toward ${esc(goalWord)}.</p>
+      <div class="draft-box">${esc(connectionMsg)}</div>
+      <div class="char-count">${connectionMsg.length} / 300 characters</div>`},
+    {title:'Comment on 5 posts in your target space', body:`
+      <p><b>The Value Comment formula:</b></p>
+      <p><b>Agree</b> — state what you agree with, specifically.<br>
+      <b>Add insight</b> — bring one detail, number, or experience of your own.<br>
+      <b>Ask a question</b> — invite a reply, which is what actually gets you seen by their network.</p>`},
+    {title:'Publish Post #2 — lessons-learned / hot take', body:`
+      <div class="draft-box">${esc(post2)}</div>
+      <div class="char-count">${post2.length} / 1300 characters</div>`},
+    {title:'Engage + 5 more connection requests', body:`
+      <div class="checklist">
+        <label><input type="checkbox"> Reply to every comment on both posts within a few hours</label>
+        <label><input type="checkbox"> Send 5 more connection requests using yesterday's template, personalized per person</label>
+        <label><input type="checkbox"> Revisit anyone who commented but didn't connect yet</label>
+      </div>`},
+    {title:'Review the numbers', body:`
+      <p><b>Profile views up?</b> Your headline and search keywords are working — more people are finding you.</p>
+      <p><b>Connection acceptance rate low (&lt;40%)?</b> Your request message is too generic or you're targeting the wrong people — tighten both.</p>
+      <p><b>Post engagement flat?</b> The hook (first line) isn't earning the "see more" click — rewrite it, not the whole post.</p>
+      <p>Adjust one variable at a time next week so you know what actually moved the needle.</p>`}
+  ];
+
+  let html = `<div class="sheet" data-tag="Part 4 · 7-Day Activation">
+    <h2>7-Day LinkedIn Activation Plan</h2>
+    <p class="desc">Not just profile edits — the actions that make the profile start working.</p>`;
+  days.forEach((d,i)=>{
+    html += `<div class="day-card" data-day="${i}">
+      <div class="day-head" onclick="toggleDay(${i})">
+        <div><div class="d">DAY ${i+1}</div><h3>${d.title}</h3></div>
+        <span>+</span>
+      </div>
+      <div class="day-body">${d.body}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function wireDayCards(){
+  const first = document.querySelector('.day-card[data-day="0"]');
+  if(first) first.classList.add('open');
+}
+function toggleDay(i){
+  document.querySelector('.day-card[data-day="'+i+'"]').classList.toggle('open');
+}
+
+function copySummary(){
+  const node = document.getElementById('summaryCard');
+  const text = node.innerText;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>flashCopied()).catch(()=>fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); flashCopied(); }catch(e){}
+  document.body.removeChild(ta);
+}
+function flashCopied(){
+  const btns = document.querySelectorAll('.toolbar button');
+  if(btns[0]){ const orig = btns[0].textContent; btns[0].textContent='Copied ✓'; setTimeout(()=>btns[0].textContent=orig, 1600); }
+}
+function restart(){
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').innerHTML='';
+  document.getElementById('pathSheet').style.display='block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
