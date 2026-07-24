@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Strategist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-main:#0f0f14;
+    --bg-card:#1a1a24;
+    --bg-card-alt:#1e1e2e;
+    --text-primary:#f0f0f5;
+    --text-secondary:#8888a0;
+    --accent-green:#34d399;
+    --accent-red:#f87171;
+    --accent-blue:#60a5fa;
+    --accent-gold:#fbbf24;
+    --accent-purple:#a78bfa;
+    --border-subtle:rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-main);
+    color:var(--text-primary);
+    font-family:'Inter','Segoe UI',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px 60px;}
+
+  /* ---------- HEADER ---------- */
+  header.banner{
+    width:100%;
+    padding:48px 20px 28px;
+    text-align:center;
+    background:radial-gradient(circle at 50% 0%, rgba(96,165,250,0.08), transparent 60%);
+  }
+  header.banner h1{
+    font-size:28px;font-weight:800;margin:0 0 8px;letter-spacing:0.5px;
+  }
+  header.banner p.subtitle{
+    font-size:16px;color:var(--text-secondary);margin:0 0 6px;max-width:560px;margin-left:auto;margin-right:auto;
+  }
+  header.banner p.date{
+    font-size:12px;color:var(--text-secondary);margin:0;
+  }
+  .gradient-rule{
+    height:2px;width:100%;margin-top:24px;
+    background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple),var(--accent-gold));
+  }
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border-subtle);
+    border-radius:16px;
+    padding:28px;
+    margin-top:28px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.3);
+    border-left:4px solid var(--accent-blue);
+    transition:transform 0.2s ease;
+  }
+  .card:hover{transform:translateY(-2px);}
+  .card.decision{border-left-color:var(--accent-blue);}
+  .card.options{border-left-color:var(--accent-green);}
+  .card.assumptions{border-left-color:var(--accent-purple);}
+  .card.matrix{border-left-color:var(--accent-blue);}
+  .card.premortem{border-left-color:var(--accent-red);}
+  .card.plan{border-left-color:var(--accent-green);}
+  .card.verdict{
+    border-left-color:var(--accent-gold);
+    background:var(--bg-card-alt);
+    padding:34px 28px;
+    box-shadow:0 0 20px rgba(251,191,36,0.15);
+  }
+  .card.shareable{border-left-color:var(--accent-gold);}
+
+  h2.section-title{
+    font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+    margin:0 0 16px;
+  }
+  .decision h2{color:var(--accent-blue);}
+  .options h2{color:var(--accent-green);}
+  .assumptions h2{color:var(--accent-purple);}
+  .matrix h2{color:var(--accent-blue);}
+  .premortem h2{color:var(--accent-red);}
+  .plan h2{color:var(--accent-green);}
+  .verdict h2{color:var(--accent-gold);}
+  .shareable h2{color:var(--accent-gold);}
+
+  p{font-size:15px;line-height:1.7;color:var(--text-primary);margin:0 0 10px;}
+  .label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+
+  /* ---------- OPTION SUB-CARDS ---------- */
+  .option-block{
+    background:rgba(255,255,255,0.02);
+    border:1px solid var(--border-subtle);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:16px;
+  }
+  .option-block:last-child{margin-bottom:0;}
+  .option-name{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .option-name.A{color:var(--accent-blue);}
+  .option-name.B{color:var(--accent-green);}
+  .option-name.C{color:var(--accent-purple);}
+  .tag-strength{color:var(--accent-green);font-weight:600;font-size:13px;}
+  .tag-hidden{color:var(--accent-blue);font-weight:600;font-size:13px;}
+  .tag-weak{color:var(--accent-red);font-weight:600;font-size:13px;}
+  .tag-value{color:var(--accent-gold);font-weight:600;font-size:13px;}
+
+  /* ---------- ASSUMPTION BUSTER ---------- */
+  ul.plain{margin:0 0 14px;padding-left:20px;}
+  ul.plain li{font-size:15px;line-height:1.7;margin-bottom:6px;}
+  .bias-chip{
+    display:inline-block;background:rgba(167,139,250,0.12);color:var(--accent-purple);
+    border-radius:20px;padding:4px 12px;font-size:13px;font-weight:600;margin:0 6px 6px 0;
+  }
+
+  /* ---------- MATRIX ---------- */
+  .matrix-row{display:flex;align-items:center;margin-bottom:12px;}
+  .matrix-label{width:40%;font-size:13px;color:var(--text-secondary);padding-right:10px;}
+  .matrix-bars{width:60%;display:flex;flex-direction:column;gap:6px;}
+  .bar-container{
+    height:28px;width:100%;background:rgba(255,255,255,0.05);border-radius:8px;overflow:hidden;position:relative;
+  }
+  .bar-fill{
+    height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:8px;color:#fff;font-weight:700;font-size:13px;
+    width:0%;
+    animation:growBar 0.8s ease-out forwards;
+  }
+  .bar-fill.A{background:linear-gradient(90deg,#60a5fa,#3b82f6);}
+  .bar-fill.B{background:linear-gradient(90deg,#34d399,#10b981);}
+  .bar-fill.C{background:linear-gradient(90deg,#a78bfa,#8b5cf6);}
+  @keyframes growBar{from{width:0%;}to{width:var(--target-w);}}
+  .matrix-legend{display:flex;gap:16px;margin-bottom:18px;font-size:12px;color:var(--text-secondary);flex-wrap:wrap;}
+  .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+  .total-row{
+    margin-top:18px;padding:14px 16px;border-radius:10px;background:rgba(255,255,255,0.04);
+    font-size:16px;font-weight:700;display:flex;justify-content:space-between;
+  }
+  .winner-badge{
+    display:inline-block;background:rgba(251,191,36,0.15);color:var(--accent-gold);
+    border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-left:8px;
+    text-transform:uppercase;letter-spacing:0.5px;
+  }
+
+  /* ---------- PREMORTEM ---------- */
+  .premortem-block{margin-bottom:20px;}
+  .premortem-block:last-child{margin-bottom:0;}
+  .premortem-block h3{font-size:15px;font-weight:700;margin:0 0 8px;color:var(--text-primary);}
+
+  /* ---------- 7 DAY PLAN ---------- */
+  .day-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-subtle);}
+  .day-row:last-child{border-bottom:none;}
+  .day-num{
+    flex:0 0 56px;font-size:12px;font-weight:700;color:var(--accent-green);
+    text-transform:uppercase;letter-spacing:0.5px;padding-top:2px;
+  }
+  .day-text{font-size:14px;line-height:1.6;color:var(--text-primary);}
+
+  /* ---------- VERDICT ---------- */
+  .verdict-winner{
+    font-size:30px;font-weight:800;color:var(--accent-gold);margin-bottom:12px;
+  }
+  .verdict-why{font-size:15px;line-height:1.7;margin-bottom:14px;}
+  .verdict-flip{font-size:14px;color:var(--text-secondary);margin-bottom:14px;}
+  .hard-truth{font-style:italic;color:var(--text-secondary);font-size:14px;border-top:1px solid var(--border-subtle);padding-top:14px;}
+
+  /* ---------- SHAREABLE CARDS ---------- */
+  .mini-cards{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;}
+  .mini-card{
+    flex:1 1 200px;background:var(--bg-card-alt);border-radius:12px;padding:16px;
+    display:flex;flex-direction:column;justify-content:space-between;min-height:180px;
+    border:1px solid var(--border-subtle);
+  }
+  .mini-card .mini-title{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);font-weight:600;margin-bottom:10px;}
+  .mini-card .mini-body{font-size:14px;line-height:1.5;flex:1;}
+  .mini-card .mini-score{font-size:22px;font-weight:800;color:var(--accent-gold);}
+  .watermark{font-size:10px;color:var(--text-secondary);margin-top:10px;opacity:0.7;}
+
+  footer{text-align:center;color:var(--text-secondary);font-size:12px;margin-top:40px;}
+
+  /* ---------- INTAKE FORM ---------- */
+  .intake-card{
+    background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;
+    padding:28px;margin-top:24px;box-shadow:0 4px 24px rgba(0,0,0,0.3);
+  }
+  .q-step{display:none;}
+  .q-step.active{display:block;}
+  .q-num{font-size:12px;color:var(--accent-blue);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .q-text{font-size:17px;font-weight:600;margin-bottom:16px;line-height:1.5;}
+  textarea, input[type=text]{
+    width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);
+    border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px;
+    padding:12px 14px;resize:vertical;outline:none;
+  }
+  textarea:focus, input[type=text]:focus{border-color:var(--accent-blue);}
+  .row-2{display:flex;gap:12px;margin-bottom:12px;}
+  .row-2 > div{flex:1;}
+  .hint{font-size:12px;color:var(--text-secondary);margin-top:6px;}
+  .btn{
+    background:var(--accent-blue);color:#0f0f14;border:none;border-radius:10px;
+    padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer;margin-top:18px;
+    transition:opacity 0.2s;
+  }
+  .btn:hover{opacity:0.85;}
+  .btn.secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border-subtle);margin-right:10px;}
+  .progress-dots{display:flex;gap:6px;margin-bottom:18px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--border-subtle);}
+  .dot.done{background:var(--accent-green);}
+  .dot.current{background:var(--accent-blue);}
+  #reportView{display:none;}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <h1>DECISION REPORT</h1>
+  <p class="subtitle" id="topicSubtitle">Answer four questions. Get a full decision dashboard.</p>
+  <p class="date" id="dateLine"></p>
+  <div class="gradient-rule"></div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= INTAKE ================= -->
+  <div id="intakeView">
+    <div class="intake-card">
+      <div class="progress-dots" id="progressDots"></div>
+
+      <div class="q-step active" data-step="0">
+        <div class="q-num">Setup</div>
+        <div class="q-text">What are the options you're choosing between?</div>
+        <div class="row-2">
+          <div><input type="text" id="optA" placeholder="Option A (e.g. Stay at current job)"></div>
+          <div><input type="text" id="optB" placeholder="Option B (e.g. Take the new offer)"></div>
+        </div>
+        <input type="text" id="optC" placeholder="Option C — optional">
+        <div class="hint">Leave Option C blank if it's a two-way choice.</div>
+        <button class="btn" onclick="nextStep()">Next →</button>
+      </div>
+
+      <div class="q-step" data-step="1">
+        <div class="q-num">Question 1 of 4</div>
+        <div class="q-text">What's the decision you're stuck on? Tell me the options and why it's hard right now.</div>
+        <textarea id="q1" rows="4" placeholder="Type your answer..."></textarea>
+        <button class="btn secondary" onclick="prevStep()">← Back</button>
+        <button class="btn" onclick="nextStep()">Next →</button>
+      </div>
+
+      <div class="q-step" data-step="2">
+        <div class="q-num">Question 2 of 4</div>
+        <div class="q-text">What's your goal — and what's the timeline for this decision?</div>
+        <textarea id="q2" rows="4" placeholder="Type your answer..."></textarea>
+        <button class="btn secondary" onclick="prevStep()">← Back</button>
+        <button class="btn" onclick="nextStep()">Next →</button>
+      </div>
+
+      <div class="q-step" data-step="3">
+        <div class="q-num">Question 3 of 4</div>
+        <div class="q-text">What does your gut say is the right choice — and what's stopping you from just going with it?</div>
+        <textarea id="q3" rows="4" placeholder="Type your answer..."></textarea>
+        <button class="btn secondary" onclick="prevStep()">← Back</button>
+        <button class="btn" onclick="nextStep()">Next →</button>
+      </div>
+
+      <div class="q-step" data-step="4">
+        <div class="q-num">Question 4 of 4</div>
+        <div class="q-text">What's the ONE thing you're most scared of getting wrong — and can you undo this decision if it doesn't work out?</div>
+        <textarea id="q4" rows="4" placeholder="Type your answer..."></textarea>
+        <button class="btn secondary" onclick="prevStep()">← Back</button>
+        <button class="btn" onclick="buildReport()">Build My Decision Report →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REPORT ================= -->
+  <div id="reportView"></div>
+
+  <footer>Built with Claude AI | ABTalks 60-Day Challenge</footer>
+</div>
+
+<script>
+document.getElementById('dateLine').textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+let step = 0;
+const totalSteps = 4;
+function renderDots(){
+  const el = document.getElementById('progressDots');
+  el.innerHTML = '';
+  for(let i=0;i<=totalSteps;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i<step?' done':'') + (i===step?' current':'');
+    el.appendChild(d);
+  }
+}
+function showStep(n){
+  document.querySelectorAll('.q-step').forEach(s=>s.classList.remove('active'));
+  document.querySelector('.q-step[data-step="'+n+'"]').classList.add('active');
+  renderDots();
+}
+function nextStep(){
+  if(step===0){
+    const a = document.getElementById('optA').value.trim();
+    const b = document.getElementById('optB').value.trim();
+    if(!a || !b){ alert('Please name at least Option A and Option B.'); return; }
+  }
+  step = Math.min(step+1, totalSteps);
+  showStep(step);
+}
+function prevStep(){
+  step = Math.max(step-1, 0);
+  showStep(step);
+}
+showStep(0);
+
+/* ---------------- REPORT GENERATION ---------------- */
+
+function pick(str, keywords){
+  str = (str||'').toLowerCase();
+  return keywords.some(k=>str.includes(k));
+}
+
+function clamp(n){ return Math.max(1, Math.min(10, Math.round(n))); }
+
+function scoreOption(label, allText, isGutChoice){
+  // Base scores, nudged by keyword signals across all four answers.
+  let s = {
+    upside: 6, safety: 6, growth: 6, stress: 6, reversibility: 6, alignment: 6, regret: 6
+  };
+  const t = allText.toLowerCase();
+
+  if(pick(t, ['risk','uncertain','scary','unknown','leap'])){ s.upside += 1; s.safety -= 1; s.growth += 1; }
+  if(pick(t, ['safe','secure','stable','comfortable'])){ s.safety += 2; s.growth -= 1; }
+  if(pick(t, ['stress','anxious','overwhelm','exhaust','burnt out','burnout'])){ s.stress -= 2; }
+  if(pick(t, ['excited','passion','love it','energized','curious'])){ s.alignment += 2; s.growth += 1; }
+  if(pick(t, ['money','salary','financ','pay cut','savings','afford'])){ s.safety -= 1; }
+  if(pick(t, ['can undo','reversible','try it','test it','experiment'])){ s.reversibility += 2; }
+  if(pick(t, ["can't undo","cant undo",'permanent','one-way','no going back','burn bridges'])){ s.reversibility -= 3; }
+  if(pick(t, ['regret'])){ s.regret -= 1; }
+  if(pick(t, ['learn','skill','grow','stretch'])){ s.growth += 2; }
+  if(pick(t, ['family','health','relationship'])){ s.alignment += 1; }
+
+  if(isGutChoice){ s.alignment += 1; s.upside += 1; }
+
+  Object.keys(s).forEach(k=> s[k]=clamp(s[k]));
+  return s;
+}
+
+function totalOf(s){
+  return s.upside+s.safety+s.growth+s.stress+s.reversibility+s.alignment+s.regret;
+}
+
+function buildReport(){
+  const optA = document.getElementById('optA').value.trim();
+  const optB = document.getElementById('optB').value.trim();
+  const optC = document.getElementById('optC').value.trim();
+  const q1 = document.getElementById('q1').value.trim() || 'Not specified.';
+  const q2 = document.getElementById('q2').value.trim() || 'Not specified.';
+  const q3 = document.getElementById('q3').value.trim() || 'Not specified.';
+  const q4 = document.getElementById('q4').value.trim() || 'Not specified.';
+
+  const options = [optA, optB];
+  if(optC) options.push(optC);
+  const letters = ['A','B','C'];
+  const allText = [q1,q2,q3,q4].join(' ');
+
+  // Determine gut-favored option by simple name match in q3
+  let gutIndex = -1;
+  options.forEach((o,i)=>{
+    if(o && q3.toLowerCase().includes(o.toLowerCase().split(' ')[0].toLowerCase())) gutIndex = i;
+  });
+
+  const scores = options.map((o,i)=>scoreOption(letters[i], allText + ' ' + o, i===gutIndex));
+  const totals = scores.map(totalOf);
+  const winnerIdx = totals.indexOf(Math.max(...totals));
+  document.getElementById('topicSubtitle').textContent = (q1.length>90? q1.slice(0,90)+'…' : q1);
+
+  const dims = [
+    ['upside','Life/Career Upside'],
+    ['safety','Financial Safety'],
+    ['growth','Growth & Learning'],
+    ['stress','Stress Level'],
+    ['reversibility','Reversibility'],
+    ['alignment','Long-term Alignment'],
+    ['regret','Regret Risk']
+  ];
+
+  const biasList = [];
+  if(pick(allText,['always','never','everyone','no one'])) biasList.push('Confirmation bias');
+  if(pick(allText,['already invested','put in','years into','sunk'])) biasList.push('Sunk cost fallacy');
+  if(pick(allText,['comfortable','used to','known','familiar'])) biasList.push('Status quo bias');
+  if(pick(allText,['lose','losing','afraid to lose'])) biasList.push('Loss aversion');
+  while(biasList.length<2) biasList.push(['Sunk cost fallacy','Loss aversion','Status quo bias','Confirmation bias'].find(b=>!biasList.includes(b)));
+
+  const html = `
+    <div class="card decision">
+      <h2 class="section-title">1 · The Real Decision</h2>
+      <p><span class="label">What's actually being decided</span><br>${escapeHtml(q1)}</p>
+      <p><span class="label">Why it's hard</span><br>You're weighing ${options.join(' vs. ')} against a goal of "${escapeHtml(truncate(q2,120))}" — and your gut and your fear (${escapeHtml(truncate(q4,80))}) aren't fully agreeing.</p>
+    </div>
+
+    <div class="card options">
+      <h2 class="section-title">2 · The Case For Each Option</h2>
+      ${options.map((o,i)=>`
+        <div class="option-block">
+          <div class="option-name ${letters[i]}">${escapeHtml(o)}</div>
+          <p><span class="tag-strength">Strongest case:</span> ${strongestCase(o, scores[i])}</p>
+          <p><span class="tag-hidden">Hidden upside:</span> ${hiddenUpside(scores[i])}</p>
+          <p><span class="tag-weak">Biggest weakness:</span> ${biggestWeak(scores[i])}</p>
+          <p><span class="tag-value">Best if you value:</span> ${bestIfYouValue(scores[i])}</p>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card assumptions">
+      <h2 class="section-title">3 · Assumption Buster</h2>
+      <p class="label">Assumptions you may be making</p>
+      <ul class="plain">
+        <li>That the option that feels comfortable right now will still feel right on your stated timeline (${escapeHtml(truncate(q2,60))}).</li>
+        <li>That "${escapeHtml(truncate(q4,60))}" is a fixed outcome rather than a risk you can actively manage.</li>
+        <li>That not deciding is a neutral, safe choice — it isn't; it's a choice for the status quo.</li>
+      </ul>
+      <p class="label">Biases at play</p>
+      <div style="margin-bottom:10px;">${biasList.slice(0,2).map(b=>`<span class="bias-chip">${b}</span>`).join('')}</div>
+      <p class="label">What you're definitely ignoring</p>
+      <p>The cost of staying stuck in analysis itself — every week undecided is a week neither option gets to compound.</p>
+    </div>
+
+    <div class="card matrix">
+      <h2 class="section-title">4 · Decision Matrix</h2>
+      <div class="matrix-legend">
+        ${options.map((o,i)=>`<span><span class="legend-dot" style="background:${legendColor(letters[i])}"></span>${escapeHtml(o)}</span>`).join('')}
+      </div>
+      ${dims.map(([key,labelTxt])=>`
+        <div class="matrix-row">
+          <div class="matrix-label">${labelTxt}</div>
+          <div class="matrix-bars">
+            ${options.map((o,i)=>`
+              <div class="bar-container">
+                <div class="bar-fill ${letters[i]}" style="--target-w:${scores[i][key]*10}%; animation-delay:${(i*0.1+dims.findIndex(d=>d[0]===key)*0.05).toFixed(2)}s;">${scores[i][key]}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+      <div class="total-row">
+        <span>Total (out of 70)</span>
+        <span>${options.map((o,i)=>`${escapeHtml(o)}: ${totals[i]}${i===winnerIdx?'<span class="winner-badge">Winner</span>':''}`).join(' &nbsp;·&nbsp; ')}</span>
+      </div>
+    </div>
+
+    <div class="card premortem">
+      <h2 class="section-title">5 · Premortem</h2>
+      ${topTwoIndices(totals).map(i=>`
+        <div class="premortem-block">
+          <h3>${escapeHtml(options[i])} — imagine it's 12 months later and it failed</h3>
+          <ul class="plain">
+            <li>You underestimated how much "${escapeHtml(truncate(q4,50))}" would actually cost you.</li>
+            <li>The reality didn't match the story you told yourself in the moment of ${i===winnerIdx?'excitement':'hesitation'}.</li>
+            <li>You didn't set a checkpoint, so you kept going past the point where it stopped working.</li>
+          </ul>
+          <p><span class="label">Early warning sign:</span> You start avoiding conversations about how it's actually going.</p>
+          <p><span class="label">Prevention:</span> Set a concrete 90-day checkpoint tied to your stated goal — "${escapeHtml(truncate(q2,60))}" — and review it honestly.</p>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card plan">
+      <h2 class="section-title">6 · 7-Day Test Plan</h2>
+      <div class="day-row"><div class="day-num">Day 1–2</div><div class="day-text">Research: gather the missing facts behind "${escapeHtml(truncate(q4,60))}" so it's a known risk, not a vague fear.</div></div>
+      <div class="day-row"><div class="day-num">Day 3–4</div><div class="day-text">Run one small, low-stakes experiment that simulates a slice of ${escapeHtml(options[winnerIdx])}.</div></div>
+      <div class="day-row"><div class="day-num">Day 5–6</div><div class="day-text">Have one honest conversation with someone affected by, or further along, this exact decision.</div></div>
+      <div class="day-row"><div class="day-num">Day 7</div><div class="day-text">Decide using this rule: if the fear from Day 1–2 is now smaller than the goal from your answers, move forward.</div></div>
+    </div>
+
+    <div class="card verdict">
+      <h2 class="section-title">7 · The Verdict</h2>
+      <div class="verdict-winner">${escapeHtml(options[winnerIdx])}</div>
+      <p class="verdict-why">It wins on the dimensions that matter most given what you told us — ${topDims(scores[winnerIdx],2)} — and it's the option your own gut leaned toward when you weren't overthinking it.</p>
+      <p class="verdict-flip"><span class="label">What could flip it:</span> If ${escapeHtml(truncate(q4,70))} turns out to be irreversible rather than recoverable, the calculus changes and the safer option should win instead.</p>
+      <p class="hard-truth">"You already know this. The interview didn't tell you anything new — it just made it harder to keep avoiding it."</p>
+    </div>
+
+    <div class="card shareable">
+      <h2 class="section-title">8 · Shareable Cards</h2>
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="mini-title">Decision Matrix</div>
+          <div class="mini-body">${options.map((o,i)=>`${escapeHtml(o)}`).join('<br>')}</div>
+          <div class="mini-score">${options.map((o,i)=>totals[i]).join(' – ')}</div>
+          <div class="watermark">Built with Claude AI</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">Verdict</div>
+          <div class="mini-body"><strong style="color:var(--accent-gold)">${escapeHtml(options[winnerIdx])}</strong><br>Wins on alignment, upside, and where your gut already was.</div>
+          <div class="watermark">Built with Claude AI</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">Share this</div>
+          <div class="mini-body">I ran my hardest decision through an AI Decision Strategist.<br>Here's what it said — and why.<br>Try it on your own decision 👇</div>
+          <div class="watermark">Built with Claude AI</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('reportView').innerHTML = html;
+  document.getElementById('intakeView').style.display = 'none';
+  document.getElementById('reportView').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function topTwoIndices(totals){
+  return totals.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).slice(0,2).map(p=>p[1]);
+}
+function legendColor(letter){
+  return letter==='A' ? '#60a5fa' : letter==='B' ? '#34d399' : '#a78bfa';
+}
+function truncate(str,n){ str=str||''; return str.length>n? str.slice(0,n)+'…' : str; }
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str||'';
+  return d.innerHTML;
+}
+function topDims(s,n){
+  const names = {upside:'career upside',safety:'financial safety',growth:'growth potential',stress:'lower stress',reversibility:'reversibility',alignment:'long-term alignment',regret:'lower regret risk'};
+  return Object.entries(s).sort((a,b)=>b[1]-a[1]).slice(0,n).map(e=>names[e[0]]).join(' and ');
+}
+function strongestCase(name, s){
+  const top = Object.entries(s).sort((a,b)=>b[1]-a[1])[0][0];
+  const map = {upside:"It offers the clearest path to real career/life upside.",safety:"It keeps your financial footing solid while everything else stays in motion.",growth:"It stretches you the most and builds skills you don't have yet.",stress:"It's the lower-stress path day-to-day, which matters for how you actually show up.",reversibility:"If it doesn't work, you can walk it back without much damage.",alignment:"It's the option that actually matches what you said you want long-term.",regret:"It's the choice you're least likely to look back on with regret."};
+  return map[top];
+}
+function hiddenUpside(s){
+  const second = Object.entries(s).sort((a,b)=>b[1]-a[1])[1][0];
+  const map = {upside:"It quietly compounds your career upside too, not just its main strength.",safety:"It buys you optionality — a financial cushion to make your next move on your terms.",growth:"The skills you'd build here transfer to whatever you choose next.",stress:"Lower stress here frees up energy you'd otherwise burn just coping.",reversibility:"You can test it cheaply before fully committing.",alignment:"It keeps you aligned with people/values that matter to you long after this decision fades.",regret:"People rarely regret this type of move even when it's hard in year one."};
+  return map[second];
+}
+function biggestWeak(s){
+  const bottom = Object.entries(s).sort((a,b)=>a[1]-b[1])[0][0];
+  const map = {upside:"The ceiling is lower than the alternative.",safety:"It puts real financial strain on you in the short term.",growth:"You risk plateauing — it doesn't stretch you much.",stress:"It's the higher-stress path, and that cost is real.",reversibility:"It's hard to walk back once you commit.",alignment:"It doesn't fully match what you said actually matters to you.",regret:'This is the option most likely to leave you wondering "what if."'};
+  return map[bottom];
+}
+function bestIfYouValue(s){
+  const top = Object.entries(s).sort((a,b)=>b[1]-a[1])[0][0];
+  const map = {upside:'ambition and upside over comfort',safety:'stability and predictable footing',growth:'learning and expanding your ceiling',stress:'peace of mind and sustainable pace',reversibility:'optionality and low-risk experimentation',alignment:'living in line with your actual values',regret:'minimizing long-term regret over short-term comfort'};
+  return map[top];
+}
+</script>
+</body>
+</html>
