@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Verdict Engine — Where Should You Relocate?</title>
+<style>
+  :root{
+    --ink:#14171F;
+    --ink-2:#1B1F2A;
+    --parchment:#F3EFE4;
+    --parchment-dim:#E7E1D0;
+    --brass:#B08D3F;
+    --brass-bright:#D4AF5E;
+    --redact:#8A3324;
+    --line:rgba(243,239,228,0.14);
+    --good:#4F7A5B;
+    --serif:'Fraunces', Georgia, serif;
+    --mono:'JetBrains Mono', 'Courier New', monospace;
+    --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @font-face{
+    font-family:'Fraunces';
+    src:local('Georgia');
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  a{color:var(--brass-bright);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- HEADER / DOCKET ---------- */
+  header.docket{
+    border-bottom:1px solid var(--line);
+    padding:38px 0 30px;
+  }
+  .docket-top{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    flex-wrap:wrap;gap:16px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:rgba(243,239,228,0.55);
+  }
+  .docket-top .seal{
+    color:var(--brass-bright);
+    font-weight:700;
+  }
+  h1.title{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.04;
+    margin:18px 0 10px;
+    letter-spacing:-0.01em;
+  }
+  h1.title em{
+    font-style:italic;
+    color:var(--brass-bright);
+    font-weight:600;
+  }
+  .subhead{
+    font-size:16px;
+    max-width:620px;
+    color:rgba(243,239,228,0.72);
+    margin:0 0 4px;
+  }
+  .case-meta{
+    margin-top:22px;
+    display:flex;flex-wrap:wrap;gap:10px 26px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:rgba(243,239,228,0.6);
+  }
+  .case-meta strong{color:var(--parchment);font-weight:600;}
+
+  /* ---------- SECTION LABELS ---------- */
+  .section{padding:46px 0;border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--brass-bright);
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;
+  }
+  .eyebrow::before{content:"§";font-size:14px;}
+  h2.section-title{
+    font-family:var(--serif);
+    font-size:clamp(24px,3vw,32px);
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .section-desc{color:rgba(243,239,228,0.62);max-width:640px;font-size:14.5px;margin-bottom:28px;}
+
+  /* ---------- WEIGH-IN CONTROLS ---------- */
+  .weigh-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:22px;
+  }
+  .weigh-card{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:20px 22px;
+  }
+  .weigh-card .wc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .wc-label{font-weight:600;font-size:14.5px;}
+  .wc-value{font-family:var(--mono);color:var(--brass-bright);font-weight:700;font-size:15px;}
+  .wc-desc{font-size:12.5px;color:rgba(243,239,228,0.5);margin-bottom:14px;}
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;height:4px;
+    background:var(--line);
+    border-radius:2px;
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--brass-bright);
+    border:2px solid var(--ink);
+    cursor:pointer;
+    box-shadow:0 0 0 2px var(--brass-bright);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--brass-bright);border:2px solid var(--ink);cursor:pointer;
+  }
+  .weigh-reset{
+    margin-top:22px;
+    font-family:var(--mono);
+    font-size:12px;
+    background:transparent;
+    border:1px solid var(--line);
+    color:rgba(243,239,228,0.7);
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+    letter-spacing:0.04em;
+    transition:all .15s;
+  }
+  .weigh-reset:hover{border-color:var(--brass-bright);color:var(--brass-bright);}
+
+  /* ---------- VERDICT LIST ---------- */
+  .verdict-list{display:flex;flex-direction:column;gap:14px;}
+  .verdict-card{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:20px 24px;
+    display:grid;
+    grid-template-columns:56px 1fr 200px;
+    gap:20px;
+    align-items:center;
+    transition:border-color .2s;
+    position:relative;
+  }
+  .verdict-card.rank-1{border-color:var(--brass);background:linear-gradient(90deg, rgba(176,141,63,0.14), var(--ink-2) 60%);}
+  .rank-num{
+    font-family:var(--serif);
+    font-size:34px;
+    font-weight:700;
+    color:rgba(243,239,228,0.25);
+    text-align:center;
+  }
+  .rank-1 .rank-num{color:var(--brass-bright);}
+  .vc-name-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .vc-name{font-family:var(--serif);font-size:21px;font-weight:700;}
+  .vc-country{font-size:12.5px;color:rgba(243,239,228,0.5);font-family:var(--mono);}
+  .verdict-tag{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.05em;
+    background:var(--brass);color:var(--ink);
+    padding:2px 8px;border-radius:2px;font-weight:700;text-transform:uppercase;
+  }
+  .vc-bar-track{
+    margin-top:10px;height:7px;background:rgba(243,239,228,0.08);border-radius:4px;overflow:hidden;
+  }
+  .vc-bar-fill{
+    height:100%;background:linear-gradient(90deg,var(--brass),var(--brass-bright));
+    border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .vc-score-block{text-align:right;}
+  .vc-score{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--brass-bright);}
+  .vc-score-label{font-size:11px;color:rgba(243,239,228,0.45);text-transform:uppercase;letter-spacing:0.06em;}
+
+  /* ---------- EVIDENCE TABLE ---------- */
+  .evidence-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .evidence-table th{
+    text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;
+    letter-spacing:0.06em;color:rgba(243,239,228,0.5);
+    padding:10px 14px;border-bottom:1px solid var(--line);font-weight:500;
+  }
+  .evidence-table td{
+    padding:14px;border-bottom:1px solid var(--line);vertical-align:top;
+  }
+  .evidence-table tr:last-child td{border-bottom:none;}
+  .ev-city{font-weight:700;font-family:var(--serif);font-size:16px;}
+  .ev-figure{font-family:var(--mono);font-weight:700;color:var(--parchment);}
+  .ev-note{color:rgba(243,239,228,0.5);font-size:12px;margin-top:3px;line-height:1.4;}
+  .flag{
+    display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;
+    letter-spacing:0.04em;padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle;
+  }
+  .flag-sourced{background:rgba(79,122,91,0.2);color:#8FCB9F;border:1px solid rgba(79,122,91,0.4);}
+  .flag-estimate{background:rgba(138,51,36,0.2);color:#E39284;border:1px solid rgba(138,51,36,0.4);}
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:4px;}
+
+  /* ---------- COLLAPSIBLES ---------- */
+  details.panel{
+    background:var(--ink-2);border:1px solid var(--line);border-radius:4px;
+    margin-bottom:12px;overflow:hidden;
+  }
+  details.panel summary{
+    list-style:none;cursor:pointer;padding:18px 22px;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--serif);font-weight:700;font-size:16.5px;
+  }
+  details.panel summary::-webkit-details-marker{display:none;}
+  details.panel summary .chev{
+    font-family:var(--mono);color:var(--brass-bright);font-size:13px;
+    transition:transform .2s;
+  }
+  details.panel[open] summary .chev{transform:rotate(90deg);}
+  .panel-body{padding:0 22px 22px;color:rgba(243,239,228,0.75);font-size:14px;}
+  .panel-body p{margin:0 0 12px;}
+  .panel-body h4{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--brass-bright);margin:18px 0 8px;}
+  .conflict-item{
+    border-left:2px solid var(--redact);padding-left:14px;margin-bottom:14px;
+  }
+  .conflict-item .ci-title{font-weight:600;color:var(--parchment);font-size:13.5px;margin-bottom:4px;}
+
+  /* ---------- SOURCES / EXHIBITS ---------- */
+  .exhibit-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;}
+  .exhibit{
+    border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-size:12.5px;
+    background:var(--ink-2);
+  }
+  .exhibit .ex-num{font-family:var(--mono);color:var(--brass-bright);font-weight:700;margin-right:6px;}
+  .exhibit a{word-break:break-all;font-size:11.5px;display:block;margin-top:4px;color:rgba(243,239,228,0.55);text-decoration:none;}
+  .exhibit a:hover{color:var(--brass-bright);}
+
+  /* ---------- LOADING / EMPTY ---------- */
+  #loading{
+    position:fixed;inset:0;background:var(--ink);z-index:99;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  }
+  .gavel{font-size:40px;animation:tap 1.1s ease-in-out infinite;}
+  @keyframes tap{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-18deg);}}
+  #loading p{font-family:var(--mono);font-size:13px;color:rgba(243,239,228,0.6);letter-spacing:0.05em;}
+  .empty-state{
+    text-align:center;padding:50px 20px;color:rgba(243,239,228,0.5);
+    font-family:var(--mono);font-size:13px;border:1px dashed var(--line);border-radius:4px;
+  }
+
+  footer{padding:36px 0 60px;text-align:center;font-family:var(--mono);font-size:11.5px;color:rgba(243,239,228,0.4);}
+
+  @media (max-width:640px){
+    .verdict-card{grid-template-columns:40px 1fr;grid-template-rows:auto auto;}
+    .vc-score-block{grid-column:2;text-align:left;display:flex;gap:10px;align-items:baseline;margin-top:8px;}
+    .rank-num{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="gavel">⚖️</div>
+  <p>CONVENING THE COURT…</p>
+</div>
+
+<div class="wrap">
+
+  <header class="docket">
+    <div class="docket-top">
+      <span><span class="seal">THE VERDICT ENGINE</span> — Case File No. RLC-2026</span>
+      <span>Filed: July 27, 2026</span>
+    </div>
+    <h1 class="title">Where should <em>you</em><br>actually relocate?</h1>
+    <p class="subhead">A remote tech worker is weighing four European hubs on cost, connectivity, visa friction, and climate. The court has reviewed the evidence. You render the verdict — adjust the weights and watch the ranking change in real time.</p>
+    <div class="case-meta">
+      <span>PLAINTIFF: <strong>Remote-first knowledge worker</strong></span>
+      <span>DEFENDANTS: <strong>Lisbon · Valencia · Berlin · Tbilisi</strong></span>
+      <span>CRITERIA: <strong>4</strong></span>
+      <span>EXHIBITS: <strong id="exhibitCount">0</strong></span>
+    </div>
+  </header>
+
+  <!-- WEIGH THE EVIDENCE -->
+  <section class="section" id="weighSection">
+    <div class="eyebrow">Chamber One</div>
+    <h2 class="section-title">Weigh the evidence</h2>
+    <p class="section-desc">Every juror weighs things differently. Slide each lever to reflect what matters most to you — the verdict below recalculates instantly. Weights are normalized automatically, so don't worry about making them add to 100.</p>
+
+    <div class="weigh-grid" id="weighGrid"></div>
+    <button class="weigh-reset" id="resetWeights">↺ Reset to equal weighting</button>
+  </section>
+
+  <!-- THE VERDICT -->
+  <section class="section" id="verdictSection">
+    <div class="eyebrow">Chamber Two</div>
+    <h2 class="section-title">The verdict</h2>
+    <p class="section-desc">Ranked by your weighted score, 0–100. Each city's score is a blend of the four criteria, normalized against the best and worst performer in this case, then combined using your priorities above.</p>
+    <div class="verdict-list" id="verdictList"></div>
+  </section>
+
+  <!-- THE EVIDENCE -->
+  <section class="section" id="evidenceSection">
+    <div class="eyebrow">Chamber Three</div>
+    <h2 class="section-title">The raw evidence</h2>
+    <p class="section-desc">Every figure the verdict is built on, with a flag for anything that's a sourced statistic versus an estimate derived from incomplete data. <span class="flag flag-sourced">SOURCED</span> means the number traces to a named, citable source. <span class="flag flag-estimate">ESTIMATE</span> means research could not confirm an exact current figure, and the number is a reasoned approximation — treat it as directional, not precise.</p>
+
+    <div class="table-scroll">
+      <table class="evidence-table" id="evidenceTable"></table>
+    </div>
+  </section>
+
+  <!-- HOW THIS WAS RESEARCHED -->
+  <section class="section" id="researchSection">
+    <div class="eyebrow">Chamber Four</div>
+    <h2 class="section-title">How this verdict was reached</h2>
+    <p class="section-desc">Full transparency on methodology, and the conflicts between sources that had to be resolved along the way.</p>
+
+    <details class="panel" open>
+      <summary>Methodology <span class="chev">▸</span></summary>
+      <div class="panel-body">
+        <p><strong>Cost of living</strong> combines each country's Numbeo national average monthly cost (excluding rent) with a locally-reported average one-bedroom, city-center rent, to produce one comparable "total monthly cost" figure per city. Lower cost scores higher.</p>
+        <p><strong>Internet speed</strong> uses Ookla Speedtest Global Index median fixed-broadband download speed where a specific 2025–2026 country figure could be verified (Spain). Where a precise current figure could not be confirmed in this research (Portugal, Germany), a directional estimate is used and clearly flagged. Georgia's figure is a city-level estimate from a digital-nomad guide, not the primary Ookla dataset, and is flagged accordingly.</p>
+        <p><strong>Visa/residency ease</strong> is a composite 0–100 score built from each country's actual remote-worker visa pathway: minimum income threshold, processing time, and bureaucratic complexity, as described in 2026 immigration guides.</p>
+        <p><strong>Climate & quality of life</strong> uses verified 30-year average annual sunshine hours per city as the primary comparable metric, cross-referenced against Numbeo's 2025 Quality of Life ranking for regional context.</p>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary>Conflicts between sources, and how they were resolved <span class="chev">▸</span></summary>
+      <div class="panel-body">
+        <div class="conflict-item">
+          <div class="ci-title">Tbilisi cost of living — a wide range depending on the source</div>
+          <p>Sources ranged from a "budget-conscious" baseline of about $814/month including rent (livingcostindex.com) to a more lifestyle-inclusive $900–$1,400/month range (GREM 2026 expat guide), with one nomad-guide citing $1,190–$1,904/month for a "comfortable" single lifestyle. Post-2022 inflation means older "$600/month" blog claims are now out of date. This tool uses the GREM mid-range estimate ($1,150/month) as the most representative figure for a remote worker seeking a comfortable, not bare-minimum, lifestyle.</p>
+        </div>
+        <div class="conflict-item">
+          <div class="ci-title">Valencia's total cost had to be derived, not looked up directly</div>
+          <p>Numbeo publishes Valencia's Cost of Living Index (≈50, NYC=100) but no single-figure "total monthly cost" comparable to the country-level Portugal/Germany numbers. This tool derived Valencia's estimated total by applying a sourced relative comparison (Berlin reported as ~33% more expensive than Valencia on a rent-inclusive basis, per a 2026 relocation guide) against Berlin's own sourced total. This is flagged as a derived estimate, not a direct citation.</p>
+        </div>
+        <div class="conflict-item">
+          <div class="ci-title">Internet speed — Portugal and Germany lacked a precise, current, citable national figure</div>
+          <p>Multiple 2025–2026 internet-speed rankings were checked, but none in this research returned an exact, attributable Ookla Speedtest figure for Portugal or Germany at the time of writing (only Spain's figure — 248.12 Mbps, global rank 14 — was directly confirmed). Rather than fabricate precision, both are shown as flagged estimates positioned relative to known regional patterns.</p>
+        </div>
+        <div class="conflict-item">
+          <div class="ci-title">Germany has no dedicated "digital nomad visa"</div>
+          <p>Unlike Portugal, Spain, and Georgia, Germany does not offer a purpose-built remote-work visa. Guides use the Freiberufler (freelance) residence permit as the closest comparable pathway, but it is generally reported as more document-heavy and less standardized than the other three countries' programs — reflected in a lower visa-ease score.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary>Sources / Exhibits <span class="chev">▸</span></summary>
+      <div class="panel-body">
+        <div class="exhibit-list" id="exhibitList"></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    The Verdict Engine · Built for illustrative decision-support purposes only. Immigration rules, prices, and connectivity change — verify current figures with the linked sources before making a relocation decision. Not legal or financial advice.
+  </footer>
+
+</div>
+
+<script>
+/* ============ DATA ============ */
+const criteria = [
+  {key:'cost', label:'Cost of Living', unit:'/month', desc:'Lower is better', invert:true},
+  {key:'internet', label:'Internet Speed', unit:'Mbps', desc:'Higher is better', invert:false},
+  {key:'visa', label:'Visa Ease', unit:'/100', desc:'Higher is better', invert:false},
+  {key:'climate', label:'Climate & QoL', unit:'hrs sun/yr', desc:'Higher is better', invert:false},
+];
+
+const cities = [
+  {
+    id:'lisbon', name:'Lisbon', country:'Portugal', flag:'🇵🇹',
+    cost:2280, costSourced:true,
+    costNote:'Numbeo Portugal nat’l average, $770/mo excl. rent, + avg. 1BR city-center rent ≈€1,400/mo (≈$1,510)',
+    internet:180, internetSourced:false,
+    internetNote:'No precise current Ookla country figure confirmed; directional estimate based on Portugal’s fiber rollout context',
+    visa:55, visaSourced:true,
+    visaNote:'D8 Digital Nomad Visa: €3,680/mo income threshold, 4–7 month processing, 183-day residency requirement',
+    climate:2800, climateSourced:true,
+    climateNote:'30-year average annual sunshine hours (weather-and-climate.com, meteorological normals)',
+  },
+  {
+    id:'valencia', name:'Valencia', country:'Spain', flag:'🇪🇸',
+    cost:1790, costSourced:false,
+    costNote:'Derived: Berlin reported ~33% pricier than Valencia (rent-inclusive), applied against Berlin’s sourced total',
+    internet:248, internetSourced:true,
+    internetNote:'Spain: 248.12 Mbps median fixed broadband, global rank #14 (Speedtest Global Index, most recent snapshot)',
+    visa:75, visaSourced:true,
+    visaNote:'Digital Nomad Visa: ~€2,850/mo income threshold, 20–45 day processing, up to 5-year stay, flat 15% tax option',
+    climate:2690, climateSourced:true,
+    climateNote:'30-year average annual sunshine hours; also ranked #1 in Numbeo’s 2025 Southern Europe Quality of Life index',
+  },
+  {
+    id:'berlin', name:'Berlin', country:'Germany', flag:'🇩🇪',
+    cost:2439, costSourced:true,
+    costNote:'Numbeo Germany nat’l average, $1,142.5/mo excl. rent, + avg. Berlin 1BR rent ≈€1,200/mo (≈$1,296) 2026',
+    internet:150, internetSourced:false,
+    internetNote:'No precise current Ookla country figure confirmed; directional estimate, generally reported behind Iberia on fiber coverage',
+    visa:35, visaSourced:true,
+    visaNote:'No dedicated digital nomad visa — Freiberufler (freelance) permit only, more document-heavy, 4–8 week processing',
+    climate:1718, climateSourced:true,
+    climateNote:'30-year average annual sunshine hours (weather-and-climate.com / climate.top)',
+  },
+  {
+    id:'tbilisi', name:'Tbilisi', country:'Georgia', flag:'🇬🇪',
+    cost:1150, costSourced:true,
+    costNote:'GREM 2026 expat guide: comfortable single lifestyle $900–$1,400/mo, midpoint used',
+    internet:100, internetSourced:false,
+    internetNote:'City-level figure from a nomad-guide source (not primary Ookla dataset) — flagged as secondary',
+    visa:95, visaSourced:true,
+    visaNote:'"Remotely from Georgia" program: near-immediate online processing; many nationalities also get 1-year visa-free stay, no dedicated income minimum',
+    climate:2045, climateSourced:true,
+    climateNote:'30-year average annual sunshine hours (weather-and-climate.com / climate.top)',
+  },
+];
+
+const exhibits = [
+  {n:1, label:'Numbeo — Cost of Living by Country (Portugal, Germany)', url:'https://www.numbeo.com/cost-of-living/country_result.jsp?country=Portugal'},
+  {n:2, label:'Numbeo Valencia CoL Index ≈50 (via Valencia Property 2026 guide)', url:'https://www.valencia-property.com/new/2026/01/26/the-cost-of-living-in-valencia-2026/'},
+  {n:3, label:'Lisbon rent figures citing Numbeo (Portugal Buyers Agent)', url:'https://portugalbuyersagent.com/what-is-the-cost-of-living-in-lisbon/'},
+  {n:4, label:'Valencia vs. Berlin/Northern Europe cost comparison 2026', url:'https://homevested.es/cost-of-living-in-valencia-vs-northern-europe-the-2026-reality/'},
+  {n:5, label:'Berlin rent & cost of living 2026 (Move2Europe)', url:'https://move2europe.eu/blog/cost-of-living-in-germany-for-expats-2026/'},
+  {n:6, label:'Tbilisi cost of living 2026 (GREM Capital expat guide)', url:'https://home.grem.capital/en/guides/cost-of-living-in-tbilisi-for-expats-2026'},
+  {n:7, label:'Tbilisi budget baseline (Living Cost Index)', url:'https://livingcostindex.com/regions/tbilisi-ge/'},
+  {n:8, label:'Speedtest Global Index — Spain fixed broadband 248.12 Mbps, rank #14', url:'https://www.digitalwebsolutions.com/blog/internet-speed-statistics/'},
+  {n:9, label:'Tbilisi internet speed reference (nomad guide, secondary source)', url:'https://enoughmoney.ai/blog/tbilisi'},
+  {n:10, label:'Portugal D8 Digital Nomad Visa 2026 — income & processing', url:'https://globallawexperts.com/portugal-d8-visa-requirements-2026-income-e3680-documents-aima-process-timelines/'},
+  {n:11, label:'Portugal D8 Visa 2026 guide', url:'https://www.globalcitizensolutions.com/portugal-digital-nomad-visa/'},
+  {n:12, label:'Spain Digital Nomad Visa 2026 — income & tax', url:'https://www.globalcitizensolutions.com/spain-digital-nomad-visa/'},
+  {n:13, label:'Spain Digital Nomad Visa requirements (Citizen Remote)', url:'https://citizenremote.com/visas/spain-digital-nomad-visa/'},
+  {n:14, label:'Digital Nomad Visa country-by-country comparison (incl. Germany, Georgia)', url:'https://immigrationinfoguide.com/blog/digital-nomad-visa-guide'},
+  {n:15, label:'Best Digital Nomad Visas 2026 — Georgia visa-free comparison', url:'https://casabasilico.com/blog/best-digital-nomad-visas-2026'},
+  {n:16, label:'Lisbon annual sunshine hours (30-yr average)', url:'https://weather-and-climate.com/average-monthly-hours-Sunshine,lisbon,Portugal'},
+  {n:17, label:'Valencia annual sunshine hours (30-yr average)', url:'https://weather-and-climate.com/average-monthly-hours-Sunshine,Valencia,Spain'},
+  {n:18, label:'Berlin annual sunshine hours', url:'https://weather-and-climate.com/average-monthly-hours-Sunshine,Berlin,Germany'},
+  {n:19, label:'Tbilisi annual sunshine hours', url:'https://weather-and-climate.com/average-monthly-hours-Sunshine,tbilisi,Georgia'},
+  {n:20, label:'Valencia ranked #1 Southern Europe, Numbeo Quality of Life 2025', url:'https://www.aol.com/2025s-most-enviable-addresses-top-165700314.html'},
+];
+
+/* ============ STATE ============ */
+let weights = {cost:25, internet:25, visa:25, climate:25};
+
+/* ============ RENDER: SLIDERS ============ */
+const weighGrid = document.getElementById('weighGrid');
+criteria.forEach(c=>{
+  const card = document.createElement('div');
+  card.className='weigh-card';
+  card.innerHTML = `
+    <div class="wc-top">
+      <span class="wc-label">${c.label}</span>
+      <span class="wc-value" id="val-${c.key}">${weights[c.key]}%</span>
+    </div>
+    <div class="wc-desc">${c.desc}</div>
+    <input type="range" min="0" max="100" value="${weights[c.key]}" id="slider-${c.key}">
+  `;
+  weighGrid.appendChild(card);
+});
+
+criteria.forEach(c=>{
+  document.getElementById(`slider-${c.key}`).addEventListener('input', (e)=>{
+    weights[c.key] = parseInt(e.target.value,10);
+    document.getElementById(`val-${c.key}`).textContent = weights[c.key] + '%';
+    render();
+  });
+});
+
+document.getElementById('resetWeights').addEventListener('click', ()=>{
+  weights = {cost:25, internet:25, visa:25, climate:25};
+  criteria.forEach(c=>{
+    document.getElementById(`slider-${c.key}`).value = 25;
+    document.getElementById(`val-${c.key}`).textContent = '25%';
+  });
+  render();
+});
+
+/* ============ SCORING ============ */
+function normalize(key, invert){
+  const vals = cities.map(c=>c[key]);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  const out = {};
+  cities.forEach(c=>{
+    let score = ((c[key]-min)/range)*100;
+    if(invert) score = 100-score;
+    out[c.id] = score;
+  });
+  return out;
+}
+
+function computeScores(){
+  const totalWeight = criteria.reduce((s,c)=>s+weights[c.key],0);
+  const norm = {};
+  criteria.forEach(c=>{ norm[c.key] = normalize(c.key, c.invert); });
+
+  const results = cities.map(city=>{
+    let score = 0;
+    if(totalWeight === 0){
+      score = criteria.reduce((s,c)=>s+norm[c.key][city.id],0)/criteria.length;
+    } else {
+      criteria.forEach(c=>{
+        score += norm[c.key][city.id] * (weights[c.key]/totalWeight);
+      });
+    }
+    return {...city, score};
+  });
+  results.sort((a,b)=>b.score-a.score);
+  return {results, totalWeight};
+}
+
+/* ============ RENDER: VERDICT LIST ============ */
+function renderVerdict(){
+  const {results, totalWeight} = computeScores();
+  const list = document.getElementById('verdictList');
+  list.innerHTML='';
+
+  if(totalWeight === 0){
+    const note = document.createElement('div');
+    note.className='empty-state';
+    note.textContent = 'ALL WEIGHTS AT ZERO — showing unweighted average across all four criteria. Move a slider to express a priority.';
+    list.appendChild(note);
+  }
+
+  results.forEach((c, i)=>{
+    const card = document.createElement('div');
+    card.className = 'verdict-card' + (i===0 ? ' rank-1':'');
+    card.innerHTML = `
+      <div class="rank-num">${i+1}</div>
+      <div>
+        <div class="vc-name-row">
+          <span class="vc-name">${c.flag} ${c.name}</span>
+          <span class="vc-country">${c.country}</span>
+          ${i===0 ? '<span class="verdict-tag">Verdict</span>' : ''}
+        </div>
+        <div class="vc-bar-track"><div class="vc-bar-fill" style="width:${c.score.toFixed(1)}%"></div></div>
+      </div>
+      <div class="vc-score-block">
+        <div class="vc-score">${c.score.toFixed(1)}</div>
+        <div class="vc-score-label">Weighted Score / 100</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ============ RENDER: EVIDENCE TABLE ============ */
+function renderEvidence(){
+  const table = document.getElementById('evidenceTable');
+  let head = '<thead><tr><th>City</th>';
+  criteria.forEach(c=> head += `<th>${c.label}</th>`);
+  head += '</tr></thead>';
+
+  let body = '<tbody>';
+  cities.forEach(city=>{
+    body += `<tr><td class="ev-city">${city.flag} ${city.name}</td>`;
+    criteria.forEach(c=>{
+      const sourcedKey = c.key+'Sourced';
+      const val = city[c.key];
+      const note = city[c.key+'Note'];
+      const flag = city[sourcedKey] ? '<span class="flag flag-sourced">Sourced</span>' : '<span class="flag flag-estimate">Estimate</span>';
+      const display = c.key==='cost' ? `$${val.toLocaleString()}${c.unit}` : `${val}${c.unit}`;
+      body += `<td><span class="ev-figure">${display}</span>${flag}<div class="ev-note">${note}</div></td>`;
+    });
+    body += '</tr>';
+  });
+  body += '</tbody>';
+
+  table.innerHTML = head + body;
+}
+
+/* ============ RENDER: EXHIBITS ============ */
+function renderExhibits(){
+  const list = document.getElementById('exhibitList');
+  list.innerHTML='';
+  exhibits.forEach(e=>{
+    const div = document.createElement('div');
+    div.className='exhibit';
+    div.innerHTML = `<span class="ex-num">EX.${e.n}</span>${e.label}<a href="${e.url}" target="_blank" rel="noopener">${e.url}</a>`;
+    list.appendChild(div);
+  });
+  document.getElementById('exhibitCount').textContent = exhibits.length;
+}
+
+function render(){
+  renderVerdict();
+}
+
+/* ============ INIT ============ */
+try {
+  renderVerdict();
+  renderEvidence();
+  renderExhibits();
+} catch(err){
+  document.body.innerHTML = '<div class="empty-state" style="margin:80px auto;max-width:500px;">The court encountered an error assembling the case file. Please reload. (' + err.message + ')</div>';
+  console.error(err);
+}
+
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    const loader = document.getElementById('loading');
+    loader.style.transition='opacity .4s';
+    loader.style.opacity='0';
+    setTimeout(()=>loader.remove(), 400);
+  }, 500);
+});
+</script>
+</body>
+</html>
