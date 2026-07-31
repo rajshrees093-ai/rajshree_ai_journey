@@ -18,7 +18,7 @@
   2. **Implementation Blueprint (Days 2–10)** — a day-by-day, project-specific build plan
   3. **Project Pitch Deck** — Problem, Target Users, Solution, Key Features, Technical Approach, Future Scope, Vision
 
-## Key Learnings
+
 
 - Scoping tightly up front (defining what's explicitly **excluded**, not just included) is what protects a multi-day build from scope creep later.
 - Separating "Requirements & Design" (today) from "Setup & Tech Stack" (Day 2) kept today's conversation focused on the *what* and *why* instead of jumping prematurely into the *how*.
