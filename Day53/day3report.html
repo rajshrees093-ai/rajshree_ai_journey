@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusFlow — Day 3 Foundation Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0E3A5F;
+    --paper-deep:#0A2E4C;
+    --grid:rgba(255,255,255,0.09);
+    --grid-major:rgba(255,255,255,0.16);
+    --ink:#EAF2FA;
+    --muted:#9FB8CC;
+    --cyan:#6FD1E8;
+    --amber:#F2A541;
+    --line:rgba(234,242,250,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      linear-gradient(var(--grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+    background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    padding:2.5rem 1.25rem 4rem;
+  }
+  .sheet{
+    max-width:920px;
+    margin:0 auto;
+    position:relative;
+  }
+  .titleblock{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom:1.5px solid var(--line);
+    padding-bottom:1.25rem;
+    margin-bottom:2rem;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-size:0.72rem;
+    letter-spacing:0.22em;
+    color:var(--cyan);
+    text-transform:uppercase;
+    margin:0 0 0.5rem;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+    color:var(--ink);
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:0.95rem;
+    margin-top:0.6rem;
+    max-width:32ch;
+  }
+  .meta{
+    text-align:right;
+    font-size:0.78rem;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .meta strong{color:var(--ink);}
+
+  .stamp{
+    position:absolute;
+    top:-6px;
+    right:0;
+    width:118px;
+    height:118px;
+    border:2.5px solid var(--amber);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(9deg);
+    opacity:0;
+    animation:stampIn 0.5s ease-out 0.3s forwards;
+  }
+  @keyframes stampIn{
+    from{opacity:0; transform:rotate(9deg) scale(1.4);}
+    to{opacity:1; transform:rotate(9deg) scale(1);}
+  }
+  .stamp span{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    color:var(--amber);
+    text-align:center;
+    line-height:1.35;
+    text-transform:uppercase;
+  }
+  @media (max-width:640px){ .stamp{ position:static; margin-top:1rem; transform:rotate(0); } }
+
+  section{margin-bottom:2.5rem;}
+  .section-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+    margin-bottom:1rem;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--grid-major);
+  }
+
+  /* --- Connection schematic --- */
+  .schematic{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.5rem;
+    padding:1.75rem 1.25rem;
+    border:1px dashed var(--line);
+  }
+  .node{
+    flex:0 0 auto;
+    text-align:center;
+  }
+  .node .box{
+    width:118px;
+    height:76px;
+    border:1.5px solid var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:0.85rem;
+  }
+  .node .caption{
+    font-size:0.68rem;
+    color:var(--muted);
+    margin-top:0.5rem;
+    letter-spacing:0.04em;
+  }
+  .wire{
+    flex:1;
+    position:relative;
+    height:2px;
+    background:repeating-linear-gradient(90deg, var(--cyan) 0 6px, transparent 6px 12px);
+    min-width:40px;
+  }
+  .wire .pulse{
+    position:absolute;
+    top:-3px;
+    left:0;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--amber);
+    animation:travel 2.6s linear infinite;
+  }
+  @keyframes travel{
+    0%{left:0%;}
+    100%{left:calc(100% - 8px);}
+  }
+  .wire .label{
+    position:absolute;
+    top:-22px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:0.65rem;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+
+  /* --- Checklist --- */
+  .checklist{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0.6rem 1.5rem;
+  }
+  @media (max-width:640px){ .checklist{grid-template-columns:1fr;} }
+  .item{
+    display:flex;
+    align-items:baseline;
+    gap:0.65rem;
+    font-size:0.88rem;
+    padding:0.35rem 0;
+    border-bottom:1px solid var(--grid);
+  }
+  .tick{
+    flex:0 0 auto;
+    width:16px;
+    height:16px;
+    border:1.5px solid var(--amber);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.6rem;
+    color:var(--amber);
+    transform:translateY(2px);
+  }
+  .item.pending .tick{border-color:var(--muted); color:var(--muted);}
+  .item.pending{color:var(--muted);}
+
+  /* --- Manifest table --- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  th{
+    text-align:left;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    border-bottom:1.5px solid var(--line);
+    padding:0.5rem 0.75rem 0.5rem 0;
+  }
+  td{
+    padding:0.55rem 0.75rem 0.55rem 0;
+    border-bottom:1px solid var(--grid);
+    vertical-align:top;
+  }
+  td.path{color:var(--ink); white-space:nowrap;}
+  td.desc{color:var(--muted);}
+  .tag{
+    display:inline-block;
+    font-size:0.65rem;
+    padding:0.15rem 0.45rem;
+    border:1px solid var(--amber);
+    color:var(--amber);
+    letter-spacing:0.03em;
+  }
+
+  footer{
+    border-top:1.5px solid var(--line);
+    padding-top:1.25rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:0.75rem;
+    font-size:0.78rem;
+    color:var(--muted);
+  }
+  footer .next{
+    color:var(--ink);
+  }
+  footer .next strong{color:var(--cyan);}
+
+  @media (prefers-reduced-motion: reduce){
+    .stamp, .wire .pulse{ animation:none; opacity:1; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="titleblock">
+    <div>
+      <p class="eyebrow">Capstone — Day 3 of 10</p>
+      <h1>Project Setup<br>&amp; Foundation</h1>
+      <p class="subtitle">FocusFlow moved from system design to a running, connected application today.</p>
+    </div>
+    <div class="meta">
+      <div><strong>Project</strong> FocusFlow</div>
+      <div><strong>Repo</strong> focusflow</div>
+      <div><strong>Date</strong> Aug 1, 2026</div>
+    </div>
+    <div class="stamp"><span>Foundation<br>Verified</span></div>
+  </div>
+
+  <section>
+    <p class="section-label">Verified Connection</p>
+    <div class="schematic">
+      <div class="node">
+        <div class="box">CLIENT</div>
+        <div class="caption">React + Vite<br>:5173</div>
+      </div>
+      <div class="wire">
+        <span class="label">GET /api/health</span>
+        <span class="pulse"></span>
+      </div>
+      <div class="node">
+        <div class="box">SERVER</div>
+        <div class="caption">Express + Node<br>:3001</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">Foundation Checklist</p>
+    <div class="checklist">
+      <div class="item"><span class="tick">✓</span> Dev environment configured</div>
+      <div class="item"><span class="tick">✓</span> Frontend + backend scaffolded</div>
+      <div class="item"><span class="tick">✓</span> Dependencies installed</div>
+      <div class="item"><span class="tick">✓</span> Environment variables set</div>
+      <div class="item"><span class="tick">✓</span> Nav / tab state working</div>
+      <div class="item"><span class="tick">✓</span> API client + health check live</div>
+      <div class="item"><span class="tick">✓</span> JSON data layer initialized</div>
+      <div class="item"><span class="tick">✓</span> Claude SDK client configured</div>
+      <div class="item pending"><span class="tick">–</span> Auth scaffold — n/a, out of scope</div>
+      <div class="item pending"><span class="tick">–</span> Database — n/a, file-backed by design</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">Files Built Today</p>
+    <table>
+      <thead>
+        <tr><th>Path</th><th>Responsibility</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">server/index.js</td><td class="desc">Express app, CORS, /api/health route</td><td><span class="tag">server</span></td></tr>
+        <tr><td class="path">server/lib/claudeClient.js</td><td class="desc">Shared Anthropic SDK instance</td><td><span class="tag">server</span></td></tr>
+        <tr><td class="path">server/store/taskStore.js</td><td class="desc">Read/write layer for tasks.json</td><td><span class="tag">server</span></td></tr>
+        <tr><td class="path">client/src/App.jsx</td><td class="desc">Root component, tab state, layout</td><td><span class="tag">client</span></td></tr>
+        <tr><td class="path">client/src/components/NavTabs.jsx</td><td class="desc">Two-tab navigation</td><td><span class="tag">client</span></td></tr>
+        <tr><td class="path">client/src/api/client.js</td><td class="desc">Fetch wrapper + health check</td><td><span class="tag">client</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <div>No Blueprint changes required — Days 4–10 unchanged.</div>
+    <div class="next">Tomorrow: <strong>Day 4 — Task CRUD API</strong></div>
+  </footer>
+
+</div>
+</body>
+</html>
