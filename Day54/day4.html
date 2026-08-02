@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusFlow — Day 4 Core Feature Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0E3A5F;
+    --grid:rgba(255,255,255,0.09);
+    --grid-major:rgba(255,255,255,0.16);
+    --ink:#EAF2FA;
+    --muted:#9FB8CC;
+    --cyan:#6FD1E8;
+    --amber:#F2A541;
+    --line:rgba(234,242,250,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      linear-gradient(var(--grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+    background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1.5rem;
+  }
+  .slide{
+    width:100%;
+    max-width:960px;
+    aspect-ratio:16/9;
+    border:1.5px solid var(--line);
+    padding:2.2rem 2.6rem;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .eyebrow{
+    font-size:0.72rem;
+    letter-spacing:0.22em;
+    color:var(--cyan);
+    text-transform:uppercase;
+    margin:0 0 0.4rem;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:2.3rem;
+    margin:0 0 0.3rem;
+    line-height:1.05;
+  }
+  .subtitle{color:var(--muted); font-size:0.9rem; margin:0 0 1.4rem; max-width:52ch;}
+
+  .badge{
+    position:absolute;
+    top:2.2rem; right:2.6rem;
+    border:2px solid var(--amber);
+    border-radius:50%;
+    width:92px; height:92px;
+    display:flex; align-items:center; justify-content:center;
+    transform:rotate(8deg);
+  }
+  .badge span{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:0.6rem;
+    color:var(--amber);
+    text-align:center;
+    line-height:1.3;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+
+  .body{
+    flex:1;
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:2rem;
+    align-items:stretch;
+  }
+
+  .endpoints .section-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--cyan); margin:0 0 0.7rem;
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  .endpoints .section-label::after{content:"";flex:1;height:1px;background:var(--grid-major);}
+  .endpoint-row{
+    display:flex; align-items:center; gap:0.6rem;
+    font-size:0.82rem; padding:0.4rem 0;
+    border-bottom:1px solid var(--grid);
+  }
+  .method{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:0.68rem;
+    padding:0.15rem 0.4rem;
+    border:1px solid currentColor;
+    width:52px; text-align:center; flex:0 0 auto;
+  }
+  .m-get{color:var(--cyan);}
+  .m-post{color:var(--amber);}
+  .m-patch{color:#9FE8A0;}
+  .m-delete{color:#E88F9F;}
+  .path{color:var(--ink);}
+
+  .side{
+    display:flex; flex-direction:column; justify-content:space-between;
+    border-left:1px dashed var(--line);
+    padding-left:1.6rem;
+  }
+  .stack{font-size:0.82rem; line-height:1.9; color:var(--muted);}
+  .stack strong{color:var(--ink); font-weight:600;}
+  .stat{
+    display:flex; align-items:baseline; gap:0.5rem;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .stat .num{font-size:2.6rem; font-weight:700; color:var(--amber); line-height:1;}
+  .stat .label{font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;}
+
+  footer{
+    border-top:1.5px solid var(--line);
+    margin-top:1.4rem; padding-top:0.9rem;
+    display:flex; justify-content:space-between;
+    font-size:0.75rem; color:var(--muted);
+  }
+  footer .next strong{color:var(--cyan);}
+</style>
+</head>
+<body>
+  <div class="slide">
+    <p class="eyebrow">Capstone — Day 4 of 10</p>
+    <h1>Core Feature Implementation</h1>
+    <p class="subtitle">Milestone: the Task CRUD API — the data layer every other FocusFlow feature builds on.</p>
+    <div class="badge"><span>Milestone<br>Verified</span></div>
+
+    <div class="body">
+      <div class="endpoints">
+        <p class="section-label">/api/tasks — Verified Today</p>
+        <div class="endpoint-row"><span class="method m-get">GET</span><span class="path">/api/tasks — list, filter by completed</span></div>
+        <div class="endpoint-row"><span class="method m-post">POST</span><span class="path">/api/tasks — create + validate</span></div>
+        <div class="endpoint-row"><span class="method m-patch">PATCH</span><span class="path">/api/tasks/:id — update, mark complete</span></div>
+        <div class="endpoint-row"><span class="method m-delete">DEL</span><span class="path">/api/tasks/:id — remove</span></div>
+      </div>
+
+      <div class="side">
+        <div class="stat">
+          <span class="num">4</span>
+          <span class="label">Endpoints<br>Shipped</span>
+        </div>
+        <div class="stack">
+          <div><strong>Storage</strong> — taskStore.js (Day 3)</div>
+          <div><strong>Validation</strong> — SCHEMA.md rules</div>
+          <div><strong>IDs</strong> — crypto.randomUUID()</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>No changes to API.md or SCHEMA.md — implementation matched design.</div>
+      <div class="next">Tomorrow: <strong>Day 5 — AI Task Parsing + Input UI</strong></div>
+    </footer>
+  </div>
+</body>
+</html>
