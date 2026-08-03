@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusFlow — Day 5 Core Feature Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0E3A5F;
+    --grid:rgba(255,255,255,0.09);
+    --grid-major:rgba(255,255,255,0.16);
+    --ink:#EAF2FA;
+    --muted:#9FB8CC;
+    --cyan:#6FD1E8;
+    --amber:#F2A541;
+    --line:rgba(234,242,250,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      linear-gradient(var(--grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+    background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center;
+    padding:1.5rem;
+  }
+  .slide{
+    width:100%; max-width:960px; aspect-ratio:16/9;
+    border:1.5px solid var(--line);
+    padding:2.2rem 2.6rem;
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+  .eyebrow{font-size:0.72rem; letter-spacing:0.22em; color:var(--cyan); text-transform:uppercase; margin:0 0 0.4rem;}
+  h1{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:2.1rem; margin:0 0 0.3rem; line-height:1.05;}
+  .subtitle{color:var(--muted); font-size:0.88rem; margin:0 0 1.3rem; max-width:56ch;}
+
+  .badge{
+    position:absolute; top:2.2rem; right:2.6rem;
+    border:2px solid var(--amber); border-radius:50%;
+    width:92px; height:92px;
+    display:flex; align-items:center; justify-content:center;
+    transform:rotate(8deg);
+  }
+  .badge span{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:0.58rem; color:var(--amber); text-align:center; line-height:1.3; text-transform:uppercase;}
+
+  .body{flex:1; display:grid; grid-template-columns:1fr 1fr; gap:2rem;}
+
+  .col .section-label{
+    font-family:'Space Grotesk', sans-serif; font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--cyan); margin:0 0 0.7rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .col .section-label::after{content:"";flex:1;height:1px;background:var(--grid-major);}
+
+  .flow{display:flex; flex-direction:column; gap:0.5rem;}
+  .flow-step{display:flex; align-items:center; gap:0.55rem; font-size:0.8rem;}
+  .flow-num{
+    width:20px; height:20px; border-radius:50%; border:1.5px solid var(--amber);
+    color:var(--amber); font-size:0.65rem; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+    font-family:'Space Grotesk', sans-serif; font-weight:700;
+  }
+
+  .note{
+    font-size:0.78rem; color:var(--muted); line-height:1.65;
+    border-left:2px solid var(--amber); padding-left:0.8rem;
+  }
+  .note strong{color:var(--ink);}
+
+  footer{
+    border-top:1.5px solid var(--line); margin-top:1.4rem; padding-top:0.9rem;
+    display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted);
+  }
+  footer .next strong{color:var(--cyan);}
+</style>
+</head>
+<body>
+  <div class="slide">
+    <p class="eyebrow">Capstone — Day 5 of 10</p>
+    <h1>Continue Core Feature Development</h1>
+    <p class="subtitle">Milestone: free-text task parsing + the input → review → save loop, built entirely on free tools.</p>
+    <div class="badge"><span>Loop<br>Verified</span></div>
+
+    <div class="body">
+      <div class="col">
+        <p class="section-label">The Flow, End to End</p>
+        <div class="flow">
+          <div class="flow-step"><span class="flow-num">1</span> Type messy text</div>
+          <div class="flow-step"><span class="flow-num">2</span> POST /api/parse-tasks</div>
+          <div class="flow-step"><span class="flow-num">3</span> Review &amp; edit</div>
+          <div class="flow-step"><span class="flow-num">4</span> Confirm → saved via CRUD API</div>
+        </div>
+      </div>
+      <div class="col">
+        <p class="section-label">Implementation Note</p>
+        <p class="note">
+          <strong>Parser is currently rule-based</strong>, not Claude-API-backed — a deliberate free-tools decision.
+          Output contract matches the future Claude integration exactly, so swapping it in later touches
+          <strong>one file only</strong>: lib/mockParser.js.
+        </p>
+      </div>
+    </div>
+
+    <footer>
+      <div>Days 3–4 retested, unaffected. No paid tools used.</div>
+      <div class="next">Tomorrow: <strong>Day 6 — Today's Plan generation</strong></div>
+    </footer>
+  </div>
+</body>
+</html>
