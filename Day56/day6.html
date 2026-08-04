@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusFlow — Day 6 MVP Complete Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0E3A5F; --grid:rgba(255,255,255,0.09); --grid-major:rgba(255,255,255,0.16);
+    --ink:#EAF2FA; --muted:#9FB8CC; --cyan:#6FD1E8; --amber:#F2A541; --line:rgba(234,242,250,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+    background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+    color:var(--ink); font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; justify-content:center; padding:1.5rem;
+  }
+  .slide{ width:100%; max-width:960px; aspect-ratio:16/9; border:1.5px solid var(--line); padding:2.2rem 2.6rem; display:flex; flex-direction:column; position:relative; }
+  .eyebrow{font-size:0.72rem; letter-spacing:0.22em; color:var(--cyan); text-transform:uppercase; margin:0 0 0.4rem;}
+  h1{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:2.2rem; margin:0 0 0.3rem;}
+  .subtitle{color:var(--muted); font-size:0.88rem; margin:0 0 1.2rem; max-width:60ch;}
+  .badge{ position:absolute; top:2.2rem; right:2.6rem; border:2px solid var(--amber); border-radius:50%; width:96px; height:96px; display:flex; align-items:center; justify-content:center; transform:rotate(8deg); }
+  .badge span{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:0.6rem; color:var(--amber); text-align:center; line-height:1.3; text-transform:uppercase;}
+
+  .loop{ display:flex; align-items:center; gap:0.4rem; margin:0.6rem 0 1.6rem; flex-wrap:wrap; }
+  .step{ font-size:0.72rem; padding:0.35rem 0.65rem; border:1px solid var(--line); color:var(--ink); white-space:nowrap; }
+  .arrow{color:var(--cyan); font-size:0.8rem;}
+
+  .body{flex:1; display:grid; grid-template-columns:1fr 1fr; gap:2rem;}
+  .col .section-label{ font-family:'Space Grotesk', sans-serif; font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--cyan); margin:0 0 0.6rem; display:flex; align-items:center; gap:0.5rem;}
+  .col .section-label::after{content:"";flex:1;height:1px;background:var(--grid-major);}
+  .pill-row{display:flex; flex-wrap:wrap; gap:0.4rem;}
+  .pill{font-size:0.7rem; padding:0.3rem 0.6rem; border:1px solid var(--amber); color:var(--amber);}
+  .stat{display:flex; align-items:baseline; gap:0.4rem; font-family:'Space Grotesk', sans-serif; margin-bottom:0.7rem;}
+  .stat .num{font-size:1.8rem; font-weight:700; color:var(--amber);}
+  .stat .label{font-size:0.68rem; color:var(--muted); text-transform:uppercase;}
+
+  footer{ border-top:1.5px solid var(--line); margin-top:1.2rem; padding-top:0.8rem; display:flex; justify-content:space-between; font-size:0.7rem; color:var(--muted); }
+  footer .next strong{color:var(--cyan);}
+</style>
+</head>
+<body>
+  <div class="slide">
+    <p class="eyebrow">Capstone — Day 6 of 10</p>
+    <h1>MVP Complete &amp; Deployed</h1>
+    <p class="subtitle">Every core loop from the PRD is now live, working, and shareable.</p>
+    <div class="badge"><span>MVP<br>Shipped</span></div>
+
+    <div class="loop">
+      <span class="step">Type tasks</span><span class="arrow">→</span>
+      <span class="step">Parse</span><span class="arrow">→</span>
+      <span class="step">Review</span><span class="arrow">→</span>
+      <span class="step">Save</span><span class="arrow">→</span>
+      <span class="step">Plan</span><span class="arrow">→</span>
+      <span class="step">Complete</span><span class="arrow">→</span>
+      <span class="step">Streak</span>
+    </div>
+
+    <div class="body">
+      <div class="col">
+        <p class="section-label">Built Today</p>
+        <div class="pill-row">
+          <span class="pill">generate-plan</span>
+          <span class="pill">streak tracking</span>
+          <span class="pill">complete/delete</span>
+          <span class="pill">footer credit</span>
+        </div>
+      </div>
+      <div class="col">
+        <p class="section-label">Live Deployment</p>
+        <div class="stat"><span class="num">2</span><span class="label">Free hosts —<br>Vercel + Render</span></div>
+      </div>
+    </div>
+
+    <footer>
+      <div>Built with Claude — AB Talks 60-Day Claude AI Challenge.</div>
+      <div class="next">Tomorrow: <strong>Day 7 — Visual polish</strong></div>
+    </footer>
+  </div>
+</body>
+</html>
