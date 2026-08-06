@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FocusFlow - Day 7</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:
+linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px),
+linear-gradient(#14385d,#153c63);
+
+background-size:24px 24px;
+
+font-family:Inter,sans-serif;
+
+color:white;
+
+}
+
+.slide{
+
+width:1180px;
+height:660px;
+
+border:2px solid rgba(255,255,255,.08);
+
+padding:48px;
+
+position:relative;
+
+}
+
+.small{
+
+font-size:15px;
+
+letter-spacing:5px;
+
+color:#74d6ff;
+
+margin-bottom:10px;
+
+font-family:"IBM Plex Mono";
+
+}
+
+h1{
+
+font-size:60px;
+
+font-weight:800;
+
+margin-bottom:12px;
+
+}
+
+.subtitle{
+
+font-size:22px;
+
+color:#9cb4c8;
+
+max-width:720px;
+
+line-height:1.5;
+
+margin-bottom:42px;
+
+font-family:"IBM Plex Mono";
+
+}
+
+.flow{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+margin-bottom:50px;
+
+}
+
+.box{
+
+padding:11px 20px;
+
+border:1px solid rgba(255,255,255,.25);
+
+font-family:"IBM Plex Mono";
+
+font-size:17px;
+
+}
+
+.arrow{
+
+font-size:22px;
+
+color:#6fd5ff;
+
+}
+
+.section{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-top:25px;
+
+}
+
+.left{
+
+width:58%;
+
+}
+
+.right{
+
+width:32%;
+
+}
+
+.heading{
+
+font-family:"IBM Plex Mono";
+
+letter-spacing:2px;
+
+font-size:18px;
+
+color:#59d3ff;
+
+margin-bottom:18px;
+
+}
+
+.tags{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:14px;
+
+}
+
+.tag{
+
+padding:10px 18px;
+
+border:2px solid #d79c3c;
+
+color:#d79c3c;
+
+font-family:"IBM Plex Mono";
+
+font-size:17px;
+
+}
+
+.score{
+
+font-size:72px;
+
+font-weight:800;
+
+color:#d79c3c;
+
+}
+
+.text{
+
+font-family:"IBM Plex Mono";
+
+color:#c7d3dd;
+
+line-height:1.6;
+
+}
+
+.circle{
+
+position:absolute;
+
+right:70px;
+
+top:70px;
+
+width:145px;
+
+height:145px;
+
+border-radius:50%;
+
+border:3px solid #d79c3c;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+text-align:center;
+
+font-weight:700;
+
+font-family:"IBM Plex Mono";
+
+color:#d79c3c;
+
+}
+
+.footer{
+
+position:absolute;
+
+bottom:35px;
+
+left:48px;
+
+font-family:"IBM Plex Mono";
+
+font-size:18px;
+
+color:#bcc8d3;
+
+}
+
+.tomorrow{
+
+position:absolute;
+
+bottom:35px;
+
+right:48px;
+
+font-family:"IBM Plex Mono";
+
+font-size:18px;
+
+color:#84d7ff;
+
+}
+
+.line{
+
+position:absolute;
+
+left:48px;
+
+right:48px;
+
+bottom:82px;
+
+height:1px;
+
+background:rgba(255,255,255,.15);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="slide">
+
+<div class="small">
+CAPSTONE — DAY 7 OF 10
+</div>
+
+<h1>
+Product Refined & UX Polished
+</h1>
+
+<div class="subtitle">
+Focused entirely on improving usability, responsiveness,
+accessibility, and visual consistency without changing the
+core MVP.
+</div>
+
+<div class="flow">
+
+<div class="box">Layout</div>
+
+<div class="arrow">→</div>
+
+<div class="box">Spacing</div>
+
+<div class="arrow">→</div>
+
+<div class="box">Typography</div>
+
+<div class="arrow">→</div>
+
+<div class="box">Responsive</div>
+
+<div class="arrow">→</div>
+
+<div class="box">Accessibility</div>
+
+<div class="arrow">→</div>
+
+<div class="box">Polish</div>
+
+</div>
+
+<div class="section">
+
+<div class="left">
+
+<div class="heading">
+REFINEMENTS COMPLETED
+</div>
+
+<div class="tags">
+
+<div class="tag">UI polish</div>
+
+<div class="tag">mobile responsive</div>
+
+<div class="tag">loading states</div>
+
+<div class="tag">empty states</div>
+
+<div class="tag">error handling</div>
+
+<div class="tag">micro interactions</div>
+
+<div class="tag">accessibility</div>
+
+<div class="tag">design consistency</div>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="heading">
+PRODUCT REVIEW
+</div>
+
+<div class="score">
+100%
+</div>
+
+<div class="text">
+
+Senior Product Review<br>
+
+✓ UI refined<br>
+
+✓ UX improved<br>
+
+✓ MVP verified<br>
+
+✓ Portfolio ready
+
+</div>
+
+</div>
+
+</div>
+
+<div class="circle">
+DAY 7<br><br>
+POLISHED
+</div>
+
+<div class="line"></div>
+
+<div class="footer">
+Built with Claude — AB Talks 60-Day Claude AI Challenge.
+</div>
+
+<div class="tomorrow">
+Tomorrow: <b>Day 8 — Testing & Optimization</b>
+</div>
+
+</div>
+
+</body>
+</html>
