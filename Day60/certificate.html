@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate of Completion — FocusFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B2B26; --paper:#F3EFE6; --gold:#B78A3F; --gold-soft:#D4AF6A;
+    --ink:#1C2B27; --muted:#5B6E68; --line:#C9BFA6;
+  }
+  *{box-sizing:border-box;}
+  html,body{ margin:0; background:var(--bg); font-family:'Inter', sans-serif; }
+
+  .toolbar{
+    max-width:900px; margin:0 auto; padding:1rem 1.5rem;
+    display:flex; justify-content:flex-end;
+  }
+  .toolbar button{
+    background:var(--gold-soft); color:#1C2B27; border:none;
+    padding:0.6rem 1.2rem; border-radius:8px; font-weight:600; cursor:pointer;
+    font-family:inherit; font-size:0.85rem;
+  }
+
+  .certificate{
+    max-width:900px; margin:0 auto 3rem; background:var(--paper);
+    padding:clamp(2rem, 6vw, 4rem); position:relative;
+    border:1px solid var(--line);
+  }
+  .certificate::before{
+    content:""; position:absolute; inset:14px;
+    border:1.5px solid var(--gold); pointer-events:none;
+  }
+  .cert-inner{ position:relative; text-align:center; }
+
+  .logo-slot{
+    height:64px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:1.5rem;
+  }
+  .logo-slot img{ max-height:64px; max-width:220px; }
+  .logo-placeholder{
+    font-size:0.75rem; color:var(--muted); border:1px dashed var(--line);
+    padding:0.6rem 1.2rem; border-radius:6px; letter-spacing:0.05em;
+    background-color: black;
+  }
+
+  .kicker{
+    font-size:0.75rem; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 0.6rem;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:clamp(1.7rem, 4vw, 2.5rem);
+    color:var(--ink); margin:0 0 1.6rem;
+  }
+  .presented{ color:var(--muted); font-size:0.95rem; margin-bottom:0.5rem; }
+  .recipient{
+    font-family:'Fraunces', serif; font-size:clamp(1.6rem, 4vw, 2.2rem);
+    color:var(--ink); font-weight:600; margin:0.3rem 0 1.4rem;
+    border-bottom:1.5px solid var(--gold); display:inline-block; padding:0 0.5rem 0.4rem;
+  }
+
+  .body-text{
+    color:var(--ink); font-size:1rem; line-height:1.75; max-width:56ch;
+    margin:0 auto 1.8rem;
+  }
+  .body-text strong{ color:var(--ink); }
+
+  .meta-row{
+    display:flex; justify-content:center; gap:clamp(1.5rem, 6vw, 4rem);
+    flex-wrap:wrap; margin:2rem 0 2.2rem;
+    padding:1.2rem 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .meta-item .meta-label{ font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .meta-item .meta-value{ font-family:'Fraunces', serif; font-size:1.15rem; color:var(--ink); font-weight:600; margin-top:0.2rem; }
+
+  .credit-line{ font-size:0.85rem; color:var(--muted); margin-bottom:2rem; }
+
+  .signoff{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-top:2.5rem; text-align:left; flex-wrap:wrap; gap:1.5rem;
+  }
+  .signoff .sig{ text-align:center; }
+  .sig-line{ width:180px; border-bottom:1.5px solid var(--ink); margin-bottom:0.4rem; height:28px; }
+  .sig-label{ font-size:0.75rem; color:var(--muted); letter-spacing:0.04em; }
+
+  .links{ text-align:center; margin-top:2.2rem; font-size:0.82rem; }
+  .links a{ color:var(--gold); text-decoration:none; margin:0 0.6rem; }
+  .links a:hover{ text-decoration:underline; }
+
+  @media print{
+    body{ background:white; }
+    .toolbar{ display:none; }
+    .certificate{ border:none; margin:0; max-width:100%; }
+    .certificate::before{ inset:10mm; }
+    @page{ size:landscape; margin:0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <button onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <div class="certificate">
+    <div class="cert-inner">
+
+      <div class="logo-slot">
+        <!-- Replace this div with: <img src="ab-talks-logo.png" alt="AB Talks logo"> -->
+        <div class="logo-placeholder">
+            <img src="./abtalks-logo.webp" alt="AB Talks logo" >
+        </div>
+      </div>
+
+      <p class="kicker">Certificate of Completion</p>
+      <h1>AB Talks 10-Day Capstone Sprint</h1>
+
+      <p class="presented">This certifies that</p>
+      <p class="recipient">RAJSHREE</p>
+
+      <p class="body-text">
+        has successfully designed, built, and launched <strong>FocusFlow</strong> — an
+        AI-powered task prioritization and daily planning application — completing
+        the full software development lifecycle from requirements through a
+        production-ready release, as the capstone project of the
+        <strong>AB Talks 60-Day Claude AI Challenge</strong>.
+      </p>
+
+      <div class="meta-row">
+        <div class="meta-item">
+          <div class="meta-label">Project</div>
+          <div class="meta-value">FocusFlow</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Version</div>
+          <div class="meta-value">v1.0.0</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Completion Date</div>
+          <div class="meta-value">08/08/2026</div>
+        </div>
+      </div>
+
+      <p class="credit-line">Built with Claude (free tier) as AI pair-programmer and project mentor throughout the sprint.</p>
+
+      <div class="signoff">
+        <div class="sig">
+          <div class="sig-line"></div>
+          <div class="sig-label">AB Talks</div>
+        </div>
+        <div class="sig">
+          <div class="sig-line"></div>
+          <div class="sig-label">Program Facilitator</div>
+        </div>
+      </div>
+
+      <div class="links">
+        <a href="https://www.abtalks.in/" target="_blank" rel="noopener">abtalks.in</a>
+        ·
+        <a href="https://www.linkedin.com/company/abtalks-on-ai/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
